@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LavaCar App
 
-## Getting Started
+Sistema de agendamento para lava-jatos e serviços automotivos.
 
-First, run the development server:
+## 🚀 Tecnologias
+
+- **Next.js 16** - Framework React
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS 4** - Estilização
+- **daisyUI** - Componentes UI
+- **React Query** - Gerenciamento de estado do servidor
+- **Axios** - Cliente HTTP
+- **next-themes** - Gerenciamento de tema (dark/light)
+
+## 📦 Instalação
+
+1. Instale as dependências:
+
+```bash
+pnpm install
+```
+
+ou
+
+```bash
+npm install
+```
+
+## 🛠️ Desenvolvimento
+
+Execute o servidor de desenvolvimento:
+
+```bash
+pnpm dev
+```
+
+ou
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Estrutura do Projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+lavacar-app/
+├── app/                    # Rotas do Next.js (App Router)
+│   ├── (auth)/            # Grupo de rotas de autenticação
+│   ├── (main)/            # Grupo de rotas principais
+│   ├── layout.tsx         # Layout raiz
+│   └── providers.tsx      # Providers (React Query, Theme)
+├── components/            # Componentes React
+│   └── layout/           # Componentes de layout
+├── services/              # Serviços de API
+├── hooks/                 # Hooks customizados (React Query)
+├── types/                 # Tipos TypeScript
+├── utils/                 # Funções utilitárias
+└── constants/             # Constantes
+```
 
-## Learn More
+## 🎨 Padrões e Convenções
 
-To learn more about Next.js, take a look at the following resources:
+Este projeto segue os padrões estabelecidos no projeto de referência:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Estrutura de pastas**: Organização por feature/domínio
+- **Services**: Encapsulam chamadas à API usando `axiosInstance`
+- **Hooks**: Encapsulam `useQuery`/`useMutation` do React Query
+- **Types**: Tipos TypeScript baseados no schema Prisma
+- **Components**: Componentes reutilizáveis usando daisyUI
+- **Layouts**: Separação entre rotas de autenticação e principais
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔧 Configuração
 
-## Deploy on Vercel
+### Variáveis de Ambiente
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Crie um arquivo `.env.local`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+NEXT_PUBLIC_ENVIRONMENT=development
+NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL=http://localhost:3000
+NEXT_PUBLIC_STAGING_BACKEND_URL=https://staging-api.example.com
+NEXT_PUBLIC_PRODUCTION_BACKEND_URL=https://api.example.com
+```
+
+## 📝 Scripts Disponíveis
+
+- `pnpm dev` - Inicia o servidor de desenvolvimento
+- `pnpm build` - Cria build de produção
+- `pnpm start` - Inicia o servidor de produção
+- `pnpm lint` - Executa o linter
+
+## 🎯 Próximos Passos
+
+- [ ] Implementar autenticação
+- [ ] Criar páginas de agendamentos
+- [ ] Criar páginas de veículos
+- [ ] Criar páginas de lojas
+- [ ] Implementar contextos de autenticação
+- [ ] Adicionar testes
