@@ -1,0 +1,107 @@
+import axios, { AxiosResponse } from 'axios';
+import axiosInstance from './axiosInstance';
+import { Evaluation } from '../types/evaluation';
+
+const base = '/evaluations';
+
+export const evaluationService = {
+  create: async (payload: Partial<Evaluation>) => {
+    try {
+      const response: AxiosResponse<Evaluation> = await axiosInstance.post(base, payload);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao criar avaliação (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao criar avaliação:', error);
+      }
+      throw error;
+    }
+  },
+
+  findAll: async (shopId?: string) => {
+    try {
+      const params = new URLSearchParams();
+      if (shopId) params.append('shopId', shopId);
+      const response: AxiosResponse<Evaluation[]> = await axiosInstance.get(base, { params });
+      return response.data || [];
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar avaliações (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao buscar avaliações:', error);
+      }
+      throw error;
+    }
+  },
+
+  findOne: async (id: string) => {
+    try {
+      const response: AxiosResponse<Evaluation> = await axiosInstance.get(`${base}/${id}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar avaliação ${id} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao buscar avaliação ${id}:`, error);
+      }
+      throw error;
+    }
+  },
+
+  getShopStats: async (shopId: string) => {
+    try {
+      const response = await axiosInstance.get(`${base}/stats/${shopId}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar estatísticas da loja (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao buscar estatísticas da loja:', error);
+      }
+      throw error;
+    }
+  },
+
+  update: async (id: string, payload: Partial<Evaluation>) => {
+    try {
+      const response: AxiosResponse<Evaluation> = await axiosInstance.patch(`${base}/${id}`, payload);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao atualizar avaliação ${id} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao atualizar avaliação ${id}:`, error);
+      }
+      throw error;
+    }
+  },
+
+  remove: async (id: string) => {
+    try {
+      const response = await axiosInstance.delete(`${base}/${id}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao deletar avaliação ${id} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao deletar avaliação ${id}:`, error);
+      }
+      throw error;
+    }
+  },
+};
+
+export default evaluationService;
