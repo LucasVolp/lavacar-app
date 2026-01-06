@@ -4,8 +4,25 @@ import { Appointment } from '../types/appointment';
 
 const base = '/appointments';
 
+export interface CreateAppointmentRequest {
+  scheduledAt: string;
+  endTime: string;
+  totalPrice: number;
+  totalDuration: number;
+  notes?: string;
+  userId: string;
+  shopId: string;
+  vehicleId: string;
+  serviceIds: {
+    serviceId: string;
+    serviceName: string;
+    servicePrice: number;
+    duration: number;
+  }[];
+}
+
 export const appointmentService = {
-  create: async (payload: Partial<Appointment>) => {
+  create: async (payload: CreateAppointmentRequest) => {
     try {
       const response: AxiosResponse<Appointment> = await axiosInstance.post(base, payload);
       return response.data;

@@ -1,5 +1,4 @@
 import { Shop } from "./shop";
-
 export interface ServiceGroup {
     id: string;
     name: string;

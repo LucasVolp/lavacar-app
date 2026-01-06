@@ -1,26 +1,187 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* daisyUI theme customization */
+@theme {
+  /* Primary colors - Indigo */
+  --color-primary: #6366f1;
+  --color-primary-content: #ffffff;
+  
+  /* Secondary colors */
+  --color-secondary: #5046e5;
+  --color-secondary-content: #ffffff;
+  
+  /* Accent */
+  --color-accent: #10b981;
+  --color-accent-content: #ffffff;
+  
+  /* Neutral */
+  --color-neutral: #1f2937;
+  --color-neutral-content: #ffffff;
+  
+  /* Base colors */
+  --color-base-100: #ffffff;
+  --color-base-200: #f9fafb;
+  --color-base-300: #f3f4f6;
+  --color-base-content: #1f2937;
+  
+  /* Semantic colors */
+  --color-info: #3b82f6;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  
+  /* Font families */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --color-base-100: #121212;
+  --color-base-200: #1e1e1e;
+  --color-base-300: #282828;
+  --color-base-content: #e6e6e6;
+  --color-neutral: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* Ant Design layout integration */
+.ant-layout {
+  min-height: 100vh;
+  background: transparent !important;
+}
+
+.ant-layout-header {
+  background: transparent;
+  padding: 0 1rem;
+}
+
+.ant-layout-content {
+  padding: 1.5rem;
+}
+
+.ant-layout-sider {
+  background: transparent !important;
+}
+
+.ant-layout-footer {
+  background: transparent !important;
+}
+
+/* Ant Menu customization for daisyUI compatibility */
+.ant-menu {
+  background: transparent !important;
+}
+
+.ant-menu-item-selected {
+  background-color: oklch(var(--p) / 0.1) !important;
+}
+
+.ant-menu-item:hover {
+  background-color: oklch(var(--b3)) !important;
+}
+
+/* Card hover effects */
+.ant-card {
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(var(--bc) / 0.2);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--bc) / 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.28s ease-out both;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out both;
+}
+
+/* Utility classes */
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass effect */
+.glass {
+  backdrop-filter: blur(10px);
+  background-color: oklch(var(--b1) / 0.8);
+}
+
+/* Focus ring */
+.focus-ring:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+

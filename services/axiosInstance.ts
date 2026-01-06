@@ -1,14 +1,9 @@
-import { EnvironmentType } from "@/types/env";
-import { ENVIRONMENT_VARIABLES } from "@/utils/env";
 import axios from "axios";
 
-const baseURL = (() => {
-  const env = process.env.NEXT_PUBLIC_ENVIRONMENT as EnvironmentType || 'development';
-
-  const api_url = ENVIRONMENT_VARIABLES.find(envVar => envVar.api_url !== undefined || envVar.environment_type === env)?.api_url;
-
-  return api_url || 'http://localhost:3000';
-})();
+// URL base da API - usa variável de ambiente ou fallback para localhost
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 
+                process.env.NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL || 
+                'http://localhost:3000';
 
 const axiosInstance = axios.create({
   baseURL,

@@ -53,6 +53,22 @@ export const shopService = {
     }
   },
 
+  findBySlug: async (slug: string) => {
+    try {
+      const response: AxiosResponse<Shop> = await axiosInstance.get(`${base}/slug/${slug}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar loja por slug ${slug} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao buscar loja por slug ${slug}:`, error);
+      }
+      throw error;
+    }
+  },
+
   update: async (id: string, payload: Partial<Shop>) => {
     try {
       const response: AxiosResponse<Shop> = await axiosInstance.patch(`${base}/${id}`, payload);
