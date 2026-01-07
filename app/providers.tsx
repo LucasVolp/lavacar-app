@@ -9,6 +9,7 @@ import { App, ConfigProvider } from "antd";
 import ptBR from "antd/lib/locale/pt_BR";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ShopProvider } from "@/contexts/ShopContext";
+import { OrganizationProvider } from "@/contexts/OrganizationContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -28,7 +29,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ShopProvider>
-            {children}
+            <OrganizationProvider>
+              {children}
+            </OrganizationProvider>
           </ShopProvider>
         </AuthProvider>
         <ReactQueryDevtools initialIsOpen={false} />
