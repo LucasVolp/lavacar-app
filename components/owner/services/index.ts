@@ -1,5 +1,8 @@
-export { ServicesHeader } from "./ServicesHeader";
 export { ServiceCard } from "./ServiceCard";
-export type { Service } from "./ServiceCard";
-export { ServicesList } from "./ServicesList";
-export { ServiceFormModal } from "./ServiceFormModal";
+export { ServiceTable } from "./ServiceTable";
+export { ServiceModal, GroupModal } from "./ServiceModals";
+export { GroupCollapse } from "./GroupCollapse";
+export { ServiceStats } from "./ServiceStats";
+export { ServiceFilters } from "./ServiceFilters";
+export { ServiceGrid } from "./ServiceGrid";
+export { ServiceGroupsView } from "./ServiceGroupsView";

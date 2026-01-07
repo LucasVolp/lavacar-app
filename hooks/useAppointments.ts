@@ -133,3 +133,28 @@ export function useCancelAppointment() {
     },
   });
 }
+
+/**
+ * Hook para atualizar apenas o status de um agendamento
+ */
+export function useUpdateAppointmentStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ 
+      id, 
+      status, 
+      cancellationReason 
+    }: { 
+      id: string; 
+      status: string; 
+      cancellationReason?: string;
+    }) => appointmentService.update(id, { 
+      status: status as Appointment["status"],
+      cancellationReason,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+    },
+  });
+}

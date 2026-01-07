@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { serviceService } from "@/services/service";
-import { Services, CreateServicePayload } from "@/types/services";
+import { CreateServicePayload, UpdateServicePayload } from "@/types/services";
 
 // Query Keys
 export const serviceKeys = {
@@ -25,14 +25,14 @@ export function useServices(enabled = true) {
 }
 
 /**
- * Hook para buscar serviços de uma loja específica
+ * Hook para buscar serviços de uma loja específica (todos, ativos e inativos)
  */
 export function useServicesByShop(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: serviceKeys.byShop(shopId || ""),
     queryFn: async () => {
       const allServices = await serviceService.findAll();
-      return allServices.filter((service) => service.shopId === shopId && service.isActive !== false);
+      return allServices.filter((service) => service.shopId === shopId);
     },
     enabled: enabled && !!shopId,
     staleTime: 5 * 60 * 1000,
@@ -71,7 +71,7 @@ export function useUpdateService() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<Services> }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateServicePayload }) =>
       serviceService.update(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: serviceKeys.all });

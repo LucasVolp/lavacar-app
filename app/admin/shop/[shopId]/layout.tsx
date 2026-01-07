@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Layout, Menu, Spin, Empty, Button, Typography } from "antd";
+import { Menu, Spin, Empty, Button, Typography, Tooltip, Breadcrumb } from "antd";
 import {
   DashboardOutlined,
   CalendarOutlined,
@@ -12,45 +12,90 @@ import {
   SettingOutlined,
   LeftOutlined,
   ShopOutlined,
+  LineChartOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { ShopAdminProvider, useShopAdmin } from "@/contexts/ShopAdminContext";
 
-const { Sider, Content, Header } = Layout;
 const { Title, Text } = Typography;
+
+const SIDER_WIDTH = 260;
+const SIDER_COLLAPSED_WIDTH = 80;
 
 /**
  * Menu items do painel administrativo do Shop
  */
-const getMenuItems = (shopId: string) => [
+const getMenuItems = (shopId: string, collapsed: boolean) => [
   {
     key: `/admin/shop/${shopId}`,
-    icon: <DashboardOutlined />,
-    label: "Dashboard",
+    icon: <DashboardOutlined style={{ fontSize: "18px", color: "#8b5cf6" }} />,
+    label: <span className="font-medium">Dashboard</span>,
+  },
+  { 
+    type: "divider" as const, 
+    style: { margin: "12px 0" } 
   },
   {
-    key: `/admin/shop/${shopId}/appointments`,
-    icon: <CalendarOutlined />,
-    label: "Agendamentos",
+    key: "operations-group",
+    type: "group" as const,
+    label: collapsed ? null : (
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2">
+        Operações
+      </span>
+    ),
+    children: [
+      {
+        key: `/admin/shop/${shopId}/appointments`,
+        icon: <CalendarOutlined style={{ fontSize: "18px", color: "#3b82f6" }} />,
+        label: <span className="font-medium">Agendamentos</span>,
+      },
+      {
+        key: `/admin/shop/${shopId}/services`,
+        icon: <ToolOutlined style={{ fontSize: "18px", color: "#10b981" }} />,
+        label: <span className="font-medium">Serviços</span>,
+      },
+    ],
+  },
+  { 
+    type: "divider" as const, 
+    style: { margin: "12px 0" } 
   },
   {
-    key: `/admin/shop/${shopId}/services`,
-    icon: <ToolOutlined />,
-    label: "Serviços",
+    key: "config-group",
+    type: "group" as const,
+    label: collapsed ? null : (
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2">
+        Configurações
+      </span>
+    ),
+    children: [
+      {
+        key: `/admin/shop/${shopId}/schedules`,
+        icon: <ClockCircleOutlined style={{ fontSize: "18px", color: "#f59e0b" }} />,
+        label: <span className="font-medium">Horários</span>,
+      },
+      {
+        key: `/admin/shop/${shopId}/blocked-times`,
+        icon: <StopOutlined style={{ fontSize: "18px", color: "#ef4444" }} />,
+        label: <span className="font-medium">Bloqueios</span>,
+      },
+    ],
+  },
+  { 
+    type: "divider" as const, 
+    style: { margin: "12px 0" } 
   },
   {
-    key: `/admin/shop/${shopId}/schedules`,
-    icon: <ClockCircleOutlined />,
-    label: "Horários",
-  },
-  {
-    key: `/admin/shop/${shopId}/blocked-times`,
-    icon: <StopOutlined />,
-    label: "Bloqueios",
+    key: `/admin/shop/${shopId}/insights`,
+    icon: <LineChartOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
+    label: <span className="font-medium">Insights</span>,
   },
   {
     key: `/admin/shop/${shopId}/settings`,
-    icon: <SettingOutlined />,
-    label: "Configurações",
+    icon: <SettingOutlined style={{ fontSize: "18px", color: "#64748b" }} />,
+    label: <span className="font-medium">Configurações</span>,
   },
 ];
 
@@ -61,12 +106,13 @@ function ShopLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { shop, shopId, isLoading, error } = useShopAdmin();
+  const [collapsed, setCollapsed] = useState(false);
 
-  const menuItems = getMenuItems(shopId);
+  const menuItems = getMenuItems(shopId, collapsed);
 
   // Encontrar a key ativa baseada no pathname
   const selectedKey = menuItems.find((item) => pathname === item.key)?.key 
-    || menuItems.find((item) => pathname.startsWith(item.key) && item.key !== `/shop/${shopId}`)?.key
+    || menuItems.find((item) => item.key && pathname.startsWith(item.key) && item.key !== `/shop/${shopId}`)?.key
     || `/admin/shop/${shopId}`;
 
   if (isLoading) {
@@ -93,95 +139,130 @@ function ShopLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Layout className="min-h-screen">
-      {/* Sidebar */}
-      <Sider
-        width={250}
-        theme="light"
-        className="border-r border-gray-200"
-        breakpoint="lg"
-        collapsedWidth="0"
+    <div className="min-h-screen bg-slate-50">
+      {/* Sidebar Fixa */}
+      <aside
+        className="fixed left-0 top-0 h-screen z-50 bg-white border-r border-slate-200 transition-all duration-200"
+        style={{ width: collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH }}
       >
         {/* Header do Shop */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
-              <ShopOutlined className="text-white text-lg" />
+        <div className="px-4 py-5 border-b border-slate-100" style={{ minHeight: 72 }}>
+          {!collapsed ? (
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+                <ShopOutlined className="text-white text-xl" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Title level={5} className="!m-0 truncate !text-[15px] !font-bold !text-slate-800">
+                  {shop.name}
+                </Title>
+                <Text className="text-xs text-slate-400 font-medium">
+                  Painel Admin
+                </Text>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <Title level={5} className="!m-0 truncate">
-                {shop.name}
-              </Title>
-              <Text type="secondary" className="text-xs">
-                {shop.city}, {shop.state}
-              </Text>
+          ) : (
+            <div className="flex justify-center">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+                <ShopOutlined className="text-white text-xl" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Menu de Navegação */}
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          items={menuItems}
-          onClick={({ key }) => router.push(key)}
-          className="border-none"
-        />
+        <div 
+          className="overflow-y-auto overflow-x-hidden" 
+          style={{ height: collapsed ? "calc(100vh - 144px)" : "calc(100vh - 144px)" }}
+        >
+          <Menu
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            items={menuItems}
+            onClick={({ key }) => router.push(key)}
+            className="border-none bg-transparent"
+            inlineCollapsed={collapsed}
+            style={{ paddingTop: "8px", paddingBottom: "16px" }}
+          />
+        </div>
 
-        {/* Voltar para Organization */}
-        {shop.organizationId && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-            <Button
-              type="text"
-              icon={<LeftOutlined />}
-              onClick={() => router.push(`/organization/${shop.organizationId}`)}
-              className="w-full text-left"
-            >
-              Voltar à Organização
-            </Button>
+        {/* Footer - Collapse Toggle */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-100 bg-white">
+          {shop.organizationId && !collapsed && (
+            <div className="px-4 py-3 border-b border-slate-100">
+              <Button
+                type="text"
+                icon={<LeftOutlined className="text-slate-400" />}
+                onClick={() => router.push(`/organization/${shop.organizationId}`)}
+                className="w-full text-left hover:!bg-slate-50 !text-slate-500 !text-xs"
+                size="small"
+              >
+                Voltar à Organização
+              </Button>
+            </div>
+          )}
+          <div className="p-3">
+            <Tooltip title={collapsed ? "Expandir" : "Recolher"} placement="right">
+              <Button
+                type="text"
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+                className="w-full flex items-center justify-center hover:!bg-slate-50 !text-slate-400"
+                size="small"
+              />
+            </Tooltip>
           </div>
-        )}
-      </Sider>
+        </div>
+      </aside>
 
-      {/* Conteúdo Principal */}
-      <Layout>
-        {/* Header com Breadcrumbs */}
-        <Header className="bg-white px-6 border-b border-gray-200 flex items-center h-16">
-          <nav className="flex items-center gap-2 text-sm">
-            {shop.organizationId && (
-              <>
-                <button
-                  onClick={() => router.push(`/organization/${shop.organizationId}`)}
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
-                  Organização
-                </button>
-                <span className="text-gray-300">/</span>
-              </>
-            )}
-            <button
-              onClick={() => router.push(`/admin/shop/${shopId}`)}
-              className="text-gray-500 hover:text-blue-500 transition-colors"
-            >
-              {shop.name}
-            </button>
-            {pathname !== `/admin/shop/${shopId}` && (
-              <>
-                <span className="text-gray-300">/</span>
-                <span className="text-gray-900 font-medium">
-                  {menuItems.find((item) => pathname.startsWith(item.key) && item.key !== `/admin/shop/${shopId}`)?.label || ""}
-                </span>
-              </>
-            )}
-          </nav>
-        </Header>
+      {/* Área Principal */}
+      <main 
+        className="min-h-screen bg-slate-50 transition-all duration-200"
+        style={{ marginLeft: collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH }}
+      >
+        {/* Breadcrumb */}
+        <nav className="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-40">
+          <Breadcrumb
+            items={[
+              ...(shop.organizationId ? [{
+                title: (
+                  <button
+                    onClick={() => router.push(`/organization/${shop.organizationId}`)}
+                    className="text-slate-500 hover:text-violet-600 transition-colors flex items-center gap-1"
+                  >
+                    <HomeOutlined className="text-xs" />
+                    <span>Organização</span>
+                  </button>
+                ),
+              }] : []),
+              {
+                title: (
+                  <button
+                    onClick={() => router.push(`/admin/shop/${shopId}`)}
+                    className="text-slate-500 hover:text-violet-600 transition-colors"
+                  >
+                    {shop.name}
+                  </button>
+                ),
+              },
+              ...(pathname !== `/admin/shop/${shopId}` ? [{
+                title: (
+                  <span className="text-slate-800 font-medium">
+                    {menuItems.find((item) => item.key && pathname.startsWith(item.key) && item.key !== `/admin/shop/${shopId}`)?.label || ""}
+                  </span>
+                ),
+              }] : []),
+            ]}
+            className="text-sm"
+          />
+        </nav>
 
         {/* Área de Conteúdo */}
-        <Content className="p-6 bg-gray-50">
+        <div className="p-6">
           {children}
-        </Content>
-      </Layout>
-    </Layout>
+        </div>
+      </main>
+    </div>
   );
 }
 

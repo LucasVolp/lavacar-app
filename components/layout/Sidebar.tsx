@@ -13,6 +13,8 @@ import {
   ClockCircleOutlined,
   StopOutlined,
   TeamOutlined,
+  LineChartOutlined,
+  FireOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -143,6 +145,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       ),
       children: [
         {
+          key: "/insights",
+          icon: <LineChartOutlined style={{ fontSize: "18px", color: "#f43f5e" }} />,
+          label: (
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Insights</span>
+              <FireOutlined style={{ color: "#f43f5e", fontSize: "12px" }} />
+            </div>
+          ),
+        },
+        {
           key: "/users",
           icon: <TeamOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
           label: <span className="font-medium">Usuários</span>,
@@ -191,48 +203,76 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       onBreakpoint={(broken) => {
         if (broken) onCollapse(true);
       }}
-      width={260}
+      width={280}
       collapsedWidth={80}
-      className="fixed left-0 top-0 h-screen z-50"
+      className="!fixed left-0 top-0 h-screen z-50"
       style={{
         borderRight: `1px solid ${borderColor}`,
-        boxShadow: `1px 0 3px 0 ${shadowColor}`,
+        boxShadow: `4px 0 24px -4px ${shadowColor}`,
         overflow: "hidden",
+        background: isDarkMode 
+          ? "linear-gradient(180deg, #1a1a2e 0%, #16162a 100%)" 
+          : "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
       }}
     >
-      {/* Logo */}
+      {/* Logo com design premium */}
       <div
-        className="h-16 flex items-center justify-center gap-3 px-4 border-b"
-        style={{ borderColor }}
+        className="h-20 flex items-center justify-center gap-3 px-5"
+        style={{ 
+          borderBottom: `1px solid ${borderColor}`,
+          background: isDarkMode 
+            ? "linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.05) 100%)"
+            : "linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.03) 100%)"
+        }}
       >
-        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
-          <span className="text-white font-bold text-lg">L</span>
+        <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform hover:scale-105 transition-transform cursor-pointer">
+          <span className="text-white font-bold text-xl">L</span>
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <Text strong className="text-lg leading-tight">
+            <Text strong className="text-xl leading-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
               Lavacar
             </Text>
             <Text type="secondary" className="text-xs leading-tight">
-              Sistema de Agendamentos
+              Sistema Profissional
             </Text>
           </div>
         )}
       </div>
 
-      {/* Menu */}
-      <div className="h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden">
+      {/* Menu com scroll personalizado */}
+      <div 
+        className="h-[calc(100vh-80px)] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-600"
+        style={{
+          scrollbarWidth: "thin",
+        }}
+      >
         <Menu
           mode="inline"
           selectedKeys={getSelectedKeys()}
           onClick={handleMenuClick}
           items={menuItems}
-          className="border-none"
+          className="border-none bg-transparent"
           style={{
-            paddingTop: "8px",
-            paddingBottom: "16px",
+            paddingTop: "12px",
+            paddingBottom: "24px",
           }}
         />
+        
+        {/* Footer da Sidebar */}
+        {!collapsed && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t" style={{ borderColor, background: "inherit" }}>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                <FireOutlined className="text-white" />
+              </div>
+              <div className="flex-1">
+                <Text strong className="text-sm block">Pro Features</Text>
+                <Text type="secondary" className="text-xs">Desbloqueie recursos</Text>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Sider>
   );

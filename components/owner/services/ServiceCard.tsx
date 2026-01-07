@@ -1,110 +1,95 @@
 "use client";
 
 import React from "react";
-import { Card, Typography, Tag, Button, Space, Dropdown, Switch } from "antd";
-import type { MenuProps } from "antd";
-import {
-  ClockCircleOutlined,
-  DollarOutlined,
-  MoreOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  CopyOutlined,
-} from "@ant-design/icons";
+import { Card, Tag, Tooltip, Switch, Popconfirm } from "antd";
+import { EditOutlined, DeleteOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
+import { Services } from "@/types/services";
 
-const { Text, Title } = Typography;
-
-export interface Service {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  duration: number; // in minutes
-  category?: string;
-  isActive: boolean;
-}
+const { Text } = Typography;
 
 interface ServiceCardProps {
-  service: Service;
-  onEdit?: (service: Service) => void;
-  onDelete?: (id: string) => void;
-  onDuplicate?: (service: Service) => void;
-  onToggleActive?: (id: string, active: boolean) => void;
+  service: Services;
+  onEdit: (service: Services) => void;
+  onDelete: (id: string) => void;
+  onToggleActive: (service: Services) => void;
+  isUpdating: boolean;
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
   service,
   onEdit,
   onDelete,
-  onDuplicate,
   onToggleActive,
+  isUpdating,
 }) => {
-  const menuItems: MenuProps["items"] = [
-    {
-      key: "edit",
-      icon: <EditOutlined />,
-      label: "Editar",
-      onClick: () => onEdit?.(service),
-    },
-    {
-      key: "duplicate",
-      icon: <CopyOutlined />,
-      label: "Duplicar",
-      onClick: () => onDuplicate?.(service),
-    },
-    { type: "divider" },
-    {
-      key: "delete",
-      icon: <DeleteOutlined />,
-      label: "Excluir",
-      danger: true,
-      onClick: () => onDelete?.(service.id),
-    },
-  ];
-
   return (
     <Card
-      className={`border-base-200 hover:shadow-md transition-all ${!service.isActive ? "opacity-60" : ""}`}
-      styles={{ body: { padding: "16px" } }}
-    >
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-grow">
-          <div className="flex items-center gap-2 mb-1">
-            <Title level={5} className="!mb-0">
-              {service.name}
-            </Title>
-            {service.category && (
-              <Tag color="blue">{service.category}</Tag>
-            )}
-          </div>
-          {service.description && (
-            <Text type="secondary" className="text-sm line-clamp-2">
-              {service.description}
-            </Text>
-          )}
-        </div>
-        <Space>
+      hoverable
+      className={`h-full transition-all duration-200 hover:shadow-lg ${
+        service.isActive === false ? "opacity-70 grayscale-[30%]" : ""
+      }`}
+      style={{
+        borderTop: `4px solid ${service.isActive !== false ? "#52c41a" : "#d9d9d9"}`,
+      }}
+      actions={[
+        <Tooltip title={service.isActive !== false ? "Desativar" : "Ativar"} key="toggle">
           <Switch
             size="small"
-            checked={service.isActive}
-            onChange={(checked) => onToggleActive?.(service.id, checked)}
+            checked={service.isActive !== false}
+            onChange={() => onToggleActive(service)}
+            loading={isUpdating}
           />
-          <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-            <Button type="text" icon={<MoreOutlined />} size="small" />
-          </Dropdown>
-        </Space>
-      </div>
-
-      <div className="flex items-center gap-4 pt-3 border-t border-base-200">
-        <div className="flex items-center gap-2">
-          <DollarOutlined className="text-success" />
-          <Text strong className="text-success">
-            R$ {service.price.toFixed(2)}
-          </Text>
+        </Tooltip>,
+        <Tooltip title="Editar" key="edit">
+          <EditOutlined
+            onClick={() => onEdit(service)}
+            className="text-blue-500"
+          />
+        </Tooltip>,
+        <Popconfirm
+          key="delete"
+          title="Excluir serviço"
+          description="Tem certeza que deseja excluir?"
+          onConfirm={() => onDelete(service.id)}
+          okText="Sim"
+          cancelText="Não"
+          okButtonProps={{ danger: true }}
+        >
+          <Tooltip title="Excluir">
+            <DeleteOutlined className="text-red-500" />
+          </Tooltip>
+        </Popconfirm>,
+      ]}
+    >
+      <div className="space-y-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <Text strong className="text-lg block">
+              {service.name}
+            </Text>
+            {service.description && (
+              <Text type="secondary" className="text-sm line-clamp-2">
+                {service.description}
+              </Text>
+            )}
+          </div>
+          <Tag
+            color={service.isActive !== false ? "success" : "default"}
+            className="ml-2 shrink-0"
+          >
+            {service.isActive !== false ? "Ativo" : "Inativo"}
+          </Tag>
         </div>
-        <div className="flex items-center gap-2">
-          <ClockCircleOutlined className="text-info" />
-          <Text type="secondary">{service.duration} min</Text>
+        
+        <div className="flex justify-between items-center pt-3 border-t">
+          <div className="flex items-center gap-1 text-gray-500">
+            <ClockCircleOutlined />
+            <span>{service.duration} min</span>
+          </div>
+          <Text strong className="text-xl text-green-600">
+            R$ {parseFloat(service.price).toFixed(2)}
+          </Text>
         </div>
       </div>
     </Card>

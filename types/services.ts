@@ -16,7 +16,7 @@ export interface Services {
 export interface CreateServicePayload {
     name: string;
     description?: string;
-    price: string;
+    price: number;
     duration: number;
     isActive?: boolean;
 
@@ -27,7 +27,7 @@ export interface CreateServicePayload {
 export interface UpdateServicePayload {
     name?: string;
     description?: string;
-    price?: string;
+    price?: number;
     duration?: number;
     isActive?: boolean;
 

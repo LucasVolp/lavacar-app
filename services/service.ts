@@ -1,11 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
-import { Services } from '../types/services';
+import { Services, CreateServicePayload, UpdateServicePayload } from '../types/services';
 
 const base = '/service';
 
 export const serviceService = {
-  create: async (payload: Partial<Services>) => {
+  create: async (payload: CreateServicePayload) => {
     try {
       const response: AxiosResponse<Services> = await axiosInstance.post(base, payload);
       return response.data;
@@ -53,7 +53,7 @@ export const serviceService = {
     }
   },
 
-  update: async (id: string, payload: Partial<Services>) => {
+  update: async (id: string, payload: UpdateServicePayload) => {
     try {
       const response: AxiosResponse<Services> = await axiosInstance.patch(`${base}/${id}`, payload);
       return response.data;

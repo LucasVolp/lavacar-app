@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { scheduleService } from "@/services/schedule";
+import { CreateSchedulePayload, UpdateSchedulePayload } from "@/types/schedule";
 
 // Query Keys
 export const scheduleKeys = {
@@ -45,5 +46,48 @@ export function useSchedule(id: string | null, enabled = true) {
     queryKey: scheduleKeys.detail(id || ""),
     queryFn: () => scheduleService.findOne(id!),
     enabled: enabled && !!id,
+  });
+}
+
+/**
+ * Hook para criar um horário
+ */
+export function useCreateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateSchedulePayload) => scheduleService.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: scheduleKeys.all });
+    },
+  });
+}
+
+/**
+ * Hook para atualizar um horário
+ */
+export function useUpdateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateSchedulePayload }) =>
+      scheduleService.update(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: scheduleKeys.all });
+    },
+  });
+}
+
+/**
+ * Hook para deletar um horário
+ */
+export function useDeleteSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => scheduleService.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: scheduleKeys.all });
+    },
   });
 }
