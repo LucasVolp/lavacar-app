@@ -1,25 +1,7 @@
 "use client";
 
 import { use, useState, useEffect, useMemo } from "react";
-import {
-  Typography,
-  Steps,
-  Card,
-  Spin,
-  Alert,
-  Button,
-  Row,
-  Col,
-  message,
-  Result,
-} from "antd";
-import {
-  CarOutlined,
-  AppstoreOutlined,
-  CalendarOutlined,
-  CheckCircleOutlined,
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
+import { message } from "antd";
 import { useRouter } from "next/navigation";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/pt-br";
@@ -32,17 +14,21 @@ import { useUserVehicles } from "@/hooks/useVehicles";
 import { useShopSchedules } from "@/hooks/useSchedules";
 import { useShopAppointmentsByDate, useCreateAppointment } from "@/hooks/useAppointments";
 import {
-  ServiceCard,
-  VehicleSelector,
-  DateTimePicker,
-  BookingSummary,
   AddVehicleModal,
+  BookingHeader,
+  BookingSteps,
+  BookingReviewCard,
 } from "@/components/booking";
 import { Services } from "@/types/services";
+import { VehicleStep } from "@/components/shop/booking/VehicleStep";
+import { GuestVehicleData } from "@/components/shop/booking/GuestVehicleForm";
+import { ServicesStep } from "@/components/shop/booking/ServicesStep";
+import { DateTimeStep } from "@/components/shop/booking/DateTimeStep";
+import { BookingSuccess } from "@/components/shop/booking/BookingSuccess";
+import { LoginModal } from "@/components/shop/booking/LoginModal";
+import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
 dayjs.locale("pt-br");
-
-const { Title, Text } = Typography;
 
 interface BookingPageProps {
   params: Promise<{ slug: string }>;
@@ -51,16 +37,18 @@ interface BookingPageProps {
 export default function BookingPage({ params }: BookingPageProps) {
   const { slug } = use(params);
   const router = useRouter();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { setShopBySlug } = useShop();
 
-  // Estados do fluxo de agendamento
+  // Booking flow states
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [guestVehicle, setGuestVehicle] = useState<GuestVehicleData | null>(null);
   const [selectedServices, setSelectedServices] = useState<Services[]>([]);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
 
   // Queries
@@ -84,34 +72,33 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   const createAppointment = useCreateAppointment();
 
-  // Define o shop no contexto quando carregado
+  // Set shop context
   useEffect(() => {
     if (slug) {
       setShopBySlug(slug);
     }
   }, [slug, setShopBySlug]);
 
-  // Redirecionar para login se não autenticado
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push(`/auth/login?redirect=${encodeURIComponent(`/shop/${slug}/booking`)}`);
-    }
-  }, [authLoading, isAuthenticated, router, slug]);
-
-  // Cálculos
+  // Memoized calculations
   const selectedVehicle = useMemo(() => {
+    if (!isAuthenticated && guestVehicle) {
+        return {
+            id: 'guest',
+            brand: guestVehicle.brand,
+            model: guestVehicle.model,
+            plate: 'Visitante',
+            type: guestVehicle.type
+        } as any;
+    }
     return vehicles.find((v) => v.id === selectedVehicleId) || null;
-  }, [vehicles, selectedVehicleId]);
+  }, [vehicles, selectedVehicleId, isAuthenticated, guestVehicle]);
 
   const totalDuration = useMemo(() => {
     return selectedServices.reduce((sum, s) => sum + s.duration, 0);
   }, [selectedServices]);
 
   const totalPrice = useMemo(() => {
-    return selectedServices.reduce(
-      (sum, s) => sum + parseFloat(s.price),
-      0
-    );
+    return selectedServices.reduce((sum, s) => sum + parseFloat(s.price), 0);
   }, [selectedServices]);
 
   // Handlers
@@ -127,23 +114,44 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   const handleDateChange = (date: Dayjs) => {
     setSelectedDate(date);
-    setSelectedTime(null); // Reset time when date changes
+    setSelectedTime(null);
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
+    // After login, check if user has vehicles. If not, show AddVehicleModal?
+    // Or just let them proceed to vehicle selection if needed.
+    // If they have vehicles but none selected, we need to enforce selection.
+    
+    refetchVehicles().then(({ data: userVehicles }) => {
+        if (!userVehicles || userVehicles.length === 0) {
+            setShowAddVehicleModal(true);
+        } else if (!selectedVehicleId) {
+             // Avoid redirecting immediately to let user see context? 
+             // Or redirect to step 0
+             message.info("Por favor, selecione seu veículo para finalizar.");
+             setCurrentStep(0);
+        }
+    });
   };
 
   const handleConfirmBooking = async () => {
-    if (
-      !user ||
-      !shop ||
-      !selectedVehicle ||
-      !selectedDate ||
-      !selectedTime ||
-      selectedServices.length === 0
-    ) {
+    if (!isAuthenticated) {
+        setShowLoginModal(true);
+        return;
+    }
+
+    if (!selectedVehicleId) {
+        message.warning("Selecione um veículo para continuar");
+        setCurrentStep(0);
+        return;
+    }
+
+    if (!user || !shop || !selectedDate || !selectedTime || selectedServices.length === 0) {
       message.error("Por favor, preencha todos os campos");
       return;
     }
 
-    // Monta o horário de início
     const [hour, minute] = selectedTime.split(":").map(Number);
     const scheduledAt = selectedDate.hour(hour).minute(minute).second(0);
     const endTime = scheduledAt.add(totalDuration, "minute");
@@ -156,7 +164,7 @@ export default function BookingPage({ params }: BookingPageProps) {
         totalDuration,
         userId: user.id,
         shopId: shop.id,
-        vehicleId: selectedVehicle.id,
+        vehicleId: selectedVehicleId, // Use ID directly as selectedVehicle might be null initially
         serviceIds: selectedServices.map((s) => ({
           serviceId: s.id,
           serviceName: s.name,
@@ -169,8 +177,7 @@ export default function BookingPage({ params }: BookingPageProps) {
       message.success("Agendamento realizado com sucesso!");
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage =
-        err.response?.data?.message || "Erro ao criar agendamento";
+      const errorMessage = err.response?.data?.message || "Erro ao criar agendamento";
       message.error(errorMessage);
     }
   };
@@ -178,7 +185,7 @@ export default function BookingPage({ params }: BookingPageProps) {
   const canProceedToStep = (step: number) => {
     switch (step) {
       case 0:
-        return !!selectedVehicleId;
+        return isAuthenticated ? !!selectedVehicleId : !!guestVehicle;
       case 1:
         return selectedServices.length > 0;
       case 2:
@@ -198,277 +205,228 @@ export default function BookingPage({ params }: BookingPageProps) {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  // Loading states
-  if (authLoading || shopLoading) {
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
+  };
+
+  // Loading state
+  if (shopLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  if (shopError || !shop) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <Alert
-          type="error"
-          message="Loja não encontrada"
-          description="A loja que você está procurando não existe ou foi desativada."
-          showIcon
-        />
-      </div>
-    );
-  }
-
-  // Tela de sucesso
-  if (bookingComplete) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="max-w-lg w-full text-center">
-          <Result
-            status="success"
-            title="Agendamento Confirmado!"
-            subTitle={
-              <div className="space-y-2">
-                <Text>
-                  Seu agendamento foi realizado com sucesso para{" "}
-                  <strong>
-                    {selectedDate?.format("DD/MM/YYYY")} às {selectedTime}
-                  </strong>
-                </Text>
-                <br />
-                <Text type="secondary">
-                  Você receberá uma confirmação em breve.
-                </Text>
-              </div>
-            }
-            extra={[
-              <Button
-                type="primary"
-                key="shop"
-                onClick={() => router.push(`/shop/${slug}`)}
-              >
-                Voltar para a Loja
-              </Button>,
-              <Button key="home" onClick={() => router.push("/")}>
-                Ir para Início
-              </Button>,
-            ]}
-          />
-        </Card>
-      </div>
-    );
-  }
-
-  const steps = [
-    {
-      title: "Veículo",
-      icon: <CarOutlined />,
-      description: "Selecione seu veículo",
-    },
-    {
-      title: "Serviços",
-      icon: <AppstoreOutlined />,
-      description: "Escolha os serviços",
-    },
-    {
-      title: "Data e Hora",
-      icon: <CalendarOutlined />,
-      description: "Agende o horário",
-    },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => router.push(`/shop/${slug}`)}
-            >
-              Voltar
-            </Button>
-            <div>
-              <Title level={4} className="!mb-0">
-                Agendar em {shop.name}
-              </Title>
-              <Text type="secondary">
-                Olá, {user?.firstName}! Complete seu agendamento abaixo.
-              </Text>
-            </div>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+          <span className="block mt-4 text-slate-500 font-medium">Carregando loja...</span>
         </div>
       </div>
+    );
+  }
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+  // Error state
+  if (shopError || !shop) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-4">
+        <div className="max-w-md w-full text-center bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-3xl p-12">
+          <div className="text-7xl mb-6">🚗</div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3">
+            Loja não encontrada
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-8">
+            A loja que você está procurando não existe ou foi desativada.
+          </p>
+          <button 
+             onClick={() => router.push("/")}
+             className="px-8 py-3 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-black dark:hover:bg-white font-bold rounded-xl hover:scale-105 transition-all"
+          >
+            Voltar ao Início
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
+  if (bookingComplete) {
+    return (
+      <BookingSuccess
+        selectedDate={selectedDate}
+        selectedTime={selectedTime}
+        selectedServices={selectedServices}
+        totalDuration={totalDuration}
+        totalPrice={totalPrice}
+        formatDuration={formatDuration}
+        onReturnToShop={() => router.push(`/shop/${slug}`)}
+        onReturnToHome={() => router.push("/")}
+      />
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] transition-colors duration-300">
+      {/* Header */}
+      <BookingHeader
+        shop={shop}
+        onBack={() => router.push(`/shop/${slug}`)}
+        userName={user?.firstName}
+      />
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Steps */}
-        <Card className="mb-6">
-          <Steps
-            current={currentStep}
-            items={steps.map((step, index) => ({
-              ...step,
-              status:
-                index < currentStep
-                  ? "finish"
-                  : index === currentStep
-                    ? "process"
-                    : "wait",
-            }))}
-          />
-        </Card>
+        <div className="mb-12">
+          <BookingSteps currentStep={currentStep} />
+        </div>
 
-        <Row gutter={[24, 24]}>
-          {/* Conteúdo Principal */}
-          <Col xs={24} lg={16}>
-            <Card>
-              {/* Step 0: Veículo */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Main Content Area */}
+          <div className="lg:col-span-8">
+            <div className="bg-white dark:bg-[#18181b] rounded-3xl border border-slate-200 dark:border-[#27272a] shadow-xl overflow-hidden min-h-[500px]">
+              {/* Step 0: Vehicle Selection */}
               {currentStep === 0 && (
-                <div>
-                  <Title level={4} className="!mb-6">
-                    <CarOutlined className="mr-2" />
-                    Selecione seu Veículo
-                  </Title>
-
-                  {vehiclesLoading ? (
-                    <div className="flex justify-center py-8">
-                      <Spin />
-                    </div>
-                  ) : (
-                    <VehicleSelector
-                      vehicles={vehicles}
-                      selectedVehicleId={selectedVehicleId}
-                      onSelect={setSelectedVehicleId}
-                      onAddVehicle={() => setShowAddVehicleModal(true)}
-                    />
-                  )}
-                </div>
+                <VehicleStep
+                  isAuthenticated={isAuthenticated}
+                  isLoading={vehiclesLoading}
+                  vehicles={vehicles}
+                  selectedVehicleId={selectedVehicleId}
+                  onSelectVehicle={setSelectedVehicleId}
+                  onAddVehicle={() => setShowAddVehicleModal(true)}
+                  onLogin={() =>
+                    router.push(
+                      `/auth/login?redirect=${encodeURIComponent(
+                        `/shop/${slug}/booking`
+                      )}`
+                    )
+                  }
+                  guestVehicle={guestVehicle}
+                  onGuestVehicleSelect={setGuestVehicle}
+                />
               )}
 
-              {/* Step 1: Serviços */}
+              {/* Step 1: Services Selection */}
               {currentStep === 1 && (
-                <div>
-                  <Title level={4} className="!mb-2">
-                    <AppstoreOutlined className="mr-2" />
-                    Escolha os Serviços
-                  </Title>
-                  <Text type="secondary" className="block mb-6">
-                    Selecione um ou mais serviços para seu agendamento
-                  </Text>
-
-                  {servicesLoading ? (
-                    <div className="flex justify-center py-8">
-                      <Spin />
-                    </div>
-                  ) : services.length === 0 ? (
-                    <Alert
-                      type="info"
-                      message="Nenhum serviço disponível"
-                      showIcon
-                    />
-                  ) : (
-                    <div className="space-y-4">
-                      {services.map((service) => (
-                        <ServiceCard
-                          key={service.id}
-                          service={service}
-                          selected={selectedServices.some(
-                            (s) => s.id === service.id
-                          )}
-                          onSelect={handleServiceToggle}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <ServicesStep
+                  isLoading={servicesLoading}
+                  services={services}
+                  selectedServices={selectedServices}
+                  totalDuration={totalDuration}
+                  totalPrice={totalPrice}
+                  onToggleService={handleServiceToggle}
+                  formatDuration={formatDuration}
+                />
               )}
 
-              {/* Step 2: Data e Hora */}
+              {/* Step 2: Date & Time Selection */}
               {currentStep === 2 && (
-                <div>
-                  <Title level={4} className="!mb-2">
-                    <CalendarOutlined className="mr-2" />
-                    Escolha a Data e Horário
-                  </Title>
-                  <Text type="secondary" className="block mb-6">
-                    Selecione quando deseja realizar o serviço
-                  </Text>
-
-                  <DateTimePicker
-                    shopSchedules={schedules}
-                    existingAppointments={existingAppointments}
-                    shop={shop}
-                    totalDuration={totalDuration}
-                    selectedDate={selectedDate}
-                    selectedTime={selectedTime}
-                    onDateChange={handleDateChange}
-                    onTimeChange={setSelectedTime}
-                    loading={schedulesLoading || appointmentsLoading}
-                  />
-                </div>
+                <DateTimeStep
+                  schedules={schedules}
+                  existingAppointments={existingAppointments}
+                  shop={shop}
+                  totalDuration={totalDuration}
+                  selectedDate={selectedDate}
+                  selectedTime={selectedTime}
+                  onDateChange={handleDateChange}
+                  onTimeChange={setSelectedTime}
+                  isLoading={schedulesLoading || appointmentsLoading}
+                />
               )}
 
-              {/* Navegação */}
-              <div className="flex justify-between mt-8 pt-6 border-t">
-                <Button
+              {/* Navigation Footer */}
+              <div className="border-t border-slate-200 dark:border-[#27272a] p-6 sm:p-8 bg-slate-50/50 dark:bg-[#09090b]/50 flex items-center justify-between backdrop-blur-sm">
+                <button
                   onClick={prevStep}
                   disabled={currentStep === 0}
+                  className={`
+                    flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
+                    ${
+                      currentStep === 0
+                        ? "opacity-0 pointer-events-none"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-200 dark:hover:bg-[#27272a]"
+                    }
+                  `}
                 >
-                  Voltar
-                </Button>
+                  <ArrowLeftOutlined /> Voltar
+                </button>
 
                 {currentStep < 2 ? (
-                  <Button
-                    type="primary"
+                  <button
                     onClick={nextStep}
                     disabled={!canProceedToStep(currentStep)}
+                    className={`
+                       flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-sm tracking-wide transition-all
+                       ${
+                         !canProceedToStep(currentStep)
+                           ? "bg-slate-200 dark:bg-[#27272a] text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                           : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-black dark:hover:bg-white hover:scale-105 hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.4)]"
+                       }
+                    `}
                   >
-                    Continuar
-                  </Button>
+                    Continuar <ArrowRightOutlined />
+                  </button>
                 ) : (
-                  <Button
-                    type="primary"
-                    icon={<CheckCircleOutlined />}
+                  /* The final confirm button is in the sidebar for Step 3, 
+                      but we can keep a redundant one here or hide it. 
+                      Ideally, on mobile, the sidebar is below, so this is useful. 
+                   */
+                  <button
                     onClick={handleConfirmBooking}
-                    loading={createAppointment.isPending}
                     disabled={
                       !canProceedToStep(2) ||
                       selectedServices.length === 0 ||
-                      !selectedVehicleId
+                      !selectedVehicleId ||
+                      createAppointment.isPending
                     }
+                    className={`
+                       lg:hidden flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-sm tracking-wide transition-all
+                       ${
+                         !canProceedToStep(2) || createAppointment.isPending
+                           ? "bg-slate-200 dark:bg-[#27272a] text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                           : "bg-emerald-500 text-white hover:bg-emerald-400 hover:shadow-[0_0_20px_-5px_rgba(16,185,129,0.4)]"
+                       }
+                    `}
                   >
-                    Confirmar Agendamento
-                  </Button>
+                    {createAppointment.isPending
+                      ? "Agendando..."
+                      : "Confirmar Agendamento"}
+                  </button>
                 )}
               </div>
-            </Card>
-          </Col>
+            </div>
+          </div>
 
-          {/* Sidebar - Resumo */}
-          <Col xs={24} lg={8}>
-            <BookingSummary
+          {/* Sidebar - Booking Review */}
+          <div className="lg:col-span-4">
+            <BookingReviewCard
               selectedServices={selectedServices}
               selectedVehicle={selectedVehicle}
               selectedDate={selectedDate}
               selectedTime={selectedTime}
               totalPrice={totalPrice}
               totalDuration={totalDuration}
-              onConfirm={handleConfirmBooking}
-              loading={createAppointment.isPending}
+              isLoading={createAppointment.isPending}
               disabled={currentStep < 2}
+              currentStep={currentStep}
+              onConfirm={handleConfirmBooking}
             />
-          </Col>
-        </Row>
-      </div>
+          </div>
+        </div>
+      </main>
 
-      {/* Modal para adicionar veículo */}
+      {/* Add Vehicle Modal */}
       <AddVehicleModal
         open={showAddVehicleModal}
         onClose={() => setShowAddVehicleModal(false)}
         onSuccess={() => {
           refetchVehicles();
         }}
+      />
+      
+      {/* Login Modal */}
+      <LoginModal 
+        open={showLoginModal}
+        onCancel={() => setShowLoginModal(false)}
+        onSuccess={handleLoginSuccess}
       />
     </div>
   );

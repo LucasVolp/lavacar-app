@@ -88,7 +88,11 @@ export const authService = {
    */
   me: async (): Promise<AuthUser> => {
     try {
-      const response: AxiosResponse<AuthUser> = await axiosInstance.get(`${base}/me`);
+      const response: AxiosResponse<any> = await axiosInstance.get(`${base}/me`);
+      // Check if response is wrapped in { user: ... }
+      if (response.data && response.data.user) {
+         return response.data.user;
+      }
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

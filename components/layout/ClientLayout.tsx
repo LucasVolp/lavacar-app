@@ -22,6 +22,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import type { MenuProps } from "antd";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const { Sider, Header: AntHeader, Content, Footer: AntFooter } = Layout;
 const { Text } = Typography;
 
@@ -35,12 +37,19 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
+  const { logout, user, isAuthenticated, isLoading } = useAuth(); // Auth context for Logout
   const isDarkMode = resolvedTheme === "dark";
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 0);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+        router.push("/auth/login?redirect=" + encodeURIComponent(pathname));
+    }
+  }, [isLoading, isAuthenticated, router, pathname]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -71,17 +80,12 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       ),
       children: [
         {
-          key: "/client/appointments/new",
-          icon: <PlusOutlined style={{ fontSize: "18px", color: "#22c55e" }} />,
-          label: <span className="font-medium text-success">Novo Agendamento</span>,
-        },
-        {
           key: "/client/appointments",
           icon: <CalendarOutlined style={{ fontSize: "18px", color: "#6366f1" }} />,
           label: (
             <div className="flex items-center justify-between">
               <span className="font-medium">Meus Agendamentos</span>
-              <Badge count={1} size="small" />
+              <Badge count={0} size="small" /> 
             </div>
           ),
         },
@@ -127,21 +131,23 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   };
 
   const userMenuItems: MenuProps["items"] = [
-    { key: "profile", icon: <UserOutlined />, label: "Meu Perfil" },
+    { key: "profile", icon: <UserOutlined />, label: "Meu Perfil", onClick: () => router.push("/client/profile") },
     { key: "settings", icon: <SettingOutlined />, label: "Configurações" },
     { type: "divider" },
     { key: "home", icon: <HomeOutlined />, label: "Voltar ao Início", onClick: () => router.push("/") },
-    { key: "logout", icon: <LogoutOutlined />, label: "Sair", danger: true },
+    { key: "logout", icon: <LogoutOutlined />, label: "Sair", danger: true, onClick: () => { logout(); router.push("/"); } },
   ];
 
-  if (!mounted) {
+  if (!mounted || isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] flex items-center justify-center transition-colors">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-info to-cyan-500 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-            <UserOutlined className="text-white text-xl" />
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg animate-spin">
+            <UserOutlined className="text-white text-xl animate-none" />
           </div>
-          <span className="text-base-content/60 text-sm">Carregando...</span>
+          <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+            {isLoading ? "Verificando acesso..." : "Redirecionando..."}
+          </span>
         </div>
       </div>
     );

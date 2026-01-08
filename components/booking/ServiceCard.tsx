@@ -1,10 +1,7 @@
 "use client";
 
-import { Card, Typography, Tag, Button } from "antd";
-import { ClockCircleOutlined, DollarOutlined } from "@ant-design/icons";
 import { Services } from "@/types/services";
-
-const { Text, Title } = Typography;
+import { ClockCircleOutlined, DollarOutlined, CheckCircleFilled } from "@ant-design/icons";
 
 interface ServiceCardProps {
   service: Services;
@@ -37,60 +34,49 @@ export function ServiceCard({
   };
 
   return (
-    <Card
-      className={`transition-all duration-200 cursor-pointer hover:shadow-md ${
-        selected ? "border-primary border-2 shadow-md" : "border-gray-200"
-      }`}
+    <div
       onClick={() => onSelect?.(service)}
+      className={`
+        relative overflow-hidden group p-6 rounded-xl border transition-all duration-300 cursor-pointer h-full flex flex-col
+        ${
+          selected
+            ? "bg-slate-50 dark:bg-[#18181b] border-indigo-500 dark:border-slate-50 shadow-[0_0_20px_-5px_rgba(99,102,241,0.2)] dark:shadow-[0_0_20px_-5px_rgba(255,255,255,0.2)] scale-[1.02]"
+            : "bg-white dark:bg-[#18181b] border-slate-200 dark:border-[#27272a] hover:border-slate-400 dark:hover:border-slate-500 hover:scale-[1.01]"
+        }
+      `}
     >
-      <div className="flex flex-col gap-3">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <Title level={5} className="!mb-1 !text-base">
-              {service.name}
-            </Title>
-            {service.description && (
-              <Text type="secondary" className="text-sm line-clamp-2">
-                {service.description}
-              </Text>
-            )}
-          </div>
-          {selected && (
-            <Tag color="blue" className="ml-2">
-              Selecionado
-            </Tag>
+      {/* Selection Indicator */}
+      {selected && (
+        <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-200">
+          <CheckCircleFilled className="text-emerald-500 dark:text-emerald-400 text-xl shadow-lg rounded-full bg-white dark:bg-black/50" />
+        </div>
+      )}
+
+      <div className="flex flex-col gap-4 flex-1">
+        <div>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 leading-tight tracking-tight pr-8 service-title transition-colors duration-300">
+            {service.name}
+          </h3>
+          {service.description && (
+             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-0 line-clamp-3 transition-colors duration-300">
+               {service.description}
+             </p>
           )}
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-gray-600">
-              <ClockCircleOutlined />
-              <Text type="secondary">{formatDuration(service.duration)}</Text>
-            </div>
-            <div className="flex items-center gap-1 text-green-600 font-medium">
+        <div className="flex items-center gap-4 mt-auto pt-4 border-t border-slate-100 dark:border-[#27272a] transition-colors duration-300">
+           <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
               <DollarOutlined />
-              <Text className="text-green-600 font-semibold">
-                {formatPrice(service.price)}
-              </Text>
-            </div>
-          </div>
-
-          {showSelectButton && (
-            <Button
-              type={selected ? "primary" : "default"}
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect?.(service);
-              }}
-            >
-              {selected ? "Selecionado" : "Selecionar"}
-            </Button>
-          )}
+              <span>{formatPrice(service.price)}</span>
+           </div>
+           
+           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm px-2">
+              <ClockCircleOutlined />
+              <span>{formatDuration(service.duration)}</span>
+           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 

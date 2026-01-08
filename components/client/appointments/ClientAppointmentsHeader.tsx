@@ -43,11 +43,6 @@ export const ClientAppointmentsHeader: React.FC<ClientAppointmentsHeaderProps> =
           ]}
           suffixIcon={<FilterOutlined />}
         />
-        <Link href="/client/appointments/new">
-          <Button type="primary" icon={<PlusOutlined />}>
-            Novo Agendamento
-          </Button>
-        </Link>
       </Space>
     </div>
   );

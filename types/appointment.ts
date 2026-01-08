@@ -1,3 +1,6 @@
+import { Shop } from './shop';
+import { Vehicle } from './vehicle';
+
 export interface Appointment {
     id: string;
     scheduledAt: string;
@@ -11,6 +14,10 @@ export interface Appointment {
     userId: string;
     shopId: string;
     vehicleId: string;
+
+    // Relations
+    shop?: Shop;
+    vehicle?: Vehicle;
 
     services: AppointmentService[];
 

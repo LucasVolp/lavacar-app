@@ -28,6 +28,7 @@ export interface ClientAppointmentFull {
   price: number;
   status: string;
   createdAt: string;
+  isEvaluated?: boolean;
 }
 
 interface ClientAppointmentsListFullProps {
@@ -48,10 +49,6 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
   onCancel,
   onEdit,
 }) => {
-  const activeAppointments = appointments.filter(
-    (a) => a.status !== "COMPLETED" && a.status !== "CANCELED"
-  );
-
   return (
     <Card
       title={
@@ -60,45 +57,56 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
             <CalendarOutlined className="text-success" />
             <span>Meus Agendamentos</span>
           </div>
-          <Link href="/client/appointments/new">
-            <Button type="primary" icon={<PlusOutlined />}>
-              Novo Agendamento
-            </Button>
-          </Link>
         </div>
       }
       className="border-base-200"
     >
-      {activeAppointments.length > 0 ? (
+      {appointments.length > 0 ? (
         <List
           itemLayout="vertical"
-          dataSource={activeAppointments}
-          renderItem={(item) => (
-            <List.Item
-              actions={[
-                <Button
-                  key="edit"
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => onEdit?.(item.id)}
-                  disabled={item.status === "CONFIRMED"}
-                >
-                  Editar
-                </Button>,
-                <Popconfirm
-                  key="cancel"
-                  title="Cancelar agendamento"
-                  description="Tem certeza que deseja cancelar este agendamento?"
-                  onConfirm={() => onCancel?.(item.id)}
-                  okText="Sim, cancelar"
-                  cancelText="Não"
-                >
-                  <Button type="text" danger icon={<DeleteOutlined />}>
-                    Cancelar
-                  </Button>
-                </Popconfirm>,
-              ]}
-            >
+          dataSource={appointments}
+          renderItem={(item) => {
+            const actions: React.ReactNode[] = [];
+            
+            if (item.status !== "COMPLETED" && item.status !== "CANCELED") {
+                actions.push(
+                    <Button
+                    key="edit"
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => onEdit?.(item.id)}
+                    disabled={item.status === "CONFIRMED"}
+                    >
+                    Editar
+                    </Button>
+                );
+                
+                actions.push(
+                    <Popconfirm
+                    key="cancel"
+                    title="Cancelar agendamento"
+                    description="Tem certeza que deseja cancelar este agendamento?"
+                    onConfirm={() => onCancel?.(item.id)}
+                    okText="Sim, cancelar"
+                    cancelText="Não"
+                    >
+                    <Button type="text" danger icon={<DeleteOutlined />}>
+                        Cancelar
+                    </Button>
+                    </Popconfirm>
+                );
+            }
+            
+            if (item.status === "COMPLETED") {
+                actions.push(
+                    <Tag color={item.isEvaluated ? "blue" : "default"}>
+                        {item.isEvaluated ? "Avaliado" : "Não Avaliado"}
+                    </Tag>
+                );
+            }
+
+            return (
+            <List.Item actions={actions}>
               <List.Item.Meta
                 avatar={
                   <div className="w-14 h-14 bg-success/10 rounded-lg flex items-center justify-center">
@@ -141,7 +149,7 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                 }
               />
             </List.Item>
-          )}
+          )}}
         />
       ) : (
         <Empty

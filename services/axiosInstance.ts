@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 // URL base da API - usa variável de ambiente ou fallback para localhost
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 
@@ -17,7 +18,9 @@ const axiosInstance = axios.create({
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    // Tenta pegar o token dos cookies primeiro (segurança)
+    const token = Cookies.get("access_token");
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

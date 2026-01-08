@@ -65,20 +65,20 @@ const colors = {
   },
 
   dark: {
-    textBase: "#e6e6e6",
-    textHeading: "#f5f5f5",
-    textSecondary: "#b0b0b0",
-    textPlaceholder: "#a0a0a0",
-    bgBase: "#121212",
-    bgContainer: "#1e1e1e",
-    bgElevated: "#282828",
-    bgLayout: "#141414",
-    sider: "#1a1a1a",
-    border: "#303030",
-    borderSecondary: "#404040",
-    hoverBg: "#303030",
-    footerBg: "#1a1a1a",
-    headerBg: "#1a1a1a",
+    textBase: "#f8fafc", // slate-50
+    textHeading: "#ffffff",
+    textSecondary: "#94a3b8", // slate-400
+    textPlaceholder: "#64748b", // slate-500
+    bgBase: "#09090b", // zinc-950
+    bgContainer: "#18181b", // zinc-900
+    bgElevated: "#18181b", // zinc-900
+    bgLayout: "#09090b", // zinc-950
+    sider: "#09090b", // zinc-950
+    border: "#27272a", // zinc-800
+    borderSecondary: "#3f3f46", // zinc-700
+    hoverBg: "#27272a",
+    footerBg: "#09090b",
+    headerBg: "#09090b",
   },
 };
 

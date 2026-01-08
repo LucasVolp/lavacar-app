@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refreshUser } = useAuth();
+  const { loginWithToken } = useAuth(); // Usando a nova função
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -22,30 +22,36 @@ function CallbackContent() {
       }
 
       if (accessToken) {
-        // Salvar o token
-        localStorage.setItem("access_token", accessToken);
-
-        // Atualizar dados do usuário
-        await refreshUser();
-
-        message.success("Login realizado com sucesso!");
-
-        // Verificar se há um redirect salvo
-        const savedRedirect = localStorage.getItem("auth_redirect");
-        if (savedRedirect) {
-          localStorage.removeItem("auth_redirect");
-          router.push(savedRedirect);
-        } else {
-          router.push("/");
+        try {
+          const success = await loginWithToken(accessToken);
+          
+          if (success) {
+            message.success("Login com Google realizado!");
+            
+            // Verificar redirecionamento salvo
+            const redirectUrl = localStorage.getItem("auth_redirect");
+            localStorage.removeItem("auth_redirect");
+            
+            if (redirectUrl) {
+                router.push(redirectUrl);
+            } else {
+                router.push("/");
+            }
+          } else {
+             message.error("Falha ao validar sessão");
+             router.push("/auth/login");
+          }
+        } catch (err) {
+            console.error(err);
+            router.push("/auth/login");
         }
       } else {
-        message.error("Token de acesso não encontrado");
         router.push("/auth/login");
       }
     };
 
     handleCallback();
-  }, [searchParams, router, refreshUser]);
+  }, [searchParams, router, loginWithToken]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">

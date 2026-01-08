@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Enable dark mode for [data-theme="dark"] attribute (used by next-themes + daisyUI) */
+@variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /* daisyUI theme customization */
 @theme {
   /* Primary colors - Indigo */
@@ -38,11 +41,12 @@
 
 /* Dark theme overrides */
 [data-theme="dark"] {
-  --color-base-100: #121212;
-  --color-base-200: #1e1e1e;
-  --color-base-300: #282828;
-  --color-base-content: #e6e6e6;
-  --color-neutral: #374151;
+  --color-base-100: #09090b; /* User requested #09090b */
+  --color-base-200: #18181b; /* User requested #18181b for cards */
+  --color-base-300: #27272a; /* User requested #27272a for borders/subtle bg */
+  --color-base-content: #f8fafc; /* Slate-50 */
+  --color-neutral: #18181b;
+  --color-neutral-content: #94a3b8; /* Slate-400 */
 }
 
 html,
@@ -185,3 +189,24 @@ body {
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
+
+/* Dark mode overrides for Ant Design Modal */
+[data-theme="dark"] .login-modal .ant-modal-content,
+[data-theme="dark"] .login-modal .ant-modal-header {
+  background-color: #18181b;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .login-modal .ant-modal-title {
+  background-color: transparent;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .login-modal .ant-modal-close {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .login-modal .ant-modal-close:hover {
+  color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.1);
+}

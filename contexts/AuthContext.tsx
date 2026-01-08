@@ -3,12 +3,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { authService, AuthUser, LoginCredentials, RegisterPayload } from "@/services/auth";
 import { message } from "antd";
+import Cookies from "js-cookie";
 
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<boolean>;
+  loginWithToken: (token: string) => Promise<boolean>;
   register: (payload: RegisterPayload) => Promise<boolean>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -29,7 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Carregar usuário do token ao iniciar
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = Cookies.get("access_token");
       
       if (token) {
         try {
@@ -37,7 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(userData);
         } catch (error) {
           console.error("Erro ao recuperar usuário:", error);
-          localStorage.removeItem("access_token");
+          Cookies.remove("access_token");
         }
       }
       
@@ -52,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await authService.login(credentials);
       
-      localStorage.setItem("access_token", response.accessToken);
+      Cookies.set("access_token", response.accessToken, { expires: 7, secure: true, sameSite: 'Strict' });
       setUser(response.user);
       
       message.success("Login realizado com sucesso!");
@@ -66,12 +68,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
+  const loginWithToken = useCallback(async (token: string): Promise<boolean> => {
+     try {
+       setIsLoading(true);
+       Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
+       const userData = await authService.me();
+       setUser(userData);
+       return true;
+     } catch (error) {
+       console.error("Failed to login with token", error);
+       Cookies.remove("access_token");
+       return false;
+     } finally {
+       setIsLoading(false);
+     }
+  }, []);
+
   const register = useCallback(async (payload: RegisterPayload): Promise<boolean> => {
     try {
       setIsLoading(true);
       const response = await authService.register(payload);
       
-      localStorage.setItem("access_token", response.accessToken);
+      Cookies.set("access_token", response.accessToken, { expires: 7, secure: true, sameSite: 'Strict' });
       setUser(response.user);
       
       message.success("Conta criada com sucesso!");
@@ -86,7 +104,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem("access_token");
+    Cookies.remove("access_token");
     setUser(null);
     message.info("Você foi desconectado");
   }, []);
@@ -108,6 +126,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated,
         isLoading,
         login,
+        loginWithToken,
         register,
         logout,
         refreshUser,

@@ -1,22 +1,21 @@
 "use client";
 
 import { use, useEffect } from "react";
-import { Typography, Card, Spin, Alert, Tag, Button, Divider, Row, Col } from "antd";
-import {
-  EnvironmentOutlined,
-  PhoneOutlined,
-  ClockCircleOutlined,
-  StarOutlined,
-  CalendarOutlined,
-} from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useShopBySlug } from "@/hooks/useShops";
 import { useServicesByShop } from "@/hooks/useServices";
 import { useShopSchedules } from "@/hooks/useSchedules";
+import { useCuratedReviews, useEvaluationSummary } from "@/hooks/useEvaluations";
 import { useShop } from "@/contexts/ShopContext";
-import { ServiceCard } from "@/components/booking";
-
-const { Title, Text, Paragraph } = Typography;
+import {
+  HeroSection,
+  ServicesSection,
+  ReviewsSection,
+  InfoSection,
+  CTASection,
+  ShopFooter,
+} from "@/components/shop";
+import { CarFilled } from "@ant-design/icons";
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>;
@@ -27,260 +26,129 @@ export default function ShopPage({ params }: ShopPageProps) {
   const router = useRouter();
   const { setShopBySlug } = useShop();
 
+  // Fetch shop data
   const {
     data: shop,
     isLoading: shopLoading,
     error: shopError,
   } = useShopBySlug(slug);
 
+  // Fetch services
   const { data: services = [], isLoading: servicesLoading } = useServicesByShop(
     shop?.id || null,
     !!shop
   );
 
+  // Fetch schedules
   const { data: schedules = [], isLoading: schedulesLoading } = useShopSchedules(
     shop?.id || null,
     !!shop
   );
 
-  // Define o shop no contexto quando carregado
+  // Fetch curated reviews (best reviews for display)
+  const { 
+    data: curatedReviews = [], 
+    isLoading: reviewsLoading,
+  } = useCuratedReviews(shop?.id || null, 5, !!shop);
+
+  // Get evaluation summary
+  const { data: evaluationSummary } = useEvaluationSummary(shop?.id || null, !!shop);
+
+  // Set shop context
   useEffect(() => {
     if (slug) {
       setShopBySlug(slug);
     }
   }, [slug, setShopBySlug]);
 
-  const weekdayLabels: Record<string, string> = {
-    MONDAY: "Segunda",
-    TUESDAY: "Terça",
-    WEDNESDAY: "Quarta",
-    THURSDAY: "Quinta",
-    FRIDAY: "Sexta",
-    SATURDAY: "Sábado",
-    SUNDAY: "Domingo",
-  };
-
-  const weekdayOrder = [
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-    "SUNDAY",
-  ];
-
-  const sortedSchedules = [...schedules].sort(
-    (a, b) => weekdayOrder.indexOf(a.weekday) - weekdayOrder.indexOf(b.weekday)
-  );
-
+  // Handle booking navigation
   const handleBooking = () => {
     router.push(`/shop/${slug}/booking`);
   };
 
+  // Calculate stats
+  const activeServices = services.filter((s) => s.isActive !== false);
+  const averageRating = evaluationSummary?.averageRating || 0;
+  const totalReviews = evaluationSummary?.totalEvaluations || 0;
+
+  // Loading state
   if (shopLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Spin size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] transition-colors duration-300">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+          <span className="block mt-4 text-slate-500 font-medium">Carregando experiência...</span>
+        </div>
       </div>
     );
   }
 
+  // Error state
   if (shopError || !shop) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <Alert
-          type="error"
-          message="Loja não encontrada"
-          description="A loja que você está procurando não existe ou foi desativada."
-          showIcon
-        />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-4 transition-colors duration-300">
+        <div className="max-w-md w-full text-center bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-3xl p-12 shadow-xl dark:shadow-2xl transition-colors duration-300">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+             <CarFilled className="text-4xl text-indigo-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3 transition-colors duration-300">
+            Loja não encontrada
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed transition-colors duration-300">
+            A loja que você está procurando não existe ou foi desativada temporariamente.
+          </p>
+          <button 
+            onClick={() => router.push("/")}
+            className="px-8 py-3 bg-slate-900 dark:bg-slate-50 text-white dark:text-black font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-white hover:scale-105 transition-all shadow-lg shadow-slate-900/10 dark:shadow-white/10"
+          >
+            Voltar ao Início
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header da Loja */}
-      <div className="bg-gradient-to-r from-primary to-indigo-700 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <Tag
-                color={shop.status === "ACTIVE" ? "success" : "warning"}
-                className="mb-2"
-              >
-                {shop.status === "ACTIVE" ? "Aberto" : "Fechado"}
-              </Tag>
-              <Title level={1} className="!text-white !mb-2">
-                {shop.name}
-              </Title>
-              {shop.description && (
-                <Paragraph className="text-white/80 text-lg max-w-2xl !mb-0">
-                  {shop.description}
-                </Paragraph>
-              )}
-            </div>
-            <Button
-              type="primary"
-              size="large"
-              icon={<CalendarOutlined />}
-              onClick={handleBooking}
-              className="bg-white !text-primary hover:!bg-gray-100 border-none shadow-lg"
-            >
-              Agendar Agora
-            </Button>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-slate-50 selection:bg-indigo-500/30 selection:text-indigo-600 dark:selection:text-indigo-200 transition-colors duration-300">
+      {/* Hero Section */}
+      <HeroSection
+        shop={shop}
+        averageRating={averageRating}
+        totalReviews={totalReviews}
+        totalServices={activeServices.length}
+        onBooking={handleBooking}
+      />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <Row gutter={[24, 24]}>
-          {/* Coluna Principal - Serviços */}
-          <Col xs={24} lg={16}>
-            <Card className="mb-6">
-              <Title level={3} className="!mb-6">
-                Nossos Serviços
-              </Title>
+      {/* Services Section */}
+      <ServicesSection
+        services={services}
+        isLoading={servicesLoading}
+        onBooking={handleBooking}
+      />
 
-              {servicesLoading ? (
-                <div className="flex justify-center py-8">
-                  <Spin />
-                </div>
-              ) : services.length === 0 ? (
-                <Alert
-                  type="info"
-                  message="Nenhum serviço disponível no momento"
-                  showIcon
-                />
-              ) : (
-                <div className="space-y-4">
-                  {services.map((service) => (
-                    <ServiceCard
-                      key={service.id}
-                      service={service}
-                      showSelectButton={false}
-                    />
-                  ))}
-                </div>
-              )}
-            </Card>
-          </Col>
+      {/* Info Section */}
+      <InfoSection
+        shop={shop}
+        schedules={schedules}
+        isLoading={schedulesLoading}
+      />
 
-          {/* Coluna Lateral - Informações */}
-          <Col xs={24} lg={8}>
-            {/* Informações de Contato */}
-            <Card className="mb-6">
-              <Title level={4} className="!mb-4">
-                Informações
-              </Title>
+      {/* Reviews Section */}
+      <ReviewsSection
+        reviews={curatedReviews}
+        averageRating={averageRating}
+        totalReviews={totalReviews}
+        isLoading={reviewsLoading}
+      />
 
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <EnvironmentOutlined className="text-lg text-primary mt-1" />
-                  <div>
-                    <Text strong className="block">
-                      Endereço
-                    </Text>
-                    <Text type="secondary">
-                      {shop.street}, {shop.number}
-                      {shop.complement && ` - ${shop.complement}`}
-                      <br />
-                      {shop.neighborhood} - {shop.city}/{shop.state}
-                      <br />
-                      CEP: {shop.zipCode}
-                    </Text>
-                  </div>
-                </div>
+      {/* CTA Section */}
+      <CTASection
+        shopName={shop.name}
+        onBooking={handleBooking}
+      />
 
-                <Divider className="!my-3" />
-
-                <div className="flex items-start gap-3">
-                  <PhoneOutlined className="text-lg text-primary mt-1" />
-                  <div>
-                    <Text strong className="block">
-                      Telefone
-                    </Text>
-                    <Text type="secondary">{shop.phone}</Text>
-                  </div>
-                </div>
-
-                {shop.email && (
-                  <>
-                    <Divider className="!my-3" />
-                    <div className="flex items-start gap-3">
-                      <StarOutlined className="text-lg text-primary mt-1" />
-                      <div>
-                        <Text strong className="block">
-                          Email
-                        </Text>
-                        <Text type="secondary">{shop.email}</Text>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </Card>
-
-            {/* Horários de Funcionamento */}
-            <Card>
-              <Title level={4} className="!mb-4">
-                <ClockCircleOutlined className="mr-2" />
-                Horários de Funcionamento
-              </Title>
-
-              {schedulesLoading ? (
-                <div className="flex justify-center py-4">
-                  <Spin />
-                </div>
-              ) : schedules.length === 0 ? (
-                <Text type="secondary">
-                  Horários não disponíveis
-                </Text>
-              ) : (
-                <div className="space-y-2">
-                  {sortedSchedules.map((schedule) => (
-                    <div
-                      key={schedule.id}
-                      className="flex justify-between items-center py-1"
-                    >
-                      <Text
-                        className={
-                          schedule.isOpen !== "ACTIVE"
-                            ? "text-gray-400"
-                            : ""
-                        }
-                      >
-                        {weekdayLabels[schedule.weekday]}
-                      </Text>
-                      {schedule.isOpen === "ACTIVE" ? (
-                        <Text type="secondary">
-                          {schedule.startTime} - {schedule.endTime}
-                        </Text>
-                      ) : (
-                        <Tag color="default">Fechado</Tag>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-
-            {/* CTA Mobile */}
-            <div className="mt-6 lg:hidden">
-              <Button
-                type="primary"
-                size="large"
-                icon={<CalendarOutlined />}
-                onClick={handleBooking}
-                block
-              >
-                Agendar Agora
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      </div>
+      {/* Footer */}
+      <ShopFooter shopName={shop.name} />
     </div>
   );
 }

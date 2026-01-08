@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Button, Typography, Spin, Empty } from "antd";
-import { LeftOutlined, RightOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { LeftOutlined, RightOutlined, ClockCircleOutlined, CalendarOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/pt-br";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -92,8 +92,6 @@ export function DateTimePicker({
     if (!schedule || schedule.isOpen !== "ACTIVE") return [];
 
     const slots: TimeSlot[] = [];
-    const slotInterval = shop.slotInterval || 30;
-    const bufferTime = shop.bufferBetweenSlots || 0;
     const minAdvanceMinutes = shop.minAdvanceMinutes || 60;
 
     // Parse horários
@@ -149,16 +147,15 @@ export function DateTimePicker({
         );
       });
 
-      const available =
-        !isInBreak && !exceedsEndTime && !tooSoon && !hasConflict;
+      const isAvailable = !isInBreak && !exceedsEndTime && !tooSoon && !hasConflict;
 
       slots.push({
         time,
-        available,
+        available: isAvailable,
         label: time,
       });
 
-      current = current.add(slotInterval + bufferTime, "minute");
+      current = current.add(shop.slotInterval || 30, "minute"); // Default interval update
     }
 
     return slots;
@@ -170,144 +167,152 @@ export function DateTimePicker({
     existingAppointments,
   ]);
 
-  const handleMonthChange = (direction: "prev" | "next") => {
-    setCurrentMonth((prev) =>
-      direction === "prev" ? prev.subtract(1, "month") : prev.add(1, "month")
-    );
-  };
+  const prevMonth = () => setCurrentMonth(currentMonth.subtract(1, "month"));
+  const nextMonth = () => setCurrentMonth(currentMonth.add(1, "month"));
 
-  const renderDateCell = (date: Dayjs) => {
-    const isAvailable = isDateAvailable(date);
-    const isSelected = selectedDate && date.isSame(selectedDate, "day");
-    const isToday = date.isSame(dayjs(), "day");
-
-    return (
-      <div
-        className={`
-          w-full h-full flex items-center justify-center rounded-lg transition-all
-          ${isAvailable ? "cursor-pointer hover:bg-primary/10" : "cursor-not-allowed opacity-40"}
-          ${isSelected ? "bg-primary text-white" : ""}
-          ${isToday && !isSelected ? "border-2 border-primary" : ""}
-        `}
-        onClick={() => isAvailable && onDateChange(date)}
-      >
-        {date.date()}
-      </div>
-    );
-  };
+  // Calendar generation logic
+  const daysInMonth = currentMonth.daysInMonth();
+  const firstDayOfMonth = currentMonth.startOf("month").day();
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Spin size="large" />
+      <div className="flex justify-center items-center py-20">
+        <div className="flex flex-col items-center gap-3">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50"></div>
+           <span className="text-slate-500 text-sm">Carregando disponibilidade...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Calendário */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            icon={<LeftOutlined />}
-            onClick={() => handleMonthChange("prev")}
-          />
-          <Title level={5} className="!mb-0 capitalize">
+    <div className="grid lg:grid-cols-2 gap-8">
+      {/* Calendar Section */}
+      <div className="bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 transition-colors duration-300 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 transition-colors duration-300">
+            <CalendarOutlined />
             {currentMonth.format("MMMM YYYY")}
-          </Title>
-          <Button
-            icon={<RightOutlined />}
-            onClick={() => handleMonthChange("next")}
-          />
-        </div>
-
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
-            <div
-              key={day}
-              className="text-center text-xs font-medium text-gray-500 py-2"
+          </h3>
+          <div className="flex gap-2">
+            <button 
+              onClick={prevMonth} 
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              disabled={currentMonth.isBefore(dayjs(), 'month')}
             >
-              {day}
-            </div>
-          ))}
+              <LeftOutlined />
+            </button>
+            <button 
+              onClick={nextMonth} 
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              <RightOutlined />
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
-          {(() => {
-            const firstDay = currentMonth.startOf("month");
-            const lastDay = currentMonth.endOf("month");
-            const startPadding = firstDay.day();
-            const days = [];
+        {/* Weekday Headers */}
+        <div className="grid grid-cols-7 mb-4 text-center">
+           {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
+             <div key={i} className="text-xs font-bold text-slate-400 dark:text-slate-500">{d}</div>
+           ))}
+        </div>
 
-            // Padding inicial
-            for (let i = 0; i < startPadding; i++) {
-              days.push(
-                <div key={`pad-start-${i}`} className="h-10 w-full" />
+        {/* Days Grid */}
+        <div className="grid grid-cols-7 gap-2">
+           {blanks.map(i => <div key={`blank-${i}`} />)}
+           {daysArray.map(day => {
+              const date = currentMonth.date(day);
+              const isSelected = selectedDate?.isSame(date, 'day');
+              const available = isDateAvailable(date);
+              
+              return (
+                <button
+                   key={day}
+                   disabled={!available}
+                   onClick={() => onDateChange(date)}
+                   className={`
+                     h-10 w-full rounded-lg text-sm font-medium transition-all duration-200 relative
+                     ${isSelected 
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' 
+                        : available 
+                          ? 'bg-slate-50 dark:bg-[#27272a] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700' 
+                          : 'bg-transparent text-slate-300 dark:text-slate-700 cursor-not-allowed line-through'
+                      }
+                   `}
+                >
+                   {day}
+                   {available && isSelected && (
+                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 bg-white rounded-full"></span>
+                   )}
+                </button>
               );
-            }
-
-            // Dias do mês
-            let day = firstDay;
-            while (day.isSameOrBefore(lastDay)) {
-              const currentDay = day;
-              days.push(
-                <div key={day.format("YYYY-MM-DD")} className="h-10 w-full">
-                  {renderDateCell(currentDay)}
-                </div>
-              );
-              day = day.add(1, "day");
-            }
-
-            return days;
-          })()}
+           })}
         </div>
       </div>
 
-      {/* Horários */}
-      {selectedDate && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <ClockCircleOutlined className="text-primary" />
-            <Title level={5} className="!mb-0">
-              Horários disponíveis - {selectedDate.format("DD/MM/YYYY")}
-            </Title>
+      {/* Time Slots Section */}
+      <div className="bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 flex flex-col min-h-[400px] transition-colors duration-300 shadow-sm">
+          <div className="mb-6">
+             <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 mb-1 transition-colors duration-300">
+                <ClockCircleOutlined />
+                Horários
+             </h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300">
+                {selectedDate 
+                  ? `Disponibilidade para ${selectedDate.format("DD [de] MMMM")}`
+                  : "Selecione uma data para ver os horários"
+                }
+             </p>
           </div>
 
-          {timeSlots.length === 0 ? (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Nenhum horário disponível para esta data"
-            />
+          {!selectedDate ? (
+             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                <CalendarOutlined className="text-4xl mb-4 opacity-50" />
+                <p>Selecione um dia no calendário</p>
+             </div>
+          ) : timeSlots.length === 0 ? (
+             <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
+                <Empty 
+                  description={<span className="text-slate-500">Nenhum horário disponível</span>} 
+                  image={Empty.PRESENTED_IMAGE_SIMPLE} 
+                  className="[&_.ant-empty-img-simple-path]:fill-slate-300 dark:[&_.ant-empty-img-simple-path]:fill-slate-700 [&_.ant-empty-img-simple-g]:stroke-slate-400 dark:[&_.ant-empty-img-simple-g]:stroke-slate-700 [&_.ant-empty-img-simple-ellipse]:fill-slate-100 dark:[&_.ant-empty-img-simple-ellipse]:fill-slate-800"
+                />
+             </div>
           ) : (
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-              {timeSlots.map((slot) => (
-                <Button
-                  key={slot.time}
-                  type={selectedTime === slot.time ? "primary" : "default"}
-                  disabled={!slot.available}
-                  onClick={() => slot.available && onTimeChange(slot.time)}
-                  className={`
-                    ${!slot.available ? "opacity-40" : ""}
-                    ${selectedTime === slot.time ? "" : "hover:border-primary hover:text-primary"}
-                  `}
-                >
-                  {slot.label}
-                </Button>
-              ))}
-            </div>
+             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
+                {timeSlots.map(slot => (
+                   <button
+                      key={slot.time}
+                      disabled={!slot.available}
+                      onClick={() => onTimeChange(slot.time)}
+                      className={`
+                         py-2 px-1 rounded-lg text-sm font-medium border transition-all duration-200
+                         ${selectedTime === slot.time
+                            ? "bg-slate-900 dark:bg-slate-50 text-white dark:text-black border-slate-900 dark:border-slate-50 shadow-lg shadow-slate-900/20 dark:shadow-white/20 transform scale-105"
+                            : slot.available
+                               ? "bg-slate-50 dark:bg-[#09090b] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#27272a] hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-white"
+                               : "bg-slate-50 dark:bg-[#09090b] text-slate-300 dark:text-slate-700 border-transparent cursor-not-allowed opacity-50"
+                         }
+                      `}
+                   >
+                      {slot.time}
+                   </button>
+                ))}
+             </div>
           )}
 
-          {totalDuration > 0 && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-              <Text type="secondary">
-                Duração total do serviço:{" "}
-                <strong>{Math.floor(totalDuration / 60)}h {totalDuration % 60}min</strong>
-              </Text>
+          {totalDuration > 0 && selectedDate && timeSlots.length > 0 && (
+            <div className="mt-auto px-4 py-3 bg-slate-50 dark:bg-[#09090b] rounded-lg border border-slate-200 dark:border-[#27272a] flex items-center justify-between transition-colors duration-300">
+              <span className="text-slate-500 dark:text-slate-400 text-sm">Duração estimada</span>
+              <span className="text-slate-700 dark:text-slate-200 font-medium">
+                {Math.floor(totalDuration / 60)}h {totalDuration % 60 > 0 ? `${totalDuration % 60}min` : ''}
+              </span>
             </div>
           )}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
