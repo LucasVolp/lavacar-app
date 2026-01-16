@@ -29,7 +29,8 @@ interface AppointmentFilters {
 export function useAppointments(filters: AppointmentFilters = {}, enabled = true) {
   return useQuery({
     queryKey: appointmentKeys.list(filters),
-    queryFn: () => appointmentService.findAll(filters),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryFn: () => appointmentService.findAll(filters as any),
     enabled,
     staleTime: 1 * 60 * 1000, // 1 minuto
   });
@@ -65,7 +66,8 @@ export function useShopAppointmentsByDate(
         endDate: date!,
       }),
     enabled: enabled && !!shopId && !!date,
-    staleTime: 30 * 1000, // 30 segundos (mais fresco para disponibilidade)
+    staleTime: 0, // Sempre buscar dados frescos para disponibilidade
+    refetchOnMount: 'always', // Sempre refetch ao montar o componente
   });
 }
 
@@ -92,7 +94,10 @@ export function useCreateAppointment() {
   return useMutation({
     mutationFn: (payload: CreateAppointmentRequest) => appointmentService.create(payload),
     onSuccess: () => {
+      // Invalida todas as queries de agendamentos para garantir dados frescos
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+      // Invalida especificamente as listas (incluindo byShopAndDate)
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
     },
   });
 }

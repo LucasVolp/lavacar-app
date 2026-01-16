@@ -13,3 +13,4 @@ export { blockedTimeService } from "./blockedTime";
 export { evaluationService } from "./evaluation";
 
 export { default as axiosInstance } from "./axiosInstance";
+export { organizationMemberService } from "./organization-members";

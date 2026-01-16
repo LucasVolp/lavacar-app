@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Typography, Card, Space, Button } from "antd";
-import { CarOutlined, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { CarOutlined, RightOutlined } from "@ant-design/icons";
 import Link from "next/link";
 
 const { Text } = Typography;

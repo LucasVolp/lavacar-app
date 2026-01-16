@@ -1,15 +1,17 @@
 "use client";
 
 import React from "react";
-import { Typography, Card, List, Tag, Button, Empty, Space, Popconfirm } from "antd";
+import { Typography, Card, List, Tag, Button, Empty, Space } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   CarOutlined,
   ShopOutlined,
   PlusOutlined,
-  DeleteOutlined,
-  EditOutlined,
+  CloseCircleOutlined,
+  CheckCircleOutlined,
+  EyeOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 
@@ -19,11 +21,12 @@ export interface ClientAppointmentFull {
   id: string;
   shop: string;
   shopAddress?: string;
-  service: string;
+  services: { name: string }[];
   vehicle: string;
   vehiclePlate: string;
   date: string;
   time: string;
+  scheduledAt?: string;
   duration: number;
   price: number;
   status: string;
@@ -34,12 +37,16 @@ export interface ClientAppointmentFull {
 interface ClientAppointmentsListFullProps {
   appointments: ClientAppointmentFull[];
   onCancel?: (id: string) => void;
-  onEdit?: (id: string) => void;
+  onConfirm?: (id: string) => void;
+  onClick?: (id: string) => void;
+  isHistory?: boolean;
+  isConfirming?: boolean;
 }
 
 const statusConfig: Record<string, { color: string; label: string }> = {
   PENDING: { color: "gold", label: "Pendente" },
   CONFIRMED: { color: "blue", label: "Confirmado" },
+  IN_PROGRESS: { color: "processing", label: "Em Andamento" },
   COMPLETED: { color: "green", label: "Concluído" },
   CANCELED: { color: "red", label: "Cancelado" },
 };
@@ -47,19 +54,26 @@ const statusConfig: Record<string, { color: string; label: string }> = {
 export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProps> = ({
   appointments,
   onCancel,
-  onEdit,
+  onConfirm,
+  onClick,
+  isHistory = false,
+  isConfirming = false,
 }) => {
   return (
     <Card
       title={
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CalendarOutlined className="text-success" />
-            <span>Meus Agendamentos</span>
+            {isHistory ? (
+              <HistoryOutlined className="text-slate-500" />
+            ) : (
+              <CalendarOutlined className="text-indigo-500" />
+            )}
+            <span>{isHistory ? "Histórico" : "Próximos Agendamentos"}</span>
           </div>
         </div>
       }
-      className="border-base-200"
+      className="border-slate-200 dark:border-slate-800"
     >
       {appointments.length > 0 ? (
         <List
@@ -67,100 +81,126 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
           dataSource={appointments}
           renderItem={(item) => {
             const actions: React.ReactNode[] = [];
-            
-            if (item.status !== "COMPLETED" && item.status !== "CANCELED") {
-                actions.push(
-                    <Button
-                    key="edit"
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => onEdit?.(item.id)}
-                    disabled={item.status === "CONFIRMED"}
-                    >
-                    Editar
-                    </Button>
-                );
-                
-                actions.push(
-                    <Popconfirm
-                    key="cancel"
-                    title="Cancelar agendamento"
-                    description="Tem certeza que deseja cancelar este agendamento?"
-                    onConfirm={() => onCancel?.(item.id)}
-                    okText="Sim, cancelar"
-                    cancelText="Não"
-                    >
-                    <Button type="text" danger icon={<DeleteOutlined />}>
-                        Cancelar
-                    </Button>
-                    </Popconfirm>
-                );
+
+            // View details button - always visible
+            actions.push(
+              <Button
+                key="view"
+                type="text"
+                icon={<EyeOutlined />}
+                onClick={() => onClick?.(item.id)}
+              >
+                Ver Detalhes
+              </Button>
+            );
+
+            // Actions for non-completed/canceled appointments
+            if (item.status === "PENDING") {
+              actions.push(
+                <Button
+                  key="confirm"
+                  type="text"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => onConfirm?.(item.id)}
+                  loading={isConfirming}
+                  className="text-green-600 hover:text-green-700"
+                >
+                  Confirmar
+                </Button>
+              );
             }
-            
+
+            if (item.status !== "COMPLETED" && item.status !== "CANCELED") {
+              actions.push(
+                <Button
+                  key="cancel"
+                  type="text"
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  onClick={() => onCancel?.(item.id)}
+                >
+                  Cancelar
+                </Button>
+              );
+            }
+
             if (item.status === "COMPLETED") {
-                actions.push(
-                    <Tag color={item.isEvaluated ? "blue" : "default"}>
-                        {item.isEvaluated ? "Avaliado" : "Não Avaliado"}
-                    </Tag>
-                );
+              actions.push(
+                <Tag key="evaluated" color={item.isEvaluated ? "blue" : "default"}>
+                  {item.isEvaluated ? "Avaliado" : "Não Avaliado"}
+                </Tag>
+              );
             }
 
             return (
-            <List.Item actions={actions}>
-              <List.Item.Meta
-                avatar={
-                  <div className="w-14 h-14 bg-success/10 rounded-lg flex items-center justify-center">
-                    <CalendarOutlined className="text-success text-2xl" />
-                  </div>
-                }
-                title={
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Text strong className="text-lg">{item.service}</Text>
-                    <Tag color={statusConfig[item.status]?.color || "default"}>
-                      {statusConfig[item.status]?.label || item.status}
-                    </Tag>
-                    <Text strong className="text-success">
-                      R$ {item.price.toFixed(2)}
-                    </Text>
-                  </div>
-                }
-                description={
-                  <Space direction="vertical" className="w-full">
-                    <div className="flex items-center gap-2">
-                      <ShopOutlined className="text-base-content/40" />
-                      <Text type="secondary">{item.shop}</Text>
-                      {item.shopAddress && (
-                        <Text type="secondary" className="text-xs">
-                          • {item.shopAddress}
+              <List.Item
+                actions={actions}
+                className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 -mx-4 px-4 rounded-lg transition-colors"
+                onClick={() => onClick?.(item.id)}
+              >
+                <List.Item.Meta
+                  avatar={
+                    <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg flex items-center justify-center">
+                      <CalendarOutlined className="text-indigo-500 text-2xl" />
+                    </div>
+                  }
+                  title={
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Text strong className="text-lg">
+                        {item.services.map((s) => s.name).join(", ") || "Serviço"}
+                      </Text>
+                      <Tag color={statusConfig[item.status]?.color || "default"}>
+                        {statusConfig[item.status]?.label || item.status}
+                      </Tag>
+                      <Text strong className="text-green-600">
+                        R$ {item.price.toFixed(2)}
+                      </Text>
+                    </div>
+                  }
+                  description={
+                    <Space direction="vertical" className="w-full">
+                      <div className="flex items-center gap-2">
+                        <ShopOutlined className="text-slate-400" />
+                        <Text type="secondary">{item.shop}</Text>
+                        {item.shopAddress && (
+                          <Text type="secondary" className="text-xs">
+                            • {item.shopAddress}
+                          </Text>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <Text type="secondary">
+                          <ClockCircleOutlined className="mr-1" />
+                          {item.date} às {item.time} ({item.duration}min)
                         </Text>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <Text type="secondary">
-                        <ClockCircleOutlined className="mr-1" />
-                        {item.date} às {item.time} ({item.duration}min)
-                      </Text>
-                      <Text type="secondary">
-                        <CarOutlined className="mr-1" />
-                        {item.vehicle} - {item.vehiclePlate}
-                      </Text>
-                    </div>
-                  </Space>
-                }
-              />
-            </List.Item>
-          )}}
+                        <Text type="secondary">
+                          <CarOutlined className="mr-1" />
+                          {item.vehicle} - {item.vehiclePlate}
+                        </Text>
+                      </div>
+                    </Space>
+                  }
+                />
+              </List.Item>
+            );
+          }}
         />
       ) : (
         <Empty
-          description="Nenhum agendamento pendente"
+          description={
+            isHistory
+              ? "Nenhum agendamento no histórico"
+              : "Nenhum agendamento pendente"
+          }
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         >
-          <Link href="/client/appointments/new">
-            <Button type="primary" icon={<PlusOutlined />}>
-              Agendar Agora
-            </Button>
-          </Link>
+          {!isHistory && (
+            <Link href="/">
+              <Button type="primary" icon={<PlusOutlined />}>
+                Agendar Agora
+              </Button>
+            </Link>
+          )}
         </Empty>
       )}
     </Card>

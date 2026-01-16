@@ -27,7 +27,6 @@ export function GuestVehicleForm({ onSelect, initialData }: GuestVehicleFormProp
   const [models, setModels] = useState<{ label: string; value: string }[]>([]);
 
   const [selectedType, setSelectedType] = useState<VehicleType | null>(initialData?.type || null);
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(initialData?.brand || null);
   
   const [selectedBrandCode, setSelectedBrandCode] = useState<string | null>(null);
 
@@ -37,12 +36,12 @@ export function GuestVehicleForm({ onSelect, initialData }: GuestVehicleFormProp
   // Fetch Brands
   useEffect(() => {
     if (selectedType) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingBrands(true);
       setBrands([]);
       // Reset downstream
       if (selectedBrandCode) {
         setSelectedBrandCode(null);
-        setSelectedBrand(null);
         setModels([]);
       }
 
@@ -61,6 +60,7 @@ export function GuestVehicleForm({ onSelect, initialData }: GuestVehicleFormProp
   // Fetch Models
   useEffect(() => {
     if (selectedType && selectedBrandCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingModels(true);
       setModels([]);
       
@@ -120,8 +120,6 @@ export function GuestVehicleForm({ onSelect, initialData }: GuestVehicleFormProp
           loading={loadingBrands}
           onChange={(val) => {
               setSelectedBrandCode(val);
-              const label = brands.find(b => b.value === val)?.label;
-              if(label) setSelectedBrand(label);
           }}
           notFoundContent={loadingBrands ? "Carregando..." : "Nenhuma marca encontrada"}
         />

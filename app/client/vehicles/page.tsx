@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Spin, Empty, Button, Card, Popconfirm, message } from "antd";
 import { CarOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,21 +64,30 @@ export default function VehiclesPage() {
                 <Card key={vehicle.id} className="border-slate-200 dark:border-[#27272a] hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h3 className="text-lg font-bold">{vehicle.brand} {vehicle.model}</h3>
+                            <Link href={`/client/vehicles/${vehicle.id}`} className="group hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                <h3 className="text-lg font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                    {vehicle.brand} {vehicle.model}
+                                </h3>
+                            </Link>
                             <div className="inline-block bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-sm font-mono mt-1">
                                 {vehicle.plate}
                             </div>
                             <p className="text-slate-500 text-sm mt-2">{vehicle.color} • {vehicle.year}</p>
                         </div>
-                        <Popconfirm
-                            title="Remover veículo"
-                            description="Tem certeza que deseja remover este veículo?"
-                            onConfirm={() => handleDelete(vehicle.id)}
-                            okText="Sim"
-                            cancelText="Não"
-                        >
-                            <Button type="text" danger icon={<DeleteOutlined />} />
-                        </Popconfirm>
+                        <div className="flex gap-2">
+                             <Link href={`/client/vehicles/${vehicle.id}`}>
+                                <Button icon={<CarOutlined />} type="text" />
+                             </Link>
+                             <Popconfirm
+                                title="Remover veículo"
+                                description="Tem certeza que deseja remover este veículo?"
+                                onConfirm={() => handleDelete(vehicle.id)}
+                                okText="Sim"
+                                cancelText="Não"
+                            >
+                                <Button type="text" danger icon={<DeleteOutlined />} />
+                            </Popconfirm>
+                        </div>
                     </div>
                 </Card>
             ))}

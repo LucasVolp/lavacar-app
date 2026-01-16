@@ -38,7 +38,7 @@ export const appointmentService = {
     }
   },
 
-  findAll: async (filters?: Record<string, any>) => {
+  findAll: async (filters?: Record<string, string | number | boolean | undefined>) => {
     try {
       const params = new URLSearchParams();
       if (filters) Object.entries(filters).forEach(([k, v]) => v !== undefined && params.append(k, String(v)));

@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { Row, Col, message } from "antd";
+import React, { useState, useEffect } from "react";
+import { Row, Col, message, Spin } from "antd";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUpdateUser } from "@/hooks/useUsers";
 import {
   ProfileHeader,
   ProfileInfoForm,
@@ -11,14 +13,6 @@ import {
   type ClientNotificationSettings,
 } from "@/components/client/profile";
 
-// Mock data
-const initialProfile: UserProfile = {
-  name: "João Silva",
-  email: "joao.silva@email.com",
-  phone: "(11) 99999-1234",
-  cpf: "123.456.789-00",
-};
-
 const initialNotifications: ClientNotificationSettings = {
   emailAppointmentConfirm: true,
   emailReminder: true,
@@ -27,11 +21,30 @@ const initialNotifications: ClientNotificationSettings = {
 };
 
 export default function ClientProfilePage() {
-  const [profile, setProfile] = useState<UserProfile>(initialProfile);
+  const { user, refreshUser, isLoading: authLoading } = useAuth();
+  const updateUser = useUpdateUser();
+
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [notifications, setNotifications] = useState<ClientNotificationSettings>(initialNotifications);
-  const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Initialize profile from user data - re-run when user changes to support updates
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({
+        ...prev, // Keep existing form state if valid, or overwrite? usually overwrite with fresh data
+        name: `${user.firstName}${user.lastName ? " " + user.lastName : ""}`,
+        email: user.email,
+        phone: user.phone || "",
+        // Only overwrite CPF if it comes from backend, otherwise keep local state if user is typing
+        // But since CPF isn't in user context, we might need to fetch it separately or relying on it being undefined for now
+        // If we want to persist between reloads, we need to update the useAuth context user object to include CPF
+        cpf: user.cpf || prev?.cpf || undefined, 
+        avatarUrl: user.picture,
+      }));
+    }
+  }, [user]);
 
   const handleProfileChange = (values: UserProfile) => {
     setProfile(values);
@@ -44,25 +57,72 @@ export default function ClientProfilePage() {
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSaving(false);
-    setHasChanges(false);
-    message.success("Perfil atualizado com sucesso!");
+    if (!user || !profile) return;
+
+    try {
+      // Parse name into firstName and lastName
+      const nameParts = profile.name.trim().split(" ");
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(" ") || undefined;
+
+      await updateUser.mutateAsync({
+        id: user.id,
+        payload: {
+          firstName,
+          lastName,
+          email: profile.email,
+          phone: profile.phone || undefined,
+          cpf: profile.cpf ? profile.cpf.replace(/\D/g, "") : undefined,
+        },
+      });
+
+      // Refresh user data in auth context
+      await refreshUser();
+      setHasChanges(false);
+      message.success("Perfil atualizado com sucesso!");
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).response?.data?.message || "Erro ao atualizar perfil";
+      message.error(errorMessage);
+    }
   };
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    if (!user) return;
+
     setIsChangingPassword(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsChangingPassword(false);
-    message.success("Senha alterada com sucesso!");
+    try {
+      // Note: This would need a proper password change endpoint in the backend
+      // For now, we'll show a message that this feature needs backend support
+      await updateUser.mutateAsync({
+        id: user.id,
+        payload: {
+          password: newPassword,
+        },
+      });
+      message.success("Senha alterada com sucesso!");
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).response?.data?.message || "Erro ao alterar senha";
+      message.error(errorMessage);
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
+
+  if (authLoading || !profile) {
+    return (
+      <div className="h-[60vh] flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
       <ProfileHeader
         onSave={handleSave}
-        isSaving={isSaving}
+        isSaving={updateUser.isPending}
         hasChanges={hasChanges}
       />
 

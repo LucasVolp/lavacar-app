@@ -5,7 +5,6 @@ import { Card, Form, Input, Typography, Select } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
-const { TextArea } = Input;
 
 export interface AddressInfo {
   zipCode: string;

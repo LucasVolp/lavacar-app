@@ -3,10 +3,10 @@
 import { use, useState, useEffect, useMemo } from "react";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
-import dayjs, { Dayjs } from "dayjs";
-import "dayjs/locale/pt-br";
+import { format } from "date-fns";
+import { setTimeOnDate, addMinutes } from "@/utils/dateUtils";
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";;
 import { useShop } from "@/contexts/ShopContext";
 import { useShopBySlug } from "@/hooks/useShops";
 import { useServicesByShop } from "@/hooks/useServices";
@@ -28,8 +28,6 @@ import { BookingSuccess } from "@/components/shop/booking/BookingSuccess";
 import { LoginModal } from "@/components/shop/booking/LoginModal";
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
-dayjs.locale("pt-br");
-
 interface BookingPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -45,7 +43,7 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [guestVehicle, setGuestVehicle] = useState<GuestVehicleData | null>(null);
   const [selectedServices, setSelectedServices] = useState<Services[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -66,7 +64,7 @@ export default function BookingPage({ params }: BookingPageProps) {
   const { data: existingAppointments = [], isLoading: appointmentsLoading } =
     useShopAppointmentsByDate(
       shop?.id || null,
-      selectedDate?.format("YYYY-MM-DD") || null,
+      selectedDate ? format(selectedDate, "yyyy-MM-dd") : null,
       !!shop && !!selectedDate
     );
 
@@ -88,7 +86,7 @@ export default function BookingPage({ params }: BookingPageProps) {
             model: guestVehicle.model,
             plate: 'Visitante',
             type: guestVehicle.type
-        } as any;
+        };
     }
     return vehicles.find((v) => v.id === selectedVehicleId) || null;
   }, [vehicles, selectedVehicleId, isAuthenticated, guestVehicle]);
@@ -103,6 +101,7 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   // Handlers
   const handleServiceToggle = (service: Services) => {
+    setSelectedTime(null);
     setSelectedServices((prev) => {
       const exists = prev.find((s) => s.id === service.id);
       if (exists) {
@@ -112,7 +111,7 @@ export default function BookingPage({ params }: BookingPageProps) {
     });
   };
 
-  const handleDateChange = (date: Dayjs) => {
+  const handleDateChange = (date: Date) => {
     setSelectedDate(date);
     setSelectedTime(null);
   };
@@ -152,9 +151,8 @@ export default function BookingPage({ params }: BookingPageProps) {
       return;
     }
 
-    const [hour, minute] = selectedTime.split(":").map(Number);
-    const scheduledAt = selectedDate.hour(hour).minute(minute).second(0);
-    const endTime = scheduledAt.add(totalDuration, "minute");
+    const scheduledAt = setTimeOnDate(selectedDate, selectedTime);
+    const endTime = addMinutes(scheduledAt, totalDuration);
 
     try {
       await createAppointment.mutateAsync({
@@ -258,7 +256,7 @@ export default function BookingPage({ params }: BookingPageProps) {
         totalPrice={totalPrice}
         formatDuration={formatDuration}
         onReturnToShop={() => router.push(`/shop/${slug}`)}
-        onReturnToHome={() => router.push("/")}
+        onReturnToHome={() => router.push("/client/appointments")}
       />
     );
   }
@@ -406,7 +404,6 @@ export default function BookingPage({ params }: BookingPageProps) {
               totalDuration={totalDuration}
               isLoading={createAppointment.isPending}
               disabled={currentStep < 2}
-              currentStep={currentStep}
               onConfirm={handleConfirmBooking}
             />
           </div>

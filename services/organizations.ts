@@ -69,6 +69,25 @@ export const organizationService = {
     }
   },
 
+  findByOwner: async (ownerId: string) => {
+    try {
+      const response: AxiosResponse<Organization[]> = await axiosInstance.get(`${base}/owner/${ownerId}`);
+      // Assuming return type is an array of organizations owned by the user
+      // But based on user request "Organization do usuário" singular, we might handle the first one or the array.
+      // API Controller returns `this.organizationService.findByOwner(ownerId)`.
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar organizações do owner ${ownerId} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao buscar organizações do owner ${ownerId}:`, error);
+      }
+      throw error;
+    }
+  },
+
   update: async (id: string, payload: Partial<Organization>) => {
     try {
       const response: AxiosResponse<Organization> = await axiosInstance.patch(`${base}/${id}`, payload);

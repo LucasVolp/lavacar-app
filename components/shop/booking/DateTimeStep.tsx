@@ -5,16 +5,15 @@ import { DateTimePicker } from "@/components/booking";
 import { Schedule } from "@/types/schedule";
 import { Appointment } from "@/types/appointment";
 import { Shop } from "@/types/shop";
-import { Dayjs } from "dayjs";
 
 interface DateTimeStepProps {
   schedules: Schedule[];
   existingAppointments: Appointment[];
   shop: Shop | null;
   totalDuration: number;
-  selectedDate: Dayjs | null;
+  selectedDate: Date | null;
   selectedTime: string | null;
-  onDateChange: (date: Dayjs) => void;
+  onDateChange: (date: Date) => void;
   onTimeChange: (time: string) => void;
   isLoading: boolean;
 }

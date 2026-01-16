@@ -1,6 +1,6 @@
 "use client";
 
-import { Typography, Rate, Avatar, Spin } from "antd";
+import { Avatar } from "antd";
 import { StarFilled } from "@ant-design/icons";
 import { Evaluation } from "@/types/evaluation";
 import dayjs from "dayjs";
@@ -9,8 +9,6 @@ import "dayjs/locale/pt-br";
 
 dayjs.extend(relativeTime);
 dayjs.locale("pt-br");
-
-const { Title, Text, Paragraph } = Typography;
 
 interface ReviewsSectionProps {
   reviews: Evaluation[];
@@ -59,8 +57,6 @@ function ReviewCard({ review }: { review: Evaluation }) {
 
 export function ReviewsSection({
   reviews,
-  averageRating,
-  totalReviews,
   isLoading,
 }: ReviewsSectionProps) {
   if (isLoading) {

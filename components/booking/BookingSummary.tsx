@@ -10,14 +10,14 @@ import {
 } from "@ant-design/icons";
 import { Services } from "@/types/services";
 import { Vehicle } from "@/types/vehicle";
-import dayjs from "dayjs";
+import { formatDateInTimezone } from "@/utils/dateUtils";
 
 const { Title, Text } = Typography;
 
 interface BookingSummaryProps {
   selectedServices: Services[];
   selectedVehicle: Vehicle | null;
-  selectedDate: dayjs.Dayjs | null;
+  selectedDate: Date | null;
   selectedTime: string | null;
   totalPrice: number;
   totalDuration: number;
@@ -126,7 +126,7 @@ export function BookingSummary({
         </div>
         {selectedDate && selectedTime ? (
           <div className="pl-6">
-            <Text strong>{selectedDate.format("dddd, DD [de] MMMM")}</Text>
+            <Text strong>{formatDateInTimezone(selectedDate, "EEEE, dd 'de' MMMM")}</Text>
             <br />
             <Text type="secondary">às {selectedTime}</Text>
           </div>

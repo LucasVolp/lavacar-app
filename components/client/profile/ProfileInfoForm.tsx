@@ -26,7 +26,29 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   const [form] = Form.useForm();
 
   const handleValuesChange = (_: unknown, allValues: UserProfile) => {
-    onChange?.(allValues);
+    // Preserve avatarUrl and other fields that might not be in the form items
+    onChange?.({
+        ...initialValues,
+        ...allValues,
+        avatarUrl: initialValues?.avatarUrl 
+    });
+  };
+
+  const formatCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+      .replace(/(-\d{2})\d+?$/, "$1");
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const formatted = formatCPF(e.target.value);
+      form.setFieldsValue({ cpf: formatted });
+      // Trigger onChange with new value
+      const currentValues = form.getFieldsValue(); 
+      handleValuesChange(null, { ...currentValues, cpf: formatted });
   };
 
   return (
@@ -95,7 +117,7 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
         </div>
 
         <Form.Item name="cpf" label="CPF">
-          <Input placeholder="000.000.000-00" />
+          <Input placeholder="000.000.000-00" onChange={handleCpfChange} maxLength={14} />
         </Form.Item>
       </Form>
     </Card>

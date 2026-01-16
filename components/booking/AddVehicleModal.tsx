@@ -43,9 +43,11 @@ export function AddVehicleModal({ open, onClose, onSuccess }: AddVehicleModalPro
       form.resetFields();
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const err = error as any;
       const errorMessage =
-        error.response?.data?.message || "Erro ao adicionar veículo";
+        err.response?.data?.message || "Erro ao adicionar veículo";
       message.error(errorMessage);
     }
   };
@@ -56,7 +58,7 @@ export function AddVehicleModal({ open, onClose, onSuccess }: AddVehicleModalPro
       open={open}
       onCancel={onClose}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}
@@ -107,6 +109,31 @@ export function AddVehicleModal({ open, onClose, onSuccess }: AddVehicleModalPro
               min={1900}
               max={new Date().getFullYear() + 1}
               style={{ width: "100%" }}
+              keyboard={false}
+              controls={false}
+              parser={(value) => {
+                // Remove any non-numeric characters
+                const parsed = value?.replace(/\D/g, "");
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                return (parsed ? parseInt(parsed, 10) : undefined) as any;
+              }}
+              formatter={(value) => (value ? String(value) : "")}
+              onKeyDown={(e) => {
+                // Only allow numbers, backspace, delete, tab, arrows
+                const allowedKeys = [
+                  "Backspace",
+                  "Delete",
+                  "Tab",
+                  "ArrowLeft",
+                  "ArrowRight",
+                  "Home",
+                  "End",
+                ];
+                if (allowedKeys.includes(e.key)) return;
+                if (!/^\d$/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
             />
           </Form.Item>
 

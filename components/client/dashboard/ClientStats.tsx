@@ -23,7 +23,7 @@ export const ClientStats: React.FC<ClientStatsProps> = ({
             title={<span className="text-slate-500 font-medium">Meus Veículos</span>}
             value={vehiclesCount}
             prefix={<div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mr-2"><CarOutlined className="text-indigo-500 text-lg" /></div>}
-            valueStyle={{ fontWeight: 700 }}
+            styles={{ content: { fontWeight: 700 } }}
           />
         </Card>
       </Col>

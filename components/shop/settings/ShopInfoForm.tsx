@@ -4,7 +4,7 @@ import React from "react";
 import { Card, Form, Input, Typography, Upload, Avatar, Button } from "antd";
 import { ShopOutlined, CameraOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { TextArea } = Input;
 
 export interface ShopInfo {

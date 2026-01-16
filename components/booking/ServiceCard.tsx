@@ -7,14 +7,12 @@ interface ServiceCardProps {
   service: Services;
   selected?: boolean;
   onSelect?: (service: Services) => void;
-  showSelectButton?: boolean;
 }
 
 export function ServiceCard({
   service,
   selected = false,
   onSelect,
-  showSelectButton = true,
 }: ServiceCardProps) {
   const formatPrice = (price: string | number) => {
     const numPrice = typeof price === "string" ? parseFloat(price) : price;

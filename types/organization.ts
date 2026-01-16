@@ -1,4 +1,11 @@
-import { Shop, ShopManager } from "./shop";
+import { Shop } from "./shop";
+
+export interface ShopManager {
+    id: string;
+    shopId: string;
+    memberId: string;
+    createdAt: string;
+}
 
 export interface Organization {
     id: string;

@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, Select, Button, Space, Tag, Tooltip, Collapse, Row, Col } from "antd";
+import { 
+  Input, 
+  Select, 
+  Button, 
+  Tag,
+  Space,
+  Tooltip,
+  Row,
+  Col
+} from "antd";
 import {
   SearchOutlined,
   FilterOutlined,
@@ -11,7 +20,6 @@ import {
 import { ShopStatus, SHOP_STATUS_MAP } from "@/types/shop";
 
 const { Search } = Input;
-const { Panel } = Collapse;
 
 interface ShopFiltersProps {
   onSearch?: (query?: string) => void;
@@ -178,7 +186,7 @@ export default function ShopFilters({
             <span className="text-base-content/60 text-sm">Filtros ativos:</span>
             {searchValue && (
               <Tag closable onClose={() => handleSearch("")} color="blue">
-                Busca: "{searchValue}"
+                Busca: &quot;{searchValue}&quot;
               </Tag>
             )}
             {statusValue && (

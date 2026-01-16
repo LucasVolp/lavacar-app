@@ -2,10 +2,10 @@
 
 import { CheckCircleFilled } from "@ant-design/icons";
 import { Services } from "@/types/services";
-import { Dayjs } from "dayjs";
+import { formatDisplayDate } from "@/utils/dateUtils";
 
 interface BookingSuccessProps {
-  selectedDate: Dayjs | null;
+  selectedDate: Date | null;
   selectedTime: string | null;
   selectedServices: Services[];
   totalDuration: number;
@@ -45,7 +45,7 @@ export function BookingSuccess({
             <div className="flex justify-between items-center">
               <span className="text-slate-500 dark:text-slate-400 transition-colors duration-300">Data</span>
               <span className="text-slate-800 dark:text-slate-50 font-medium transition-colors duration-300">
-                {selectedDate?.format("DD/MM/YYYY")}
+                {selectedDate ? formatDisplayDate(selectedDate) : '-'}
               </span>
             </div>
             <div className="h-px bg-slate-200 dark:bg-[#27272a] transition-colors duration-300" />
@@ -92,7 +92,7 @@ export function BookingSuccess({
               onClick={onReturnToHome}
               className="flex-1 py-3 bg-slate-900 dark:bg-slate-50 text-white dark:text-black font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-white transition-all shadow-lg shadow-slate-900/10 dark:shadow-white/10"
             >
-              Ir para Início
+              Meus Agendamentos
             </button>
           </div>
         </div>

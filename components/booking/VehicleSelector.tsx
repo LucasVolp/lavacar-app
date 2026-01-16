@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Empty } from "antd";
+import { Empty } from "antd";
 import { CarOutlined, PlusOutlined, CheckCircleFilled } from "@ant-design/icons";
 import { Vehicle } from "@/types/vehicle";
 

@@ -1,17 +1,16 @@
 "use client";
 
 import React from "react";
-import { Typography, Button, Avatar } from "antd";
+import { Button, Avatar } from "antd";
 import { UserOutlined, PlusOutlined } from "@ant-design/icons";
 import Link from "next/link";
 
-const { Title, Text } = Typography;
-
 interface WelcomeHeaderProps {
   clientName: string;
+  avatarUrl?: string;
 }
 
-export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ clientName }) => {
+export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ clientName, avatarUrl }) => {
   return (
     <div className="bg-gradient-to-r from-indigo-500 to-violet-600 rounded-3xl shadow-xl shadow-indigo-500/10 mb-8 p-8 transition-transform duration-300 hover:scale-[1.01]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -19,7 +18,8 @@ export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ clientName }) => {
           <div className="p-1 bg-white/20 rounded-full backdrop-blur-sm">
             <Avatar
               size={72}
-              icon={<UserOutlined />}
+              icon={!avatarUrl && <UserOutlined />}
+              src={avatarUrl}
               className="bg-white/90 !text-indigo-600 shadow-inner"
             />
           </div>

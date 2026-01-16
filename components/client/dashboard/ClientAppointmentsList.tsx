@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import { Typography, Card, List, Tag, Button, Empty } from "antd";
+import { Typography, Card, List, Tag, Button, Empty, Tooltip } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   CarOutlined,
-  PlusOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import dayjs from "dayjs";
@@ -25,17 +26,26 @@ export interface ClientAppointment {
 
 interface ClientAppointmentsListProps {
   appointments: ClientAppointment[];
+  onConfirm?: (id: string) => void;
+  onCancel?: (id: string) => void;
+  onClick?: (id: string) => void;
+  isConfirming?: boolean;
 }
 
 const statusConfig: Record<string, { color: string; label: string }> = {
   PENDING: { color: "gold", label: "Pendente" },
   CONFIRMED: { color: "blue", label: "Confirmado" },
+  IN_PROGRESS: { color: "processing", label: "Em Andamento" },
   COMPLETED: { color: "green", label: "Concluído" },
   CANCELED: { color: "red", label: "Cancelado" },
 };
 
 export const ClientAppointmentsList: React.FC<ClientAppointmentsListProps> = ({
   appointments,
+  onConfirm,
+  onCancel,
+  onClick,
+  isConfirming = false,
 }) => {
   return (
     <Card
@@ -71,7 +81,10 @@ export const ClientAppointmentsList: React.FC<ClientAppointmentsListProps> = ({
           itemLayout="horizontal"
           dataSource={appointments}
           renderItem={(item) => (
-            <div className="group flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors px-2 -mx-2 rounded-lg">
+            <div 
+              className="group flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors px-2 -mx-2 rounded-lg cursor-pointer"
+              onClick={() => onClick?.(item.id)}
+            >
               <div className="flex flex-col items-center justify-center w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors">
                  <span className="text-sm font-bold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                     {item.date.split('/')[0]}
@@ -98,9 +111,43 @@ export const ClientAppointmentsList: React.FC<ClientAppointmentsListProps> = ({
                     <span className="truncate">{item.service}</span>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-slate-400">
-                    <CarOutlined />
-                    <span className="truncate max-w-[200px]">{item.vehicle}</span>
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <CarOutlined />
+                        <span className="truncate max-w-[200px]">{item.vehicle}</span>
+                    </div>
+                    
+                    {/* Quick Actions */}
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      {item.status === "PENDING" && (
+                        <Tooltip title="Confirmar presença" color="#10b981">
+                          <Button
+                            type="primary"
+                            size="small"
+                            className="bg-green-600 hover:bg-green-500 border-green-600 dark:border-green-700 shadow-none"
+                            icon={<CheckCircleOutlined />}
+                            onClick={() => onConfirm?.(item.id)}
+                            loading={isConfirming}
+                          >
+                            Confirmar
+                          </Button>
+                        </Tooltip>
+                      )}
+                      {item.status !== "COMPLETED" && item.status !== "CANCELED" && (
+                        <Tooltip title="Cancelar agendamento" color="#ef4444">
+                          <Button
+                            type="text"
+                            danger
+                            size="small"
+                            icon={<CloseCircleOutlined />}
+                            onClick={() => onCancel?.(item.id)}
+                            className="hover:bg-red-50 dark:hover:bg-red-900/20 border-0 shadow-none"
+                          >
+                            Cancelar
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </div>
                 </div>
               </div>
             </div>

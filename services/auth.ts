@@ -7,6 +7,7 @@ export interface AuthUser {
   lastName?: string;
   email: string;
   phone?: string;
+  cpf?: string;
   picture?: string;
   role: "USER" | "OWNER" | "EMPLOYEE" | "MANAGER" | "ADMIN";
   isActive: boolean;
@@ -88,12 +89,12 @@ export const authService = {
    */
   me: async (): Promise<AuthUser> => {
     try {
-      const response: AxiosResponse<any> = await axiosInstance.get(`${base}/me`);
+      const response: AxiosResponse<{ user: AuthUser } | AuthUser> = await axiosInstance.get(`${base}/me`);
       // Check if response is wrapped in { user: ... }
-      if (response.data && response.data.user) {
+      if (response.data && 'user' in response.data) {
          return response.data.user;
       }
-      return response.data;
+      return response.data as AuthUser;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;

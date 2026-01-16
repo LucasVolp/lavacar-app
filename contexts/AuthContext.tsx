@@ -59,8 +59,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       message.success("Login realizado com sucesso!");
       return true;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Erro ao fazer login";
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).response?.data?.message || "Erro ao fazer login";
       message.error(errorMessage);
       return false;
     } finally {
@@ -94,8 +95,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       message.success("Conta criada com sucesso!");
       return true;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Erro ao criar conta";
+    } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const errorMessage = (error as any).response?.data?.message || "Erro ao criar conta";
       message.error(errorMessage);
       return false;
     } finally {

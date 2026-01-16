@@ -16,7 +16,6 @@ import {
   HomeOutlined,
   MoonOutlined,
   SunOutlined,
-  PlusOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -37,7 +36,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
-  const { logout, user, isAuthenticated, isLoading } = useAuth(); // Auth context for Logout
+  const { logout, isAuthenticated, isLoading } = useAuth(); // Auth context for Logout
   const isDarkMode = resolvedTheme === "dark";
 
   useEffect(() => {

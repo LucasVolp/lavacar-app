@@ -1,22 +1,25 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { Row, Col, Spin } from "antd";
+import React, { useMemo, useState } from "react";
+import { Row, Col, Spin, Modal, message } from "antd";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserVehicles } from "@/hooks/useVehicles";
-import { useAppointments } from "@/hooks/useAppointments";
+import { useAppointments, useUpdateAppointmentStatus, useCancelAppointment } from "@/hooks/useAppointments";
 import {
   WelcomeHeader,
   ClientStats,
   ClientAppointmentsList,
   VehiclesList,
-  RecentHistory,
 } from "@/components/client/dashboard";
 import dayjs from "dayjs";
 import { Vehicle as UserVehicle } from "@/types/vehicle";
 
 export default function ClientDashboard() {
   const { user } = useAuth();
+  const router = useRouter();
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   
   const { data: vehicles = [], isLoading: vehiclesLoading } = useUserVehicles(
     user?.id || null, 
@@ -27,6 +30,9 @@ export default function ClientDashboard() {
     { userId: user?.id },
     !!user?.id
   );
+
+  const updateStatus = useUpdateAppointmentStatus();
+  const cancelAppointment = useCancelAppointment();
 
   const upcomingAppointments = useMemo(() => {
     return appointments
@@ -47,6 +53,7 @@ export default function ClientDashboard() {
       }));
   }, [appointments]);
 
+/*
   const history = useMemo(() => {
     return appointments
       .filter(a => ['COMPLETED', 'CANCELED'].includes(a.status))
@@ -60,7 +67,7 @@ export default function ClientDashboard() {
         status: app.status,
       }));
   }, [appointments]);
-
+*/
   // Normalize vehicles to UI shape (VehiclesList requires color/year as strings)
   const vehiclesNormalized = useMemo(() => {
     return (vehicles as UserVehicle[]).map((v) => ({
@@ -72,6 +79,46 @@ export default function ClientDashboard() {
       year: v.year || 0,
     }));
   }, [vehicles]);
+
+  const handleConfirm = (id: string) => {
+    updateStatus.mutate(
+      { id, status: "CONFIRMED" },
+      {
+        onSuccess: () => {
+          message.success("Presença confirmada!");
+        },
+        onError: () => {
+          message.error("Erro ao confirmar presença");
+        },
+      }
+    );
+  };
+
+  const handleCancelClick = (id: string) => {
+    setSelectedAppointmentId(id);
+    setCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = () => {
+    if (!selectedAppointmentId) return;
+    cancelAppointment.mutate(
+      { id: selectedAppointmentId }, 
+      {
+        onSuccess: () => {
+          message.success("Agendamento cancelado");
+          setCancelModalOpen(false);
+          setSelectedAppointmentId(null);
+        },
+        onError: () => {
+          message.error("Erro ao cancelar agendamento");
+        },
+      }
+    );
+  };
+
+  const handleAppointmentClick = (id: string) => {
+    router.push(`/client/appointments/${id}`);
+  };
 
   if (!user) {
      return (
@@ -93,7 +140,7 @@ export default function ClientDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      <WelcomeHeader clientName={user.firstName} />
+      <WelcomeHeader clientName={user.firstName} avatarUrl={user.picture} />
 
       <ClientStats
         vehiclesCount={vehicles.length}
@@ -104,7 +151,13 @@ export default function ClientDashboard() {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={14} xl={16}>
           <div className="h-full">
-            <ClientAppointmentsList appointments={upcomingAppointments} />
+            <ClientAppointmentsList 
+              appointments={upcomingAppointments}
+              onConfirm={handleConfirm}
+              onCancel={handleCancelClick}
+              onClick={handleAppointmentClick}
+              isConfirming={updateStatus.isPending}
+            />
           </div>
         </Col>
         <Col xs={24} lg={10} xl={8}>
@@ -114,6 +167,18 @@ export default function ClientDashboard() {
            </div>
         </Col>
       </Row>
+
+      <Modal
+        title="Cancelar agendamento"
+        open={cancelModalOpen}
+        onOk={handleCancelConfirm}
+        onCancel={() => setCancelModalOpen(false)}
+        okText="Sim, cancelar"
+        cancelText="Voltar"
+        okButtonProps={{ danger: true, loading: cancelAppointment.isPending }}
+      >
+        <p>Tem certeza que deseja cancelar este agendamento?</p>
+      </Modal>
     </div>
   );
 }

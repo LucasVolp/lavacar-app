@@ -1,13 +1,11 @@
-"use client";
-
 import React from "react";
-import { Card, Form, Input, Typography, Button, Space, Divider } from "antd";
+import { Form, Input, Button, Card, Typography, Divider } from "antd";
 import { LockOutlined, KeyOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface PasswordFormProps {
-  onChangePassword?: (currentPassword: string, newPassword: string) => void;
+  onChangePassword?: (current: string, newPass: string) => void;
   loading?: boolean;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { Shop } from "@/types/shop";
 import { shopService } from "@/services/shop";
 
@@ -27,22 +27,10 @@ export function ShopProvider({ children }: ShopProviderProps) {
 
   const shopId = shop?.id || null;
 
-  // Persistir shopId no localStorage para manter contexto entre navegações
-  useEffect(() => {
-    const savedShopId = localStorage.getItem("current_shop_id");
-    
-    if (savedShopId && !shop) {
-      setShopById(savedShopId);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const setShopBySlug = useCallback(async (slug: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Buscar loja por slug via API usando endpoint dedicado
       const foundShop = await shopService.findBySlug(slug);
       
       if (!foundShop) {
@@ -50,7 +38,6 @@ export function ShopProvider({ children }: ShopProviderProps) {
       }
       
       setShop(foundShop);
-      localStorage.setItem("current_shop_id", foundShop.id);
     } catch (err: unknown) {
       const error = err as Error;
       const errorMessage = error.message || "Erro ao carregar loja";
@@ -73,7 +60,6 @@ export function ShopProvider({ children }: ShopProviderProps) {
       }
       
       setShop(foundShop);
-      localStorage.setItem("current_shop_id", foundShop.id);
     } catch (err: unknown) {
       const error = err as Error;
       const errorMessage = error.message || "Erro ao carregar loja";
@@ -87,7 +73,6 @@ export function ShopProvider({ children }: ShopProviderProps) {
   const clearShop = useCallback(() => {
     setShop(null);
     setError(null);
-    localStorage.removeItem("current_shop_id");
   }, []);
 
   return (

@@ -2,7 +2,7 @@
 
 import { CheckCircleFilled } from "@ant-design/icons";
 import { Services } from "@/types/services";
-import { Dayjs } from "dayjs";
+import { formatDisplayDate } from "@/utils/dateUtils";
 
 interface Vehicle {
   id: string;
@@ -15,13 +15,12 @@ interface Vehicle {
 interface BookingReviewCardProps {
   selectedServices: Services[];
   selectedVehicle: Vehicle | null;
-  selectedDate: Dayjs | null;
+  selectedDate: Date | null;
   selectedTime: string | null;
   totalPrice: number;
   totalDuration: number;
   isLoading?: boolean;
   disabled?: boolean;
-  currentStep: number;
   onConfirm: () => void;
 }
 
@@ -48,7 +47,6 @@ export function BookingReviewCard({
   totalDuration,
   isLoading,
   disabled,
-  currentStep,
   onConfirm,
 }: BookingReviewCardProps) {
   const hasVehicle = !!selectedVehicle;
@@ -115,7 +113,7 @@ export function BookingReviewCard({
               <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 transition-colors duration-300">DATA E HORA</div>
               {hasDateTime ? (
                  <div className="text-slate-800 dark:text-slate-200 text-sm font-medium transition-colors duration-300">
-                    {selectedDate.format("DD/MM/YYYY")} às {selectedTime}
+                    {formatDisplayDate(selectedDate)} às {selectedTime}
                  </div>
               ) : (
                 <div className="text-slate-400 dark:text-[#52525b] text-sm italic transition-colors duration-300">Pendente...</div>
