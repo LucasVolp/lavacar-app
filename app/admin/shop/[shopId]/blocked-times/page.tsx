@@ -10,7 +10,7 @@ import {
   useDeleteBlockedTime 
 } from "@/hooks/useBlockedTimes";
 import { BlockedTime, CreateBlockedTimePayload } from "@/types/blockedTime";
-import dayjs from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import { startOfDay, isAfter, isSameDay, isBefore, parseISO } from "date-fns";
 import {
   BlockedTimeHeader,
@@ -79,20 +79,22 @@ export default function BlockedTimesPage() {
 
   const handleSubmit = async (values: {
     type: "FULL_DAY" | "PARTIAL";
-    date: dayjs.Dayjs;
-    startTime?: dayjs.Dayjs;
-    endTime?: dayjs.Dayjs;
+    date: Dayjs;
+    startTime?: string;
+    endTime?: string;
     reason?: string;
   }) => {
     try {
+      const dateStr = values.date ? dayjs(values.date).format("YYYY-MM-DD") : "";
+      
       const payload = {
         type: values.type,
-        date: values.date.format("YYYY-MM-DD"),
+        date: dateStr,
         startTime: values.type === "PARTIAL" && values.startTime 
-          ? values.startTime.format("HH:mm") 
+          ? values.startTime
           : undefined,
         endTime: values.type === "PARTIAL" && values.endTime 
-          ? values.endTime.format("HH:mm") 
+          ? values.endTime
           : undefined,
         reason: values.reason,
       };
