@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Spin, Empty, Button, Card, Popconfirm, message } from "antd";
+import { Spin, Empty, Button, Card, message } from "antd";
 import { CarOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserVehicles, useDeleteVehicle } from "@/hooks/useVehicles";
 import { AddVehicleModal } from "@/components/booking/AddVehicleModal"; // Reusing this component
+import { CustomPopconfirm } from "@/components/ui";
 
 export default function VehiclesPage() {
   const { user } = useAuth();
@@ -78,7 +79,7 @@ export default function VehiclesPage() {
                              <Link href={`/client/vehicles/${vehicle.id}`}>
                                 <Button icon={<CarOutlined />} type="text" />
                              </Link>
-                             <Popconfirm
+                             <CustomPopconfirm
                                 title="Remover veículo"
                                 description="Tem certeza que deseja remover este veículo?"
                                 onConfirm={() => handleDelete(vehicle.id)}
@@ -86,7 +87,7 @@ export default function VehiclesPage() {
                                 cancelText="Não"
                             >
                                 <Button type="text" danger icon={<DeleteOutlined />} />
-                            </Popconfirm>
+                            </CustomPopconfirm>
                         </div>
                     </div>
                 </Card>

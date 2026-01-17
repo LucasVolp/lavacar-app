@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Card, Tag, Tooltip, Switch, Popconfirm } from "antd";
+import { Card, Tag, Switch } from "antd";
 import { EditOutlined, DeleteOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { Services } from "@/types/services";
+import { CustomTooltip, CustomPopconfirm } from "@/components/ui";
 
 const { Text } = Typography;
 
@@ -33,21 +34,21 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         borderTop: `4px solid ${service.isActive !== false ? "#52c41a" : "#d9d9d9"}`,
       }}
       actions={[
-        <Tooltip title={service.isActive !== false ? "Desativar" : "Ativar"} key="toggle">
+        <CustomTooltip title={service.isActive !== false ? "Desativar" : "Ativar"} key="toggle">
           <Switch
             size="small"
             checked={service.isActive !== false}
             onChange={() => onToggleActive(service)}
             loading={isUpdating}
           />
-        </Tooltip>,
-        <Tooltip title="Editar" key="edit">
+        </CustomTooltip>,
+        <CustomTooltip title="Editar" key="edit">
           <EditOutlined
             onClick={() => onEdit(service)}
             className="text-blue-500"
           />
-        </Tooltip>,
-        <Popconfirm
+        </CustomTooltip>,
+        <CustomPopconfirm
           key="delete"
           title="Excluir serviço"
           description="Tem certeza que deseja excluir?"
@@ -56,10 +57,10 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           cancelText="Não"
           okButtonProps={{ danger: true }}
         >
-          <Tooltip title="Excluir">
+          <CustomTooltip title="Excluir">
             <DeleteOutlined className="text-red-500" />
-          </Tooltip>
-        </Popconfirm>,
+          </CustomTooltip>
+        </CustomPopconfirm>,
       ]}
     >
       <div className="space-y-4">

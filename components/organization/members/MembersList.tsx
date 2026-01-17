@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Table, Tag, Avatar, Tooltip, Button, Modal, Form, Select, message, Popconfirm } from "antd";
+import { Table, Tag, Avatar, Button, Modal, Form, Select, message } from "antd";
 import { UserOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { OrganizationMember } from "@/types/organization";
 import { useUpdateOrganizationMember, useDeleteOrganizationMember } from "@/hooks/useOrganizations";
+import { CustomTooltip, CustomPopconfirm } from "@/components/ui";
 
 export interface ExtendedMember extends OrganizationMember {
   user?: {
@@ -137,16 +138,16 @@ export const MembersList: React.FC<MembersListProps> = ({ members }) => {
         
         return (
           <div className="flex gap-2">
-            <Tooltip title="Editar Permissões" color="blue">
+            <CustomTooltip title="Editar Permissões">
               <Button
                 type="text"
                 icon={<EditOutlined />}
                 className="text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400"
                 onClick={() => handleEdit(record)}
               />
-            </Tooltip>
+            </CustomTooltip>
             {!isOwner && (
-              <Popconfirm
+              <CustomPopconfirm
                 title="Remover membro"
                 description="Tem certeza que deseja remover este membro da organização?"
                 onConfirm={() => handleDelete(record.id)}
@@ -154,25 +155,25 @@ export const MembersList: React.FC<MembersListProps> = ({ members }) => {
                 cancelText="Não"
                 okButtonProps={{ loading: deleteMember.isPending }}
               >
-                <Tooltip title="Remover Membro" color="red">
+                <CustomTooltip title="Remover Membro">
                   <Button 
                     type="text" 
                     danger 
                     icon={<DeleteOutlined />} 
                     className="text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
                   />
-                </Tooltip>
-              </Popconfirm>
+                </CustomTooltip>
+              </CustomPopconfirm>
             )}
             {isOwner && (
-              <Tooltip title="Não é possível remover o proprietário">
+              <CustomTooltip title="Não é possível remover o proprietário">
                 <Button 
                    type="text" 
                    disabled 
                    icon={<DeleteOutlined />} 
                    className="text-zinc-300 dark:text-zinc-700 opacity-50 cursor-not-allowed"
                 />
-              </Tooltip>
+              </CustomTooltip>
             )}
           </div>
         );

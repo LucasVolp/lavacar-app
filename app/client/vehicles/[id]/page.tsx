@@ -2,9 +2,10 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Button, Card, Descriptions, Spin, Result, Tag, Popconfirm, message } from "antd";
+import { Button, Card, Descriptions, Spin, Result, Tag, message } from "antd";
 import { ArrowLeftOutlined, CarOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useVehicle, useDeleteVehicle } from "@/hooks/useVehicles";
+import { CustomPopconfirm } from "@/components/ui";
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -100,7 +101,7 @@ export default function VehicleDetailPage() {
             </Descriptions>
 
             <div className="flex gap-3 mt-6 justify-end">
-               <Popconfirm
+               <CustomPopconfirm
                   title="Remover veículo"
                   description="Tem certeza que deseja remover este veículo? Agendamentos futuros podem ser afetados."
                   onConfirm={handleDelete}
@@ -111,7 +112,7 @@ export default function VehicleDetailPage() {
                   <Button danger size="large" icon={<DeleteOutlined />}>
                     Remover
                   </Button>
-               </Popconfirm>
+               </CustomPopconfirm>
                {/* Edit functionality could be added here in the future */}
                {/* <Button type="primary" size="large" icon={<EditOutlined />}>
                  Editar

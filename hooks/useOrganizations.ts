@@ -57,7 +57,7 @@ export function useUpdateOrganizationMember() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: { role?: string; isActive?: boolean } }) =>
       organizationMemberService.update(id, payload),
-    onSuccess: (_, { id }) => {
+    onSuccess: () => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
       queryClient.invalidateQueries({ queryKey: ["organization-members"] });
