@@ -3,10 +3,10 @@
 import { use, useState, useEffect, useMemo } from "react";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { setTimeOnDate, addMinutes } from "@/utils/dateUtils";
 
-import { useAuth } from "@/contexts/AuthContext";;
+import { useAuth } from "@/contexts/AuthContext";
 import { useShop } from "@/contexts/ShopContext";
 import { useShopBySlug } from "@/hooks/useShops";
 import { useServicesByShop } from "@/hooks/useServices";
@@ -20,6 +20,7 @@ import {
   BookingReviewCard,
 } from "@/components/booking";
 import { Services } from "@/types/services";
+import { Appointment } from "@/types/appointment";
 import { VehicleStep } from "@/components/shop/booking/VehicleStep";
 import { GuestVehicleData } from "@/components/shop/booking/GuestVehicleForm";
 import { ServicesStep } from "@/components/shop/booking/ServicesStep";
@@ -30,6 +31,18 @@ import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 
 interface BookingPageProps {
   params: Promise<{ slug: string }>;
+}
+
+const STORAGE_KEY = "lavacar_booking_draft";
+
+interface BookingDraft {
+  step: number;
+  vehicleId: string | null;
+  guestVehicle: GuestVehicleData | null;
+  services: Services[];
+  date: string | null;
+  time: string | null;
+  shopSlug: string;
 }
 
 export default function BookingPage({ params }: BookingPageProps) {
@@ -48,25 +61,29 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(true);
 
   // Queries
   const { data: shop, isLoading: shopLoading, error: shopError } = useShopBySlug(slug);
-  const { data: services = [], isLoading: servicesLoading } = useServicesByShop(
+  const { data: servicesData, isLoading: servicesLoading } = useServicesByShop(
     shop?.id || null,
+    { isActive: true },
     !!shop
   );
+  const services: Services[] = servicesData?.data ?? [];
   const { data: vehicles = [], isLoading: vehiclesLoading, refetch: refetchVehicles } =
     useUserVehicles(user?.id || null, !!user);
   const { data: schedules = [], isLoading: schedulesLoading } = useShopSchedules(
     shop?.id || null,
     !!shop
   );
-  const { data: existingAppointments = [], isLoading: appointmentsLoading } =
+  const { data: existingAppointmentsData, isLoading: appointmentsLoading } =
     useShopAppointmentsByDate(
       shop?.id || null,
       selectedDate ? format(selectedDate, "yyyy-MM-dd") : null,
       !!shop && !!selectedDate
     );
+  const existingAppointments: Appointment[] = existingAppointmentsData?.data ?? [];
 
   const createAppointment = useCreateAppointment();
 
@@ -76,6 +93,61 @@ export default function BookingPage({ params }: BookingPageProps) {
       setShopBySlug(slug);
     }
   }, [slug, setShopBySlug]);
+
+  // Restore draft from sessionStorage
+  useEffect(() => {
+    try {
+      const draftJson = sessionStorage.getItem(STORAGE_KEY);
+      if (draftJson) {
+        const draft: BookingDraft = JSON.parse(draftJson);
+        // Only restore if it matches current shop
+        if (draft.shopSlug === slug) {
+          setCurrentStep(draft.step);
+          setSelectedVehicleId(draft.vehicleId);
+          setGuestVehicle(draft.guestVehicle);
+          setSelectedServices(draft.services);
+          if (draft.date) setSelectedDate(parseISO(draft.date));
+          setSelectedTime(draft.time);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to restore booking draft", e);
+    } finally {
+      setIsRestoring(false);
+    }
+  }, [slug]);
+
+  // Save draft to sessionStorage
+  useEffect(() => {
+    if (isRestoring) return;
+
+    // Don't save if complete
+    if (bookingComplete) {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+
+    const draft: BookingDraft = {
+      step: currentStep,
+      vehicleId: selectedVehicleId,
+      guestVehicle,
+      services: selectedServices,
+      date: selectedDate ? selectedDate.toISOString() : null,
+      time: selectedTime,
+      shopSlug: slug,
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+  }, [
+    currentStep,
+    selectedVehicleId,
+    guestVehicle,
+    selectedServices,
+    selectedDate,
+    selectedTime,
+    slug,
+    bookingComplete,
+    isRestoring
+  ]);
 
   // Memoized calculations
   const selectedVehicle = useMemo(() => {
@@ -118,17 +190,26 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   const handleLoginSuccess = () => {
     setShowLoginModal(false);
-    // After login, check if user has vehicles. If not, show AddVehicleModal?
-    // Or just let them proceed to vehicle selection if needed.
-    // If they have vehicles but none selected, we need to enforce selection.
+    
+    // We rely on session storage to restore state after redirect back from login
+    // If the login modal does a redirect, this function might not even run on this page instance.
+    // But if it was an inline login or popup, this would handle the aftermath.
     
     refetchVehicles().then(({ data: userVehicles }) => {
-        if (!userVehicles || userVehicles.length === 0) {
+        // Try to match guest vehicle to a real vehicle if possible, or just ask user to select.
+        // If we had a guest vehicle selected, we might want to clear it and force selection of a real vehicle.
+        
+        if (guestVehicle) {
+            // Check if user has a similar vehicle? 
+            // Simplified: Just keep guest vehicle as a fallback visual but require real selection
+             setGuestVehicle(null);
+             setSelectedVehicleId(null);
+             message.info("Login realizado! Por favor, selecione seu veículo para continuar.");
+             setCurrentStep(0);
+        } else if (!userVehicles || userVehicles.length === 0) {
             setShowAddVehicleModal(true);
         } else if (!selectedVehicleId) {
-             // Avoid redirecting immediately to let user see context? 
-             // Or redirect to step 0
-             message.info("Por favor, selecione seu veículo para finalizar.");
+             message.info("Por favor, selecione seu veículo.");
              setCurrentStep(0);
         }
     });
@@ -162,7 +243,7 @@ export default function BookingPage({ params }: BookingPageProps) {
         totalDuration,
         userId: user.id,
         shopId: shop.id,
-        vehicleId: selectedVehicleId, // Use ID directly as selectedVehicle might be null initially
+        vehicleId: selectedVehicleId,
         serviceIds: selectedServices.map((s) => ({
           serviceId: s.id,
           serviceName: s.name,
@@ -172,6 +253,7 @@ export default function BookingPage({ params }: BookingPageProps) {
       });
 
       setBookingComplete(true);
+      sessionStorage.removeItem(STORAGE_KEY);
       message.success("Agendamento realizado com sucesso!");
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -196,11 +278,13 @@ export default function BookingPage({ params }: BookingPageProps) {
   const nextStep = () => {
     if (canProceedToStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 2));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const prevStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const formatDuration = (minutes: number) => {
@@ -211,12 +295,12 @@ export default function BookingPage({ params }: BookingPageProps) {
   };
 
   // Loading state
-  if (shopLoading) {
+  if (shopLoading || isRestoring) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
-          <span className="block mt-4 text-slate-500 font-medium">Carregando loja...</span>
+          <span className="block mt-4 text-slate-500 font-medium">Carregando...</span>
         </div>
       </div>
     );
@@ -255,7 +339,13 @@ export default function BookingPage({ params }: BookingPageProps) {
         totalDuration={totalDuration}
         totalPrice={totalPrice}
         formatDuration={formatDuration}
-        onReturnToShop={() => router.push(`/shop/${slug}`)}
+        onReturnToShop={() => {
+            setBookingComplete(false);
+            setCurrentStep(0);
+            setSelectedDate(null);
+            setSelectedTime(null);
+            setSelectedServices([]);
+        }}
         onReturnToHome={() => router.push("/client/appointments")}
       />
     );
@@ -290,13 +380,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   selectedVehicleId={selectedVehicleId}
                   onSelectVehicle={setSelectedVehicleId}
                   onAddVehicle={() => setShowAddVehicleModal(true)}
-                  onLogin={() =>
-                    router.push(
-                      `/auth/login?redirect=${encodeURIComponent(
-                        `/shop/${slug}/booking`
-                      )}`
-                    )
-                  }
+                  onLogin={() => setShowLoginModal(true)}
                   guestVehicle={guestVehicle}
                   onGuestVehicleSelect={setGuestVehicle}
                 />
@@ -363,10 +447,6 @@ export default function BookingPage({ params }: BookingPageProps) {
                     Continuar <ArrowRightOutlined />
                   </button>
                 ) : (
-                  /* The final confirm button is in the sidebar for Step 3, 
-                      but we can keep a redundant one here or hide it. 
-                      Ideally, on mobile, the sidebar is below, so this is useful. 
-                   */
                   <button
                     onClick={handleConfirmBooking}
                     disabled={

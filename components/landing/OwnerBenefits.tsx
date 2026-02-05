@@ -12,7 +12,7 @@ import {
 
 export const OwnerBenefits = () => {
   return (
-    <section className="py-24 px-6 bg-base-200 border-y border-base-content/5 relative overflow-hidden transition-colors duration-300">
+    <section id="benefits" className="py-24 px-6 bg-base-200 border-y border-base-content/5 relative overflow-hidden transition-colors duration-300">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
 

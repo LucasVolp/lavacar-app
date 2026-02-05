@@ -1,17 +1,11 @@
 import { useAppointments } from "./useAppointments";
+import { Appointment } from "@/types/appointment";
 import dayjs from "dayjs";
 
-/**
- * Hook para agregar estatísticas do shop
- * 
- * Calcula métricas com base nos agendamentos:
- * - Total de agendamentos hoje
- * - Agendamentos pendentes
- * - Agendamentos completos hoje
- * - Receita estimada do dia
- */
 export function useShopStats(shopId: string | undefined) {
-  const { data: appointments = [], isLoading } = useAppointments({ shopId }, !!shopId);
+  const { data: appointmentsData, isLoading } = useAppointments({ shopId, perPage: 500 }, !!shopId);
+  
+  const appointments: Appointment[] = appointmentsData?.data ?? [];
 
   const stats = {
     todayAppointments: 0,

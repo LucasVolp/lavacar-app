@@ -11,7 +11,7 @@ export const PricingSection = () => {
   const isYearly = billingCycle === "yearly";
 
   return (
-    <section className="py-24 px-6 bg-base-100 relative overflow-hidden transition-colors duration-300">
+    <section id="pricing" className="py-24 px-6 bg-base-100 relative overflow-hidden transition-colors duration-300">
       {/* Background decorations */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 

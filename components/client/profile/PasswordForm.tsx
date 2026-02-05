@@ -21,7 +21,7 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({
   };
 
   return (
-    <Card className="border-base-200">
+    <Card className="border-base-200 space-y-4 mt-6">
       <div className="flex items-center gap-2 mb-4">
         <LockOutlined className="text-warning" />
         <Title level={5} className="!mb-0">

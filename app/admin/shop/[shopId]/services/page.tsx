@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Spin, Button, Form, message, Typography } from "antd";
+import { Spin, Button, Form, message, Typography, Pagination } from "antd";
 import { ToolOutlined, PlusOutlined, FolderOutlined } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/hooks/useServiceGroups";
 import { Services, CreateServicePayload, UpdateServicePayload } from "@/types/services";
 import { ServiceGroup, CreateServiceGroupPayload, UpdateServiceGroupPayload } from "@/types/serviceGroup";
+import { useDebouncedValue } from "@/hooks";
 
 import { ServicesHeader } from "@/components/admin/shop/services/ServicesHeader";
 import { ServicesStats } from "@/components/admin/shop/services/ServicesStats";
@@ -32,11 +33,29 @@ const { Text } = Typography;
 export default function ServicesPage() {
   const { shopId } = useShopAdmin();
 
-  // Hooks de dados
-  const { data: services = [], isLoading } = useServicesByShop(shopId);
-  const { data: serviceGroups = [], isLoading: isLoadingGroups } = useServiceGroupsByShop(shopId);
+  const [searchText, setSearchText] = useState("");
+  const [viewType, setViewType] = useState<"table" | "grid">("grid");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [activeTab, setActiveTab] = useState<"services" | "groups">("services");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(12);
 
-  // Mutations
+  const debouncedSearch = useDebouncedValue(searchText, 300);
+
+  const filters = {
+    search: debouncedSearch || undefined,
+    isActive: statusFilter === "all" ? undefined : statusFilter === "active",
+    page,
+    perPage,
+  };
+
+  const { data: servicesData, isLoading } = useServicesByShop(shopId, filters);
+  const { data: serviceGroupsData, isLoading: isLoadingGroups } = useServiceGroupsByShop(shopId);
+
+  const services = servicesData?.data ?? [];
+  const meta = servicesData?.meta;
+  const serviceGroups = serviceGroupsData?.data ?? [];
+
   const createService = useCreateService();
   const updateService = useUpdateService();
   const deleteService = useDeleteService();
@@ -44,25 +63,16 @@ export default function ServicesPage() {
   const updateGroup = useUpdateServiceGroup();
   const deleteGroup = useDeleteServiceGroup();
 
-  // Estados UI
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Services | null>(null);
-  const [searchText, setSearchText] = useState("");
-  const [viewType, setViewType] = useState<"table" | "grid">("grid");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
-  const [activeTab, setActiveTab] = useState<"services" | "groups">("services");
-
-  // Estados para grupos
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<ServiceGroup | null>(null);
 
-  // Forms
   const [form] = Form.useForm();
   const [groupForm] = Form.useForm();
 
-  // Estatísticas
   const stats = {
-    total: services.length,
+    total: meta?.total ?? services.length,
     active: services.filter((s) => s.isActive !== false).length,
     inactive: services.filter((s) => s.isActive === false).length,
     avgPrice:
@@ -71,18 +81,6 @@ export default function ServicesPage() {
         : 0,
   };
 
-  // Filtros
-  const filteredServices = services.filter((service) => {
-    const matchesSearch =
-      service.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      service.description?.toLowerCase().includes(searchText.toLowerCase());
-
-    if (statusFilter === "active") return matchesSearch && service.isActive !== false;
-    if (statusFilter === "inactive") return matchesSearch && service.isActive === false;
-    return matchesSearch;
-  });
-
-  // Handlers - Serviços
   const handleToggleActive = async (service: Services) => {
     try {
       await updateService.mutateAsync({
@@ -153,7 +151,23 @@ export default function ServicesPage() {
     }
   };
 
-  // Handlers - Grupos
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (value: "all" | "active" | "inactive") => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number, newPageSize?: number) => {
+    setPage(newPage);
+    if (newPageSize && newPageSize !== perPage) {
+      setPerPage(newPageSize);
+    }
+  };
+
   const handleOpenGroupModal = (group?: ServiceGroup) => {
     if (group) {
       setEditingGroup(group);
@@ -213,7 +227,7 @@ export default function ServicesPage() {
     setIsModalOpen(true);
   };
 
-  if (isLoading) {
+  if (isLoading && !servicesData) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Spin size="large" tip="Carregando serviços..." />
@@ -289,9 +303,9 @@ export default function ServicesPage() {
 
               <ServicesFilters
                 searchText={searchText}
-                onSearchChange={setSearchText}
+                onSearchChange={handleSearchChange}
                 statusFilter={statusFilter}
-                onStatusFilterChange={setStatusFilter}
+                onStatusFilterChange={handleStatusFilterChange}
                 viewType={viewType}
                 onViewTypeChange={setViewType}
                 onAddService={() => handleOpenModal()}
@@ -299,7 +313,7 @@ export default function ServicesPage() {
 
               {viewType === "grid" ? (
                 <ServicesGrid
-                  services={filteredServices}
+                  services={services}
                   onEdit={handleOpenModal}
                   onDelete={handleDelete}
                   onToggleActive={handleToggleActive}
@@ -308,13 +322,27 @@ export default function ServicesPage() {
                 />
               ) : (
                 <ServicesTable
-                  services={filteredServices}
+                  services={services}
                   loading={isLoading}
                   onEdit={handleOpenModal}
                   onDelete={handleDelete}
                   onToggleActive={handleToggleActive}
                   updatingServiceId={updateService.isPending ? editingService?.id || null : null}
                 />
+              )}
+
+              {meta && meta.totalPages > 1 && (
+                <div className="flex justify-center pt-4">
+                  <Pagination
+                    current={page}
+                    pageSize={perPage}
+                    total={meta.total}
+                    onChange={handlePageChange}
+                    showSizeChanger
+                    showTotal={(total, range) => `${range[0]}-${range[1]} de ${total} serviços`}
+                    pageSizeOptions={["12", "24", "48", "96"]}
+                  />
+                </div>
               )}
             </div>
           ) : (

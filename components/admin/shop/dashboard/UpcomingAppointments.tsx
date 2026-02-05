@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, Button, Badge, Empty, Typography, Tag } from "antd";
-import { CalendarOutlined, RightOutlined, CarOutlined } from "@ant-design/icons";
+import { CalendarOutlined, RightOutlined, CarOutlined, UserOutlined, PhoneOutlined } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -42,7 +42,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
 
   return (
     <Card
-      bordered={false}
+      variant="outlined"
       title={
         <div className="flex items-center gap-3 py-2">
           <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
@@ -65,7 +65,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
         </Button>
       }
       className="h-full rounded-2xl border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden shadow-sm"
-      bodyStyle={{ padding: '0 24px 24px 24px' }}
+      styles={{ body: { padding: '16px 24px 24px 24px' } }}
     >
       {appointments.length === 0 ? (
         <Empty
@@ -78,40 +78,74 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
           {appointments.map((appointment) => (
             <div
               key={appointment.id}
-              className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all cursor-pointer"
+              className="group flex flex-col p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all cursor-pointer"
               onClick={() => router.push(`/admin/shop/${shopId}/appointments/${appointment.id}`)}
             >
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg px-3 py-2 min-w-[60px] border border-zinc-200 dark:border-zinc-700 shadow-sm">
-                  <Text strong className="text-indigo-600 dark:text-indigo-400 text-lg leading-none">
-                    {dayjs(appointment.scheduledAt).format("HH:mm")}
-                  </Text>
-                  <Text type="secondary" className="text-xs">
-                    {dayjs(appointment.endTime).format("HH:mm")}
-                  </Text>
-                </div>
-                
-                <div className="flex flex-col">
-                  <Text strong className="text-zinc-800 dark:text-zinc-100 text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {appointment.services.map((s) => s.serviceName).join(", ")}
-                  </Text>
-                  <div className="flex items-center gap-3 text-zinc-500 text-sm mt-1">
-                    <span className="flex items-center gap-1"><CarOutlined /> Veículo</span>
-                    <span className="w-1 h-1 bg-zinc-300 rounded-full"></span>
-                    <span>{appointment.totalDuration} min</span>
-                    <span className="w-1 h-1 bg-zinc-300 rounded-full"></span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                      R$ {parseFloat(appointment.totalPrice).toFixed(2)}
-                    </span>
+              {/* Header: Horário + Status */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg px-3 py-2 min-w-[60px] border border-zinc-200 dark:border-zinc-700 shadow-sm">
+                    <Text strong className="text-indigo-600 dark:text-indigo-400 text-lg leading-none">
+                      {dayjs(appointment.scheduledAt).format("HH:mm")}
+                    </Text>
+                    <Text type="secondary" className="text-xs">
+                      {dayjs(appointment.endTime).format("HH:mm")}
+                    </Text>
                   </div>
+                  <div>
+                    <Text strong className="text-zinc-800 dark:text-zinc-100 text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors block">
+                      {appointment.services.map((s) => s.serviceName).join(", ")}
+                    </Text>
+                    <div className="flex items-center gap-2 text-zinc-500 text-sm mt-0.5">
+                      <span>{appointment.totalDuration} min</span>
+                      <span className="w-1 h-1 bg-zinc-300 rounded-full"></span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                        R$ {parseFloat(appointment.totalPrice).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Tag color={statusColors[appointment.status]} className="m-0 px-3 py-1 rounded-full border-0 font-medium">
+                    {statusLabels[appointment.status]}
+                  </Tag>
+                  <RightOutlined className="text-zinc-300 group-hover:text-indigo-400 transition-colors hidden sm:block" />
                 </div>
               </div>
 
-              <div className="mt-3 sm:mt-0 flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                <Tag color={statusColors[appointment.status]} className="m-0 px-3 py-1 rounded-full border-0 font-medium">
-                  {statusLabels[appointment.status]}
-                </Tag>
-                <RightOutlined className="text-zinc-300 group-hover:text-indigo-400 transition-colors" />
+              {/* Info: Cliente + Veículo */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-zinc-200 dark:border-zinc-700">
+                {/* Cliente */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+                    <UserOutlined className="text-indigo-600 dark:text-indigo-400 text-sm" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <Text className="text-zinc-700 dark:text-zinc-200 font-medium block truncate">
+                      {appointment.user?.firstName} {appointment.user?.lastName || ''}
+                    </Text>
+                    {appointment.user?.phone && (
+                      <Text type="secondary" className="text-xs flex items-center gap-1">
+                        <PhoneOutlined /> {appointment.user.phone}
+                      </Text>
+                    )}
+                  </div>
+                </div>
+
+                {/* Veículo */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                    <CarOutlined className="text-emerald-600 dark:text-emerald-400 text-sm" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <Text className="text-zinc-700 dark:text-zinc-200 font-medium block truncate">
+                      {appointment.vehicle?.brand} {appointment.vehicle?.model}
+                    </Text>
+                    <Text type="secondary" className="text-xs uppercase tracking-wide">
+                      {appointment.vehicle?.plate}
+                    </Text>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

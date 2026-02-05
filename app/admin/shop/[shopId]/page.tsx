@@ -6,50 +6,50 @@ import {
   ToolOutlined,
   StopOutlined,
   ScheduleOutlined,
+  ContactsOutlined,
 } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useAppointments } from "@/hooks/useAppointments";
 import { useServicesByShop } from "@/hooks/useServices";
 import { useShopSchedules } from "@/hooks/useSchedules";
 import { useBlockedTimesByShop } from "@/hooks/useBlockedTimes";
-import { isSameDay, isAfter, isBefore, startOfWeek, endOfWeek, startOfDay, parseISO } from "date-fns";
+import { useShopClientsCount } from "@/hooks/useShopClients";
+import { isSameDay, isAfter, isBefore, startOfWeek, endOfWeek, startOfDay, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import {
   DashboardHeader,
   DashboardStats,
   UpcomingAppointments,
   PerformanceCard,
   QuickActionsCard,
+  SalesGoalWidget,
 } from "@/components/admin/shop/dashboard";
+import { Appointment } from "@/types/appointment";
+import { Services } from "@/types/services";
 
-/**
- * Dashboard do Shop (Admin)
- * 
- * UI profissional com:
- * - Cards de estatísticas animados
- * - Agenda do dia com timeline
- * - Ações rápidas
- * - Indicadores de performance
- */
 export default function ShopDashboardPage() {
   const { shop, shopId, isLoading: isLoadingShop } = useShopAdmin();
   
-  const { data: appointments = [], isLoading: isLoadingAppointments } = useAppointments(
-    { shopId },
+  const { data: appointmentsData, isLoading: isLoadingAppointments } = useAppointments(
+    { shopId, perPage: 500 },
     !!shopId
   );
   
-  const { data: services = [] } = useServicesByShop(shopId);
+  const { data: servicesData } = useServicesByShop(shopId, { perPage: 500 });
   const { data: schedules = [] } = useShopSchedules(shopId);
   const { data: blockedTimes = [] } = useBlockedTimesByShop(shopId);
+  const { data: clientsCount = 0 } = useShopClientsCount(shopId);
+
+  const appointments: Appointment[] = appointmentsData?.data ?? [];
+  const services: Services[] = servicesData?.data ?? [];
 
   const isLoading = isLoadingShop || isLoadingAppointments;
 
-  // Datas de referência
   const today = startOfDay(new Date());
-  const weekStart = startOfWeek(today, { weekStartsOn: 0 }); // Domingo
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(today, { weekStartsOn: 0 });
+  const monthStart = startOfMonth(today);
+  const monthEnd = endOfMonth(today);
 
-  // Filtrar agendamentos
   const todayAppointments = appointments.filter((apt) =>
     isSameDay(parseISO(apt.scheduledAt), today)
   );
@@ -59,7 +59,11 @@ export default function ShopDashboardPage() {
     return isAfter(date, weekStart) && isBefore(date, weekEnd);
   });
 
-  // Calcular estatísticas
+  const monthAppointments = appointments.filter((apt) => {
+    const date = parseISO(apt.scheduledAt);
+    return isAfter(date, monthStart) && isBefore(date, monthEnd);
+  });
+
   const stats = {
     total: todayAppointments.length,
     pending: todayAppointments.filter((a) => a.status === "PENDING").length,
@@ -68,20 +72,21 @@ export default function ShopDashboardPage() {
     completed: todayAppointments.filter((a) => a.status === "COMPLETED").length,
     revenue: todayAppointments
       .filter((a) => a.status === "COMPLETED")
-      .reduce((acc, a) => acc + parseFloat(a.totalPrice), 0),
+      .reduce((acc: number, a) => acc + parseFloat(a.totalPrice), 0),
     weekRevenue: weekAppointments
       .filter((a) => a.status === "COMPLETED")
-      .reduce((acc, a) => acc + parseFloat(a.totalPrice), 0),
+      .reduce((acc: number, a) => acc + parseFloat(a.totalPrice), 0),
+    monthRevenue: monthAppointments
+      .filter((a) => a.status === "COMPLETED")
+      .reduce((acc: number, a) => acc + parseFloat(a.totalPrice), 0),
     weekAppointmentsCount: weekAppointments.length,
     activeServices: services.filter((s) => s.isActive !== false).length,
   };
 
-  // Taxa de conclusão do dia
   const completionRate = stats.total > 0 
     ? Math.round((stats.completed / stats.total) * 100) 
     : 0;
 
-  // Próximos agendamentos (não concluídos/cancelados)
   const upcomingAppointments = todayAppointments
     .filter((a) => !["COMPLETED", "CANCELED", "NO_SHOW"].includes(a.status))
     .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
@@ -89,6 +94,14 @@ export default function ShopDashboardPage() {
 
   // Ações rápidas
   const quickActions = [
+    {
+      title: "Clientes",
+      icon: <ContactsOutlined className="text-xl" />,
+      color: "#06b6d4",
+      value: clientsCount,
+      label: "cadastrados",
+      path: `/admin/shop/${shopId}/clients`,
+    },
     {
       title: "Serviços",
       icon: <ToolOutlined className="text-xl" />,
@@ -154,7 +167,12 @@ export default function ShopDashboardPage() {
 
         {/* Painel Lateral */}
         <Col xs={24} lg={8}>
-          <div className="space-y-6">
+          <div className="space-y-4">
+            <SalesGoalWidget 
+              shopId={shopId} 
+              currentRevenue={stats.monthRevenue} 
+            />
+
             <PerformanceCard 
               completionRate={completionRate} 
               stats={{

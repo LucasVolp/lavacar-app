@@ -37,7 +37,7 @@ const features = [
 
 export const FeaturesGrid = () => {
   return (
-    <section className="py-24 px-6 bg-base-100 transition-colors duration-300">
+    <section id="features" className="py-24 px-6 bg-base-100 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-base-content mb-4">

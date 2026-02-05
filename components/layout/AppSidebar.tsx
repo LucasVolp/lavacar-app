@@ -33,7 +33,7 @@ interface AppSidebarProps {
 }
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({
-  width = 260,
+  width = 280,
   collapsedWidth = 80,
   logo,
   title,

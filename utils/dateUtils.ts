@@ -25,7 +25,7 @@ import { ptBR } from 'date-fns/locale';
 import { formatInTimeZone, toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 // Timezone padrão do sistema (deve ser o mesmo do shop/backend)
-export const DEFAULT_TIMEZONE = 'America/Sao_Paulo';
+export const DEFAULT_TIMEZONE = 'America/Campo_Grande';
 
 /**
  * Obtém a data/hora atual no timezone especificado

@@ -144,7 +144,7 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
         trigger={null}
         collapsible
         collapsed={collapsed}
-        width={260}
+        width={280}
         collapsedWidth={80}
         className="fixed left-0 top-0 h-screen z-50 shadow-lg border-r"
         style={{ 
@@ -195,7 +195,7 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
       </Sider>
 
       {/* Main Content Area */}
-      <Layout style={{ marginLeft: collapsed ? 50 : 100, transition: "all 0.2s" }}>
+      <Layout style={{ transition: "all 0.2s" }}>
         {/* Header */}
         <AntHeader
           className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}

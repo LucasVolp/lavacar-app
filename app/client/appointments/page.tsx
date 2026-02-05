@@ -15,6 +15,7 @@ import {
   type ClientAppointmentFull,
 } from "@/components/client/appointments";
 import dayjs from "dayjs";
+import { Appointment } from "@/types/appointment";
 
 const { TextArea } = Input;
 
@@ -27,8 +28,8 @@ export default function ClientAppointmentsPage() {
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
 
-  const { data: appointmentsRaw = [], isLoading } = useAppointments(
-    { userId: user?.id },
+  const { data: appointmentsResult, isLoading } = useAppointments(
+    { userId: user?.id, perPage: 100 },
     !!user?.id
   );
 
@@ -36,6 +37,7 @@ export default function ClientAppointmentsPage() {
   const cancelAppointment = useCancelAppointment();
 
   const appointments: ClientAppointmentFull[] = useMemo(() => {
+    const appointmentsRaw: Appointment[] = appointmentsResult?.data ?? [];
     return appointmentsRaw.map((app) => ({
       id: app.id,
       shop: app.shop?.name || "Loja desconhecida",
@@ -57,7 +59,7 @@ export default function ClientAppointmentsPage() {
       status: app.status,
       createdAt: dayjs(app.createdAt).format("DD/MM/YYYY"),
     }));
-  }, [appointmentsRaw]);
+  }, [appointmentsResult]);
 
   // Separate upcoming and history
   const upcomingAppointments = useMemo(() => {

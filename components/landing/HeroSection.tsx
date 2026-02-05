@@ -1,10 +1,36 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CarOutlined, ShopOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOrganizationByOwner } from "@/hooks/useOrganizations";
 
 export const HeroSection = () => {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
+  const { data: organizations } = useOrganizationByOwner(user?.id);
+
+  const handleClientClick = () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login?redirect=/client");
+    } else {
+      router.push("/client");
+    }
+  };
+
+  const handleOwnerClick = () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login?redirect=/organization/create");
+    } else {
+      if (organizations && organizations.length > 0) {
+        router.push(`/organization/${organizations[0].id}`);
+      } else {
+        router.push("/organization");
+      }
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center items-center px-6 pt-20 pb-16 bg-base-100 overflow-hidden transition-colors duration-300">
       {/* Background Effects */}
@@ -37,7 +63,7 @@ export const HeroSection = () => {
         {/* Dual Gate Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
           {/* Driver Option */}
-          <Link href="/client" className="group">
+          <div onClick={handleClientClick} className="group cursor-pointer">
             <div className="h-full p-6 sm:p-8 rounded-2xl bg-blue-600 hover:bg-blue-500 border border-blue-500 transition-all duration-300 flex flex-col items-center sm:items-start text-center sm:text-left gap-4 shadow-lg shadow-blue-900/20 group-hover:shadow-blue-500/20 group-hover:scale-[1.02]">
               <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white text-2xl mb-2">
                 <CarOutlined />
@@ -54,10 +80,10 @@ export const HeroSection = () => {
                 Acessar minha área <ArrowRightOutlined />
               </div>
             </div>
-          </Link>
+          </div>
 
           {/* Business Owner Option */}
-          <Link href="/owner" className="group">
+          <div onClick={handleOwnerClick} className="group cursor-pointer">
             <div className="h-full p-6 sm:p-8 rounded-2xl bg-base-200/50 hover:bg-base-200 border border-base-300 hover:border-base-content/20 transition-all duration-300 flex flex-col items-center sm:items-start text-center sm:text-left gap-4 backdrop-blur-sm group-hover:scale-[1.02]">
               <div className="w-12 h-12 rounded-xl bg-base-300 flex items-center justify-center text-base-content text-2xl mb-2 border border-base-content/5">
                 <ShopOutlined />
@@ -74,7 +100,7 @@ export const HeroSection = () => {
                 Acessar painel <ArrowRightOutlined />
               </div>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
     </section>

@@ -16,6 +16,7 @@ import {
   ShopFooter,
 } from "@/components/shop";
 import { CarFilled } from "@ant-design/icons";
+import { Services } from "@/types/services";
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>;
@@ -26,47 +27,42 @@ export default function ShopPage({ params }: ShopPageProps) {
   const router = useRouter();
   const { setShopBySlug } = useShop();
 
-  // Fetch shop data
   const {
     data: shop,
     isLoading: shopLoading,
     error: shopError,
   } = useShopBySlug(slug);
 
-  // Fetch services
-  const { data: services = [], isLoading: servicesLoading } = useServicesByShop(
+  const { data: servicesData, isLoading: servicesLoading } = useServicesByShop(
     shop?.id || null,
+    { isActive: true },
     !!shop
   );
 
-  // Fetch schedules
+  const services: Services[] = servicesData?.data ?? [];
+
   const { data: schedules = [], isLoading: schedulesLoading } = useShopSchedules(
     shop?.id || null,
     !!shop
   );
 
-  // Fetch curated reviews (best reviews for display)
   const { 
     data: curatedReviews = [], 
     isLoading: reviewsLoading,
   } = useCuratedReviews(shop?.id || null, 5, !!shop);
 
-  // Get evaluation summary
   const { data: evaluationSummary } = useEvaluationSummary(shop?.id || null, !!shop);
 
-  // Set shop context
   useEffect(() => {
     if (slug) {
       setShopBySlug(slug);
     }
   }, [slug, setShopBySlug]);
 
-  // Handle booking navigation
   const handleBooking = () => {
     router.push(`/shop/${slug}/booking`);
   };
 
-  // Calculate stats
   const activeServices = services.filter((s) => s.isActive !== false);
   const averageRating = evaluationSummary?.averageRating || 0;
   const totalReviews = evaluationSummary?.totalEvaluations || 0;

@@ -1,57 +1,51 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { appointmentService, CreateAppointmentRequest } from "@/services/appointment";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { appointmentService, CreateAppointmentRequest, AppointmentFilters } from "@/services/appointment";
 import { Appointment } from "@/types/appointment";
 
-// Query Keys
 export const appointmentKeys = {
   all: ["appointments"] as const,
   lists: () => [...appointmentKeys.all, "list"] as const,
   list: (filters: object) => [...appointmentKeys.lists(), filters] as const,
-  byShop: (shopId: string) => [...appointmentKeys.lists(), { shopId }] as const,
-  byUser: (userId: string) => [...appointmentKeys.lists(), { userId }] as const,
+  byShop: (shopId: string, filters?: object) => [...appointmentKeys.lists(), { shopId, ...filters }] as const,
+  byUser: (userId: string, filters?: object) => [...appointmentKeys.lists(), { userId, ...filters }] as const,
   byShopAndDate: (shopId: string, date: string) =>
     [...appointmentKeys.lists(), { shopId, date }] as const,
   details: () => [...appointmentKeys.all, "detail"] as const,
   detail: (id: string) => [...appointmentKeys.details(), id] as const,
 };
 
-interface AppointmentFilters {
-  shopId?: string;
-  userId?: string;
-  status?: Appointment["status"];
-  startDate?: string;
-  endDate?: string;
-}
-
-/**
- * Hook para buscar agendamentos com filtros
- */
 export function useAppointments(filters: AppointmentFilters = {}, enabled = true) {
   return useQuery({
     queryKey: appointmentKeys.list(filters),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    queryFn: () => appointmentService.findAll(filters as any),
+    queryFn: () => appointmentService.findAll(filters),
     enabled,
-    staleTime: 1 * 60 * 1000, // 1 minuto
+    staleTime: 1 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
-/**
- * Hook para buscar agendamentos do usuário logado
- */
-export function useUserAppointments(userId: string | null, enabled = true) {
+export function useShopAppointments(shopId: string | null, filters: Omit<AppointmentFilters, 'shopId'> = {}, enabled = true) {
+  const queryFilters = { ...filters, shopId: shopId! };
   return useQuery({
-    queryKey: appointmentKeys.byUser(userId || ""),
-    queryFn: () => appointmentService.findAll({ userId: userId! }),
+    queryKey: appointmentKeys.byShop(shopId || "", filters),
+    queryFn: () => appointmentService.findAll(queryFilters),
+    enabled: enabled && !!shopId,
+    staleTime: 1 * 60 * 1000,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUserAppointments(userId: string | null, filters: Omit<AppointmentFilters, 'userId'> = {}, enabled = true) {
+  const queryFilters = { ...filters, userId: userId! };
+  return useQuery({
+    queryKey: appointmentKeys.byUser(userId || "", filters),
+    queryFn: () => appointmentService.findAll(queryFilters),
     enabled: enabled && !!userId,
     staleTime: 1 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
-/**
- * Hook para buscar agendamentos de uma loja em uma data específica
- * Útil para calcular slots disponíveis
- */
 export function useShopAppointmentsByDate(
   shopId: string | null,
   date: string | null,
@@ -66,14 +60,11 @@ export function useShopAppointmentsByDate(
         endDate: date!,
       }),
     enabled: enabled && !!shopId && !!date,
-    staleTime: 0, // Sempre buscar dados frescos para disponibilidade
-    refetchOnMount: 'always', // Sempre refetch ao montar o componente
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 
-/**
- * Hook para buscar um agendamento específico
- */
 export function useAppointment(id: string | null, enabled = true) {
   return useQuery({
     queryKey: appointmentKeys.detail(id || ""),
@@ -82,29 +73,20 @@ export function useAppointment(id: string | null, enabled = true) {
   });
 }
 
-// Re-exporta o tipo do service
 export type { CreateAppointmentRequest as CreateAppointmentPayload };
 
-/**
- * Hook para criar um agendamento
- */
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: CreateAppointmentRequest) => appointmentService.create(payload),
     onSuccess: () => {
-      // Invalida todas as queries de agendamentos para garantir dados frescos
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
-      // Invalida especificamente as listas (incluindo byShopAndDate)
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
     },
   });
 }
 
-/**
- * Hook para atualizar um agendamento
- */
 export function useUpdateAppointment() {
   const queryClient = useQueryClient();
 
@@ -117,9 +99,6 @@ export function useUpdateAppointment() {
   });
 }
 
-/**
- * Hook para cancelar um agendamento
- */
 export function useCancelAppointment() {
   const queryClient = useQueryClient();
 
@@ -139,9 +118,6 @@ export function useCancelAppointment() {
   });
 }
 
-/**
- * Hook para atualizar apenas o status de um agendamento
- */
 export function useUpdateAppointmentStatus() {
   const queryClient = useQueryClient();
 

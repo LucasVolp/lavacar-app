@@ -24,6 +24,7 @@ import {
   timeToMinutes,
   setTimeOnDate,
   WEEKDAY_MAP,
+  DEFAULT_TIMEZONE,
 } from "@/utils/dateUtils";
 
 interface TimeSlot {
@@ -128,6 +129,7 @@ export function DateTimePicker({
       // Verifica antecedência mínima (comparação em minutos para evitar problemas de timezone)
       const slotDateTime = setTimeOnDate(selectedDate, time);
       const nowUtc = new Date();
+      nowUtc.setSeconds(0, 0); // Ignora segundos para evitar bloqueio por frações de tempo
       const minAllowedTime = addMinutes(nowUtc, minAdvanceMinutes);
       const tooSoon = slotDateTime.getTime() < minAllowedTime.getTime();
 
@@ -270,6 +272,10 @@ export function DateTimePicker({
             {selectedDate
               ? `Disponibilidade para ${formatDayMonth(selectedDate)}`
               : "Selecione uma data para ver os horários"}
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-600 mt-1 flex items-center gap-1">
+             <ClockCircleOutlined className="text-[10px]" />
+             Fuso horário: {(DEFAULT_TIMEZONE as string) === 'America/Sao_Paulo' ? 'Horário de Brasília' : DEFAULT_TIMEZONE}
           </p>
         </div>
 

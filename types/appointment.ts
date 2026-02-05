@@ -1,11 +1,15 @@
 import { Shop } from './shop';
 import { Vehicle } from './vehicle';
+import { User } from './user';
+import { Checklist } from './checklist';
+
+export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
 
 export interface Appointment {
     id: string;
     scheduledAt: string;
     endTime: string;
-    status: 'PENDING' | 'CONFIRMED' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
+    status: AppointmentStatus;
     totalPrice: string;
     totalDuration: number;
     notes?: string;
@@ -15,9 +19,10 @@ export interface Appointment {
     shopId: string;
     vehicleId: string;
 
-    // Relations
     shop?: Shop;
     vehicle?: Vehicle;
+    user?: User;
+    checklist?: Checklist;
 
     services: AppointmentService[];
 

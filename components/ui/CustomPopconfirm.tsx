@@ -19,10 +19,10 @@ export const CustomPopconfirm: React.FC<PopconfirmProps> = (props) => {
       }}
       // Force text colors for dark background
       title={
-        <span style={{ color: '#fafafa' }}>{props.title}</span>
+        <span style={{ color: '#fafafa' }}>{props.title as React.ReactNode}</span>
       }
       description={props.description ? (
-        <span style={{ color: '#a1a1aa' }}>{props.description}</span>
+        <span style={{ color: '#a1a1aa' }}>{props.description as React.ReactNode}</span>
       ) : undefined}
     >
       {props.children}

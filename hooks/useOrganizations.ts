@@ -79,3 +79,18 @@ export function useDeleteOrganizationMember() {
     },
   });
 }
+
+/**
+ * Hook para criar uma organização
+ */
+export function useCreateOrganization() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: { name: string; document?: string; logoUrl?: string; ownerId: string }) =>
+      organizationService.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+    },
+  });
+}

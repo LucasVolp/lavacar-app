@@ -1,47 +1,37 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { serviceService } from "@/services/service";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { serviceService, ServiceFilters } from "@/services/service";
 import { CreateServicePayload, UpdateServicePayload } from "@/types/services";
 
-// Query Keys
 export const serviceKeys = {
   all: ["services"] as const,
   lists: () => [...serviceKeys.all, "list"] as const,
-  list: (filters: Record<string, unknown>) => [...serviceKeys.lists(), filters] as const,
-  byShop: (shopId: string) => [...serviceKeys.lists(), { shopId }] as const,
+  list: (filters: ServiceFilters) => [...serviceKeys.lists(), filters] as const,
+  byShop: (shopId: string, filters?: object) => [...serviceKeys.lists(), { shopId, ...filters }] as const,
   details: () => [...serviceKeys.all, "detail"] as const,
   detail: (id: string) => [...serviceKeys.details(), id] as const,
 };
 
-/**
- * Hook para buscar todos os serviços
- */
-export function useServices(enabled = true) {
+export function useServices(filters: ServiceFilters = {}, enabled = true) {
   return useQuery({
-    queryKey: serviceKeys.lists(),
-    queryFn: () => serviceService.findAll(),
+    queryKey: serviceKeys.list(filters),
+    queryFn: () => serviceService.findAll(filters),
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
-/**
- * Hook para buscar serviços de uma loja específica (todos, ativos e inativos)
- */
-export function useServicesByShop(shopId: string | null, enabled = true) {
+export function useServicesByShop(shopId: string | null, filters: Omit<ServiceFilters, 'shopId'> = {}, enabled = true) {
+  const queryFilters = { ...filters, shopId: shopId! };
   return useQuery({
-    queryKey: serviceKeys.byShop(shopId || ""),
-    queryFn: async () => {
-      const allServices = await serviceService.findAll();
-      return allServices.filter((service) => service.shopId === shopId);
-    },
+    queryKey: serviceKeys.byShop(shopId || "", filters),
+    queryFn: () => serviceService.findAll(queryFilters),
     enabled: enabled && !!shopId,
     staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
-/**
- * Hook para buscar um serviço específico
- */
 export function useService(id: string | null, enabled = true) {
   return useQuery({
     queryKey: serviceKeys.detail(id || ""),
@@ -50,9 +40,6 @@ export function useService(id: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para criar um serviço
- */
 export function useCreateService() {
   const queryClient = useQueryClient();
 
@@ -64,9 +51,6 @@ export function useCreateService() {
   });
 }
 
-/**
- * Hook para atualizar um serviço
- */
 export function useUpdateService() {
   const queryClient = useQueryClient();
 
@@ -79,9 +63,6 @@ export function useUpdateService() {
   });
 }
 
-/**
- * Hook para deletar um serviço
- */
 export function useDeleteService() {
   const queryClient = useQueryClient();
 

@@ -1,8 +1,18 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { Services, CreateServicePayload, UpdateServicePayload } from '../types/services';
+import { PaginatedResult } from '@/types/pagination';
 
 const base = '/service';
+
+export interface ServiceFilters {
+  shopId?: string;
+  groupId?: string;
+  search?: string;
+  isActive?: boolean;
+  page?: number;
+  perPage?: number;
+}
 
 export const serviceService = {
   create: async (payload: CreateServicePayload) => {
@@ -21,10 +31,18 @@ export const serviceService = {
     }
   },
 
-  findAll: async () => {
+  findAll: async (filters?: ServiceFilters): Promise<PaginatedResult<Services>> => {
     try {
-      const response: AxiosResponse<Services[]> = await axiosInstance.get(base);
-      return response.data || [];
+      const params = new URLSearchParams();
+      if (filters) {
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
+      const response: AxiosResponse<PaginatedResult<Services>> = await axiosInstance.get(base, { params });
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;

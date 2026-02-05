@@ -191,7 +191,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       </Sider>
 
       {/* Main Content Area */}
-      <Layout style={{ marginLeft: collapsed ? 80 : 260, transition: "margin-left 0.2s" }}>
+      <Layout style={{ transition: "margin-left 0.2s" }}>
         {/* Header */}
         <AntHeader
           className="flex items-center justify-between px-4 sticky top-0 z-40"

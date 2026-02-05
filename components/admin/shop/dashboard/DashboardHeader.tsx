@@ -17,6 +17,8 @@ interface DashboardHeaderProps {
   revenue: number;
 }
 
+
+
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   shop,
   totalAppointments,
@@ -37,7 +39,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </span>
             </div>
             <Title level={2} className="!text-zinc-900 dark:!text-white !mb-1 !font-bold tracking-tight">
-              Olá! Bem-vindo ao {shop?.name}
+              Olá {}! Bem-vindo ao {shop?.name}
             </Title>
             <Text className="text-zinc-500 dark:text-zinc-400 text-lg">
               {dayjs().format("dddd, DD [de] MMMM [de] YYYY")}

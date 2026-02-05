@@ -14,3 +14,6 @@ export { evaluationService } from "./evaluation";
 
 export { default as axiosInstance } from "./axiosInstance";
 export { organizationMemberService } from "./organization-members";
+export { checklistService } from "./checklist";
+export { salesGoalService } from "./salesGoal";
+export { shopClientService } from "./shopClient";

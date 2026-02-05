@@ -10,17 +10,20 @@ import {
 } from "@ant-design/icons";
 import { Button } from "antd";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Shop, SHOP_STATUS_MAP } from "@/types/shop";
 
 interface ShopsGridProps {
   shops: Shop[];
-  onCreateShop: () => void;
+  onCreateShop?: () => void;
+  createHref?: string;
   searchTerm?: string;
 }
 
 export const ShopsGrid: React.FC<ShopsGridProps> = ({
   shops,
   onCreateShop,
+  createHref,
   searchTerm,
 }) => {
   const router = useRouter();
@@ -40,14 +43,26 @@ export const ShopsGrid: React.FC<ShopsGridProps> = ({
             : "Adicione seu primeiro estabelecimento para começar."}
         </p>
         {!searchTerm && (
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            onClick={onCreateShop}
-          >
-            Adicionar Primeiro Shop
-          </Button>
+          createHref ? (
+            <Link href={createHref}>
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlusOutlined />}
+              >
+                Adicionar Primeiro Shop
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              type="primary"
+              size="large"
+              icon={<PlusOutlined />}
+              onClick={onCreateShop}
+            >
+              Adicionar Primeiro Shop
+            </Button>
+          )
         )}
       </div>
     );
@@ -96,11 +111,13 @@ export const ShopsGrid: React.FC<ShopsGridProps> = ({
               </div>
 
               <div className="mt-auto grid grid-cols-2 gap-3">
-                <button className="flex items-center justify-center gap-2 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-sm font-medium">
+                <button className="flex items-center justify-center gap-2 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-sm font-medium"
+                  onClick={() => router.push(`/admin/shop/${shop.id}/settings`)}
+                >
                   <SettingOutlined /> Configurar
                 </button>
                 <button
-                  onClick={() => router.push(`/shop/${shop.id}`)}
+                  onClick={() => router.push(`/admin/shop/${shop.id}`)}
                   className="flex items-center justify-center gap-2 p-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-colors text-sm font-medium shadow-lg shadow-indigo-900/20"
                 >
                   Gerenciar <ArrowRightOutlined />

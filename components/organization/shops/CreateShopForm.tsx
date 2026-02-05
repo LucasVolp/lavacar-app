@@ -6,6 +6,8 @@ import { Form, Input, Button, Card, Row, Col, InputNumber, message } from "antd"
 import { SaveOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useCreateShop } from "@/hooks/shop/useCreateShop";
 import { CreateShopDto } from "@/types/shop";
+import { formatDocument, generateSlug } from "@/utils/formatters";
+import { validateDocument } from "@/utils/validators";
 
 interface CreateShopFormProps {
   organizationId: string;
@@ -34,18 +36,14 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
   const [form] = Form.useForm<CreateShopDto>();
   const createShop = useCreateShop();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slugTouched, setSlugTouched] = useState(false);
 
   const handleFinish = async (values: CreateShopDto) => {
     setIsSubmitting(true);
     try {
-      let slug = values.slug;
-      if (!slug && values.name) {
-        slug = values.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-      }
-
       const payload: CreateShopDto = {
         ...values,
-        slug,
+        document: values.document?.replace(/\D/g, ''), // Remove formatting before sending
         organizationId,
         ownerId,
       };
@@ -65,11 +63,21 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
-    if (!form.getFieldValue("slug")) {
-        const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (!slugTouched) {
+        const slug = generateSlug(name);
         form.setFieldsValue({ slug });
     }
   };
+
+  const handleSlugChange = () => {
+    setSlugTouched(true);
+  };
+
+  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatDocument(e.target.value);
+    form.setFieldsValue({ document: formatted });
+  };
+
 
   return (
     <Form
@@ -162,7 +170,8 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
                 <Input 
                   size="large" 
                   placeholder="ex: lava-jato-centro" 
-                  className={INPUT_CLASS} 
+                  className={INPUT_CLASS}
+                  onChange={handleSlugChange}
                 />
               </Form.Item>
             </Col>
@@ -189,8 +198,23 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
               <Form.Item
                 name="document"
                 label={<FormLabel>CNPJ / CPF</FormLabel>}
+                rules={[
+                  { 
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      if (validateDocument(value)) return Promise.resolve();
+                      return Promise.reject(new Error("CPF ou CNPJ inválido"));
+                    }
+                  }
+                ]}
               >
-                <Input size="large" placeholder="00.000.000/0000-00" className={INPUT_CLASS} />
+                <Input 
+                  size="large" 
+                  placeholder="00.000.000/0000-00" 
+                  className={INPUT_CLASS} 
+                  maxLength={18}
+                  onChange={handleDocumentChange}
+                />
               </Form.Item>
             </Col>
 
@@ -345,6 +369,27 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
            </Col>
          </Row>
       </Card>
+      </div>
+
+      {/* --- FOOTER ACTIONS --- */}
+      <div className="flex justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <Button 
+          size="large" 
+          onClick={() => router.back()}
+          className="text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+        >
+          Cancelar
+        </Button>
+        <Button 
+          type="primary" 
+          htmlType="submit" 
+          size="large"
+          loading={isSubmitting}
+          icon={<SaveOutlined />}
+          className="bg-zinc-900 dark:bg-indigo-600 hover:!bg-zinc-800 dark:hover:!bg-indigo-500 shadow-xl shadow-black/10 dark:shadow-indigo-900/20 border-0"
+        >
+          Criar Loja
+        </Button>
       </div>
     </Form>
   );

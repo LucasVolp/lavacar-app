@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
-import { Appointment } from '../types/appointment';
+import { Appointment, AppointmentStatus } from '../types/appointment';
+import { PaginatedResult } from '@/types/pagination';
 
 const base = '/appointments';
 
@@ -21,6 +22,16 @@ export interface CreateAppointmentRequest {
   }[];
 }
 
+export interface AppointmentFilters {
+  shopId?: string;
+  userId?: string;
+  status?: AppointmentStatus;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  perPage?: number;
+}
+
 export const appointmentService = {
   create: async (payload: CreateAppointmentRequest) => {
     try {
@@ -38,12 +49,18 @@ export const appointmentService = {
     }
   },
 
-  findAll: async (filters?: Record<string, string | number | boolean | undefined>) => {
+  findAll: async (filters?: AppointmentFilters): Promise<PaginatedResult<Appointment>> => {
     try {
       const params = new URLSearchParams();
-      if (filters) Object.entries(filters).forEach(([k, v]) => v !== undefined && params.append(k, String(v)));
-      const response: AxiosResponse<Appointment[]> = await axiosInstance.get(base, { params });
-      return response.data || [];
+      if (filters) {
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
+      const response: AxiosResponse<PaginatedResult<Appointment>> = await axiosInstance.get(base, { params });
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;

@@ -20,7 +20,10 @@ import {
   HomeOutlined,
   ShopOutlined,
   ArrowLeftOutlined,
-  LineChartOutlined
+  LineChartOutlined,
+  StarOutlined,
+  DollarOutlined,
+  ContactsOutlined
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -88,6 +91,11 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           label: <span className="font-medium">Agendamentos</span>,
         },
         {
+          key: `/admin/shop/${shopId}/clients`,
+          icon: <ContactsOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
+          label: <span className="font-medium">Clientes</span>,
+        },
+        {
           key: `/admin/shop/${shopId}/services`,
           icon: <ToolOutlined style={{ fontSize: "18px", color: "#10b981" }} />,
           label: <span className="font-medium">Serviços</span>,
@@ -123,20 +131,30 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
     },
     { type: "divider", style: { margin: "12px 0" } },
     {
-        key: "analytics-group",
-        type: "group",
-        label: collapsed ? null : (
-          <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
-            Análise
-          </span>
-        ),
-        children: [
-            {
-                key: `/admin/shop/${shopId}/insights`,
-                icon: <LineChartOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
-                label: <span className="font-medium">Insights</span>,
-            },
-        ]
+      key: "analytics-group",
+      type: "group",
+      label: collapsed ? null : (
+        <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
+          Análise
+        </span>
+      ),
+      children: [
+        {
+            key: `/admin/shop/${shopId}/evaluations`,
+            icon: <StarOutlined style={{ fontSize: "18px", color: "#eab308" }} />,
+            label: <span className="font-medium">Avaliações</span>,
+        },
+        {
+            key: `/admin/shop/${shopId}/insights`,
+            icon: <LineChartOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
+            label: <span className="font-medium">Insights</span>,
+        },
+      ]
+    },
+    {
+      key: `/admin/shop/${shopId}/sales-goals`,
+      icon: <DollarOutlined  style={{fontSize: "18px", color: "#08e400"}}/>,
+      label: <span className="font-medium">Metas de Vendas</span>,
     },
     {
       key: `/admin/shop/${shopId}/settings`,

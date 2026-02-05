@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Spin, message } from "antd";
+import React, { useState } from "react";
+import { Spin, message, Pagination } from "antd";
 import {
   ClockCircleOutlined,
   CheckCircleOutlined,
@@ -10,8 +10,8 @@ import {
   CarOutlined,
 } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
-import { useAppointments, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
-import { Appointment } from "@/types/appointment";
+import { useShopAppointments, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
+import { Appointment, AppointmentStatus } from "@/types/appointment";
 import dayjs from "dayjs";
 import { AppointmentsHeader } from "@/components/admin/shop/appointments/AppointmentsHeader";
 import { AppointmentsStats } from "@/components/admin/shop/appointments/AppointmentsStats";
@@ -25,69 +25,65 @@ type DateRange = [dayjs.Dayjs | null, dayjs.Dayjs | null] | null;
 
 export default function AppointmentsListPage() {
   const { shopId } = useShopAdmin();
-  const { data: appointments = [], isLoading, refetch } = useAppointments({ shopId }, !!shopId);
   const updateStatus = useUpdateAppointmentStatus();
 
   const [dateRange, setDateRange] = useState<DateRange>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | null>(null);
   const [viewMode, setViewMode] = useState<"all" | "today" | "upcoming">("all");
   const [viewType, setViewType] = useState<ViewType>("calendar");
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
 
   const today = dayjs().startOf("day");
 
-  const filteredAppointments = useMemo(() => {
-    let filtered = [...appointments];
-
+  const getDateFilters = () => {
     if (viewMode === "today") {
-      filtered = filtered.filter((apt) => dayjs(apt.scheduledAt).isSame(today, "day"));
-    } else if (viewMode === "upcoming") {
-      filtered = filtered.filter((apt) => dayjs(apt.scheduledAt).isAfter(today));
+      return {
+        startDate: today.format("YYYY-MM-DD"),
+        endDate: today.format("YYYY-MM-DD"),
+      };
     }
-
+    if (viewMode === "upcoming") {
+      return {
+        startDate: today.format("YYYY-MM-DD"),
+      };
+    }
     if (dateRange && dateRange[0] && dateRange[1]) {
-      filtered = filtered.filter((apt) => {
-        const date = dayjs(apt.scheduledAt);
-        return date.isAfter(dateRange[0]!.startOf("day")) && date.isBefore(dateRange[1]!.endOf("day"));
-      });
+      return {
+        startDate: dateRange[0].format("YYYY-MM-DD"),
+        endDate: dateRange[1].format("YYYY-MM-DD"),
+      };
     }
+    return {};
+  };
 
-    if (statusFilter) {
-      filtered = filtered.filter((apt) => apt.status === statusFilter);
-    }
+  const filters = {
+    ...getDateFilters(),
+    status: statusFilter || undefined,
+    page,
+    perPage,
+  };
 
-    if (searchText) {
-      const search = searchText.toLowerCase();
-      filtered = filtered.filter(
-        (apt) =>
-          apt.services.some((s) => s.serviceName.toLowerCase().includes(search)) ||
-          apt.id.toLowerCase().includes(search)
-      );
-    }
+  const { data: appointmentsData, isLoading, refetch } = useShopAppointments(shopId, filters, !!shopId);
 
-    return filtered.sort((a, b) => dayjs(b.scheduledAt).unix() - dayjs(a.scheduledAt).unix());
-  }, [appointments, dateRange, statusFilter, searchText, viewMode, today]);
+  const appointments = appointmentsData?.data ?? [];
+  const meta = appointmentsData?.meta;
 
-  const stats = useMemo(() => {
-    const data = filteredAppointments;
-    const todayData = appointments.filter((a) => dayjs(a.scheduledAt).isSame(today, "day"));
-
-    return {
-      total: data.length,
-      todayTotal: todayData.length,
-      pending: data.filter((a) => a.status === "PENDING").length,
-      confirmed: data.filter((a) => a.status === "CONFIRMED" || a.status === "WAITING").length,
-      inProgress: data.filter((a) => a.status === "IN_PROGRESS").length,
-      completed: data.filter((a) => a.status === "COMPLETED").length,
-      canceled: data.filter((a) => a.status === "CANCELED" || a.status === "NO_SHOW").length,
-      revenue: data
-        .filter((a) => a.status === "COMPLETED")
-        .reduce((acc, a) => acc + parseFloat(a.totalPrice), 0),
-    };
-  }, [appointments, filteredAppointments, today]);
+  const stats = {
+    total: meta?.total ?? 0,
+    todayTotal: appointments.filter((a) => dayjs(a.scheduledAt).isSame(today, "day")).length,
+    pending: appointments.filter((a) => a.status === "PENDING").length,
+    confirmed: appointments.filter((a) => a.status === "CONFIRMED" || a.status === "WAITING").length,
+    inProgress: appointments.filter((a) => a.status === "IN_PROGRESS").length,
+    completed: appointments.filter((a) => a.status === "COMPLETED").length,
+    canceled: appointments.filter((a) => a.status === "CANCELED" || a.status === "NO_SHOW").length,
+    revenue: appointments
+      .filter((a) => a.status === "COMPLETED")
+      .reduce((acc, a) => acc + parseFloat(a.totalPrice), 0),
+  };
 
   const statusConfig: Record<string, { color: string; label: string; icon: React.ReactNode; bgColor: string }> = {
     PENDING: { color: "orange", label: "Pendente", icon: <ClockCircleOutlined />, bgColor: "#fff7e6" },
@@ -99,17 +95,14 @@ export default function AppointmentsListPage() {
     NO_SHOW: { color: "default", label: "Não Compareceu", icon: <ExclamationCircleOutlined />, bgColor: "#fafafa" },
   };
 
-  const appointmentsByDate = useMemo(() => {
-    const map: Record<string, Appointment[]> = {};
-    appointments.forEach((apt) => {
-      const dateKey = dayjs(apt.scheduledAt).format("YYYY-MM-DD");
-      if (!map[dateKey]) {
-        map[dateKey] = [];
-      }
-      map[dateKey].push(apt);
-    });
+  const appointmentsByDate = appointments.reduce<Record<string, Appointment[]>>((map, apt) => {
+    const dateKey = dayjs(apt.scheduledAt).format("YYYY-MM-DD");
+    if (!map[dateKey]) {
+      map[dateKey] = [];
+    }
+    map[dateKey].push(apt);
     return map;
-  }, [appointments]);
+  }, {});
 
   const handleStatusChange = async (appointmentId: string, newStatus: string, reason?: string) => {
     try {
@@ -155,7 +148,18 @@ export default function AppointmentsListPage() {
     return items;
   };
 
-  if (isLoading) {
+  const handleFilterChange = () => {
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number, newPageSize?: number) => {
+    setPage(newPage);
+    if (newPageSize && newPageSize !== perPage) {
+      setPerPage(newPageSize);
+    }
+  };
+
+  if (isLoading && !appointmentsData) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Spin size="large" tip="Carregando agendamentos..." />
@@ -177,40 +181,54 @@ export default function AppointmentsListPage() {
       {viewType === "table" && (
         <AppointmentsFilters
           viewMode={viewMode}
-          setViewMode={setViewMode}
+          setViewMode={(mode) => { setViewMode(mode); handleFilterChange(); }}
           dateRange={dateRange}
-          setDateRange={setDateRange}
+          setDateRange={(range) => { setDateRange(range); handleFilterChange(); }}
           statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          searchText={searchText}
-          setSearchText={setSearchText}
+          setStatusFilter={(status) => { setStatusFilter(status as AppointmentStatus | null); handleFilterChange(); }}
+          searchText=""
+          setSearchText={() => {}}
           statusConfig={statusConfig}
           onClearFilters={() => {
             setDateRange(null);
             setStatusFilter(null);
-            setSearchText("");
             setViewMode("all");
+            setPage(1);
           }}
         />
       )}
       <div className="animate-fade-in space-y-4">
-      {viewType === "table" ? (
-        <AppointmentsTable
-          appointments={filteredAppointments}
-          shopId={shopId}
-          statusConfig={statusConfig}
-          getStatusActions={getStatusActions}
-          onStatusChange={handleStatusChange}
-          onCancel={openCancelModal}
-        />
-      ) : (
-        <AppointmentsCalendar
-          appointmentsByDate={appointmentsByDate}
-          statusConfig={statusConfig}
-          shopId={shopId}
-        />
-      )}
+        {viewType === "table" ? (
+          <AppointmentsTable
+            appointments={appointments}
+            shopId={shopId}
+            statusConfig={statusConfig}
+            getStatusActions={getStatusActions}
+            onStatusChange={handleStatusChange}
+            onCancel={openCancelModal}
+          />
+        ) : (
+          <AppointmentsCalendar
+            appointmentsByDate={appointmentsByDate}
+            statusConfig={statusConfig}
+            shopId={shopId}
+          />
+        )}
       </div>
+
+      {viewType === "table" && meta && meta.totalPages > 1 && (
+        <div className="flex justify-center pt-4">
+          <Pagination
+            current={page}
+            pageSize={perPage}
+            total={meta.total}
+            onChange={handlePageChange}
+            showSizeChanger
+            showTotal={(total, range) => `${range[0]}-${range[1]} de ${total} agendamentos`}
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
+        </div>
+      )}
 
       <AppointmentCancelModal
         open={cancelModalVisible}

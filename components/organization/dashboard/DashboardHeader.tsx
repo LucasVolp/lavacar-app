@@ -4,6 +4,7 @@ import React from "react";
 import { Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardHeaderProps {
   organizationName: string;
@@ -17,11 +18,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   organizationId,
 }) => {
   const router = useRouter();
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col gap-2">
       <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
-        Visão Geral
+        Olá, {user?.firstName}
       </div>
       <div className="flex justify-between items-end">
         <div>

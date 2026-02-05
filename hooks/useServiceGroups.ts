@@ -1,33 +1,26 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { serviceGroupService } from "@/services/serviceGroup";
-import { ServiceGroup, CreateServiceGroupPayload, UpdateServiceGroupPayload } from "@/types/serviceGroup";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { serviceGroupService, ServiceGroupFilters } from "@/services/serviceGroup";
+import { CreateServiceGroupPayload, UpdateServiceGroupPayload } from "@/types/serviceGroup";
 
-/**
- * Hook para buscar todos os grupos de serviço de um shop
- */
-export function useServiceGroupsByShop(shopId: string | undefined | null) {
-  return useQuery<ServiceGroup[]>({
-    queryKey: ["serviceGroups", shopId],
-    queryFn: () => serviceGroupService.findAll(shopId || undefined),
+export function useServiceGroupsByShop(shopId: string | undefined | null, filters: Omit<ServiceGroupFilters, 'shopId'> = {}) {
+  const queryFilters = { ...filters, shopId: shopId! };
+  return useQuery({
+    queryKey: ["serviceGroups", shopId, filters],
+    queryFn: () => serviceGroupService.findAll(queryFilters),
     enabled: !!shopId,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }
 
-/**
- * Hook para buscar um grupo de serviço por ID
- */
 export function useServiceGroup(id: string | undefined | null) {
-  return useQuery<ServiceGroup>({
+  return useQuery({
     queryKey: ["serviceGroup", id],
     queryFn: () => serviceGroupService.findOne(id!),
     enabled: !!id,
   });
 }
 
-/**
- * Hook para criar um grupo de serviço
- */
 export function useCreateServiceGroup() {
   const queryClient = useQueryClient();
   
@@ -40,9 +33,6 @@ export function useCreateServiceGroup() {
   });
 }
 
-/**
- * Hook para atualizar um grupo de serviço
- */
 export function useUpdateServiceGroup() {
   const queryClient = useQueryClient();
   
@@ -55,9 +45,6 @@ export function useUpdateServiceGroup() {
   });
 }
 
-/**
- * Hook para deletar um grupo de serviço
- */
 export function useDeleteServiceGroup() {
   const queryClient = useQueryClient();
   

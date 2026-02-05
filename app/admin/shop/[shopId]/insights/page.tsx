@@ -15,26 +15,24 @@ import {
   InsightsWeeklyDistribution,
   InsightsTips,
 } from "@/components/admin/shop/insights";
+import { Appointment } from "@/types/appointment";
+import { Services } from "@/types/services";
 
-/**
- * Página de Insights e Analytics
- *
- * Métricas, gráficos e análises de desempenho do estabelecimento
- */
 export default function InsightsPage() {
   const { shop, shopId, isLoading: isLoadingShop } = useShopAdmin();
 
-  const { data: appointments = [], isLoading: isLoadingAppointments } = useAppointments(
-    { shopId },
+  const { data: appointmentsData, isLoading: isLoadingAppointments } = useAppointments(
+    { shopId, perPage: 1000 },
     !!shopId
   );
 
-  const { data: services = [] } = useServicesByShop(shopId);
+  const { data: servicesData } = useServicesByShop(shopId, { perPage: 500 });
 
   const isLoading = isLoadingShop || isLoadingAppointments;
 
-  // Métricas calculadas
   const metrics = useMemo(() => {
+    const appointments: Appointment[] = appointmentsData?.data ?? [];
+    const services: Services[] = servicesData?.data ?? [];
     const today = dayjs().startOf("day");
     const thisWeekStart = dayjs().startOf("week");
     const thisMonthStart = dayjs().startOf("month");
@@ -199,7 +197,7 @@ export default function InsightsPage() {
       totalServices: services.length,
       activeServices: services.filter((s) => s.isActive !== false).length,
     };
-  }, [appointments, services]);
+  }, [appointmentsData, servicesData]);
 
   if (isLoading) {
     return (

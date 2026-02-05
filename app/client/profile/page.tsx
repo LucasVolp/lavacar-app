@@ -139,7 +139,6 @@ export default function ClientProfilePage() {
             />
           </div>
         </Col>
-
         <Col xs={24} lg={10}>
           <ClientNotificationSettingsForm
             settings={notifications}

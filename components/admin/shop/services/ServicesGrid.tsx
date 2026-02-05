@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Row, Col, Card, Empty, Button, Tag, Typography, Tooltip } from "antd";
+import { Row, Col, Card, Empty, Button, Tag, Typography } from "antd";
 import { 
   EditOutlined, 
   DeleteOutlined, 

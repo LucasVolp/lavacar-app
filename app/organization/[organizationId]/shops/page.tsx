@@ -1,27 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useOrganization } from "@/hooks/useOrganizations";
 import { ShopsHeader } from "@/components/organization/shops/ShopsHeader";
 import { ShopsGrid } from "@/components/organization/shops/ShopsGrid";
 
-/**
- * Lista de Shops da Organization
- * 
- * Rota: /organization/[organizationId]/shops
- */
 export default function OrganizationShopsPage() {
   const params = useParams();
-  const router = useRouter();
   const organizationId = params?.organizationId as string;
 
   const { data: organization, isLoading } = useOrganization(organizationId);
   const [searchTerm, setSearchTerm] = useState("");
-
-  const handleCreateShop = () => {
-    router.push(`/organization/${organizationId}/shops/new`);
-  };
 
   if (isLoading) {
     return (
@@ -50,13 +40,13 @@ export default function OrganizationShopsPage() {
       <ShopsHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        onCreateShop={handleCreateShop}
+        createHref={`/organization/${organizationId}/shops/new`}
       />
 
       <ShopsGrid 
         shops={filteredShops} 
         searchTerm={searchTerm}
-        onCreateShop={handleCreateShop}
+        createHref={`/organization/${organizationId}/shops/new`}
       />
     </div>
   );

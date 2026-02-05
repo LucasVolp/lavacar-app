@@ -3,3 +3,4 @@ export * from "./DashboardStats";
 export * from "./UpcomingAppointments";
 export * from "./PerformanceCard";
 export * from "./QuickActionsCard";
+export * from "./SalesGoalWidget";

@@ -1,8 +1,16 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { Evaluation } from '../types/evaluation';
+import { PaginatedResult } from '@/types/pagination';
 
 const base = '/evaluations';
+
+export interface EvaluationFilters {
+  shopId?: string;
+  rating?: number;
+  page?: number;
+  perPage?: number;
+}
 
 export const evaluationService = {
   create: async (payload: Partial<Evaluation>) => {
@@ -21,12 +29,18 @@ export const evaluationService = {
     }
   },
 
-  findAll: async (shopId?: string) => {
+  findAll: async (filters?: EvaluationFilters): Promise<PaginatedResult<Evaluation>> => {
     try {
       const params = new URLSearchParams();
-      if (shopId) params.append('shopId', shopId);
-      const response: AxiosResponse<Evaluation[]> = await axiosInstance.get(base, { params });
-      return response.data || [];
+      if (filters) {
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
+      const response: AxiosResponse<PaginatedResult<Evaluation>> = await axiosInstance.get(base, { params });
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;

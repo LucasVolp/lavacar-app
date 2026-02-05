@@ -1,4 +1,7 @@
+"use client";
+
 import { ClientLayout } from "@/components/layout";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 import type React from "react";
 
 export default function ClientLayoutWrapper({
@@ -6,5 +9,9 @@ export default function ClientLayoutWrapper({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <ClientLayout>{children}</ClientLayout>;
+  return (
+    <RequireAuth>
+      <ClientLayout>{children}</ClientLayout>
+    </RequireAuth>
+  );
 }

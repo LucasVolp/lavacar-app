@@ -52,75 +52,78 @@ export const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({
   };
 
   return (
-    <Card className="border-base-200">
-      <div className="flex items-center gap-2 mb-4">
-        <UserOutlined className="text-info" />
-        <Title level={5} className="!mb-0">
-          Informações Pessoais
-        </Title>
-      </div>
-
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={initialValues}
-        onValuesChange={handleValuesChange}
-      >
-        {/* Avatar Upload */}
-        <div className="flex justify-center mb-6">
-          <div className="relative">
-            <Avatar
-              size={100}
-              icon={<UserOutlined />}
-              src={initialValues?.avatarUrl}
-              className="bg-info"
-            />
-            <Upload showUploadList={false} accept="image/*">
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<CameraOutlined />}
-                size="small"
-                className="absolute bottom-0 right-0"
-              />
-            </Upload>
-          </div>
+    <div className="space-y-4">
+      <Card className="border-base-200 space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <UserOutlined className="text-info" />
+          <Title level={5} className="!mb-0">
+            Informações Pessoais
+          </Title>
         </div>
 
-        <Form.Item
-          name="name"
-          label="Nome Completo"
-          rules={[{ required: true, message: "Informe seu nome" }]}
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={initialValues}
+          onValuesChange={handleValuesChange}
         >
-          <Input placeholder="Seu nome completo" />
-        </Form.Item>
+          {/* Avatar Upload */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <Avatar
+                size={100}
+                icon={<UserOutlined />}
+                src={initialValues?.avatarUrl}
+                className="bg-info"
+              />
+              <Upload showUploadList={false} accept="image/*">
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<CameraOutlined />}
+                  size="small"
+                  className="absolute bottom-0 right-0"
+                />
+              </Upload>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Form.Item
-            name="email"
-            label="E-mail"
-            rules={[
-              { required: true, message: "Informe seu e-mail" },
-              { type: "email", message: "E-mail inválido" },
-            ]}
+            name="name"
+            label="Nome Completo"
+            rules={[{ required: true, message: "Informe seu nome" }]}
           >
-            <Input placeholder="seu@email.com" type="email" />
+            <Input placeholder="Seu nome completo" />
           </Form.Item>
 
-          <Form.Item
-            name="phone"
-            label="Telefone/WhatsApp"
-            rules={[{ required: true, message: "Informe seu telefone" }]}
-          >
-            <Input placeholder="(11) 99999-9999" />
-          </Form.Item>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Form.Item
+              name="email"
+              label="E-mail"
+              rules={[
+                { required: true, message: "Informe seu e-mail" },
+                { type: "email", message: "E-mail inválido" },
+              ]}
+            >
+              <Input placeholder="seu@email.com" type="email" />
+            </Form.Item>
 
-        <Form.Item name="cpf" label="CPF">
-          <Input placeholder="000.000.000-00" onChange={handleCpfChange} maxLength={14} />
-        </Form.Item>
-      </Form>
-    </Card>
+            <Form.Item
+              name="phone"
+              label="Telefone/WhatsApp"
+              rules={[{ required: true, message: "Informe seu telefone" }]}
+            >
+              <Input placeholder="(11) 99999-9999" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="cpf" label="CPF">
+            <Input placeholder="000.000.000-00" onChange={handleCpfChange} maxLength={14} />
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
+
   );
 };
 

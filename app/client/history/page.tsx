@@ -10,13 +10,13 @@ import { Appointment } from "@/types/appointment";
 
 export default function HistoryPage() {
   const { user } = useAuth();
-  const { data: appointments = [], isLoading } = useAppointments(
-    { userId: user?.id, status: 'COMPLETED' },
+  const { data: appointmentsData, isLoading } = useAppointments(
+    { userId: user?.id, status: 'COMPLETED', perPage: 100 },
     !!user?.id
   );
 
-  // Filter mainly on client side if API doesn't support multiple status strictly
-  // Note: hooks/types define status as single string, but here we want history (COMPLETED, CANCELED)
+  const appointments: Appointment[] = appointmentsData?.data ?? [];
+
   const historyAppointments = appointments
     .filter(a => ['COMPLETED', 'CANCELED'].includes(a.status))
     .sort((a, b) => dayjs(b.scheduledAt).valueOf() - dayjs(a.scheduledAt).valueOf());

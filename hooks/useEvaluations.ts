@@ -1,18 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { evaluationService } from "@/services/evaluation";
-import { Evaluation } from "@/types/evaluation";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { evaluationService, EvaluationFilters } from "@/services/evaluation";
 
-// Hook para buscar todas as avaliações de um shop
-export function useShopEvaluations(shopId: string | null, enabled = true) {
-  return useQuery<Evaluation[]>({
-    queryKey: ["evaluations", "shop", shopId],
-    queryFn: () => evaluationService.findAll(shopId!),
+export function useShopEvaluations(shopId: string | null, filters: Omit<EvaluationFilters, 'shopId'> = {}, enabled = true) {
+  const queryFilters = { ...filters, shopId: shopId! };
+  return useQuery({
+    queryKey: ["evaluations", "shop", shopId, filters],
+    queryFn: () => evaluationService.findAll(queryFilters),
     enabled: enabled && !!shopId,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 }
 
-// Hook para buscar estatísticas de avaliações do shop
 export function useShopEvaluationStats(shopId: string | null, enabled = true) {
   return useQuery<{
     averageRating: number;
@@ -26,26 +25,22 @@ export function useShopEvaluationStats(shopId: string | null, enabled = true) {
   });
 }
 
-// Hook para buscar avaliações curadas (melhores avaliações para exibição)
 export function useCuratedReviews(
   shopId: string | null,
   limit = 5,
   enabled = true
 ) {
-  const { data: evaluations = [], ...rest } = useShopEvaluations(shopId, enabled);
+  const { data: evaluationsData, ...rest } = useShopEvaluations(shopId, {}, enabled);
+  const evaluations = evaluationsData?.data ?? [];
 
-  // Filtra e ordena as avaliações para exibição curada
   const curatedReviews = evaluations
-    // Filtrar apenas avaliações com nota >= 4
     .filter((e) => e.rating >= 4)
-    // Ordenar por rating (maior primeiro), depois por data (mais recente)
     .sort((a, b) => {
       if (b.rating !== a.rating) {
         return b.rating - a.rating;
       }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     })
-    // Limitar quantidade
     .slice(0, limit);
 
   return {
@@ -55,9 +50,9 @@ export function useCuratedReviews(
   };
 }
 
-// Calcula a média e total de avaliações
 export function useEvaluationSummary(shopId: string | null, enabled = true) {
-  const { data: evaluations = [], ...rest } = useShopEvaluations(shopId, enabled);
+  const { data: evaluationsData, ...rest } = useShopEvaluations(shopId, {}, enabled);
+  const evaluations = evaluationsData?.data ?? [];
 
   const summary = {
     averageRating:
@@ -78,4 +73,15 @@ export function useEvaluationSummary(shopId: string | null, enabled = true) {
     ...rest,
     data: summary,
   };
+}
+
+export function useDeleteEvaluation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => evaluationService.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+    },
+  });
 }

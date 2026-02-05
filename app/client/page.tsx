@@ -14,6 +14,7 @@ import {
 } from "@/components/client/dashboard";
 import dayjs from "dayjs";
 import { Vehicle as UserVehicle } from "@/types/vehicle";
+import { Appointment } from "@/types/appointment";
 
 export default function ClientDashboard() {
   const { user } = useAuth();
@@ -26,16 +27,20 @@ export default function ClientDashboard() {
     !!user?.id
   );
 
-  const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments(
-    { userId: user?.id },
+  const { data: appointmentsData, isLoading: appointmentsLoading } = useAppointments(
+    { userId: user?.id, perPage: 100 },
     !!user?.id
   );
 
   const updateStatus = useUpdateAppointmentStatus();
   const cancelAppointment = useCancelAppointment();
 
+  const allAppointments = useMemo((): Appointment[] => {
+    return appointmentsData?.data ?? [];
+  }, [appointmentsData]);
+
   const upcomingAppointments = useMemo(() => {
-    return appointments
+    return allAppointments
       .filter(a => ['PENDING', 'CONFIRMED'].includes(a.status))
       .filter(a => dayjs(a.scheduledAt).isAfter(dayjs()))
       .sort((a, b) => dayjs(a.scheduledAt).valueOf() - dayjs(b.scheduledAt).valueOf())
@@ -51,7 +56,7 @@ export default function ClientDashboard() {
         time: dayjs(app.scheduledAt).format('HH:mm'),
         status: app.status,
       }));
-  }, [appointments]);
+  }, [allAppointments]);
 
 /*
   const history = useMemo(() => {
@@ -144,8 +149,8 @@ export default function ClientDashboard() {
 
       <ClientStats
         vehiclesCount={vehicles.length}
-        upcomingAppointments={appointments.filter(a => ['PENDING', 'CONFIRMED'].includes(a.status)).length}
-        totalVisits={appointments.filter(a => a.status === 'COMPLETED').length}
+        upcomingAppointments={allAppointments.filter(a => ['PENDING', 'CONFIRMED'].includes(a.status)).length}
+        totalVisits={allAppointments.filter(a => a.status === 'COMPLETED').length}
       />
 
       <Row gutter={[24, 24]}>

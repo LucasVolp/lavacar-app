@@ -1,8 +1,15 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { ServiceGroup } from '../types/serviceGroup';
+import { PaginatedResult } from '@/types/pagination';
 
 const base = '/service-groups';
+
+export interface ServiceGroupFilters {
+  shopId?: string;
+  page?: number;
+  perPage?: number;
+}
 
 export const serviceGroupService = {
   create: async (payload: Partial<ServiceGroup>) => {
@@ -21,12 +28,18 @@ export const serviceGroupService = {
     }
   },
 
-  findAll: async (shopId?: string) => {
+  findAll: async (filters?: ServiceGroupFilters): Promise<PaginatedResult<ServiceGroup>> => {
     try {
       const params = new URLSearchParams();
-      if (shopId) params.append('shopId', shopId);
-      const response: AxiosResponse<ServiceGroup[]> = await axiosInstance.get(base, { params });
-      return response.data || [];
+      if (filters) {
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
+      const response: AxiosResponse<PaginatedResult<ServiceGroup>> = await axiosInstance.get(base, { params });
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
