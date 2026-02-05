@@ -24,19 +24,19 @@ export const AppointmentDetailHeader: React.FC<AppointmentDetailHeaderProps> = (
           type="text"
           icon={<LeftOutlined />}
           onClick={onBack}
-          className="hover:bg-slate-100 -ml-2 sm:ml-0"
+          className="hover:bg-slate-100 dark:hover:bg-zinc-800 dark:text-zinc-300 -ml-2 sm:ml-0"
         />
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 m-0 leading-tight">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 m-0 leading-tight">
             Detalhes do Atendimento
           </h1>
-          <Text type="secondary" className="text-xs">
+          <Text type="secondary" className="text-xs dark:text-zinc-400">
             Visualização administrativa
           </Text>
         </div>
       </div>
       <div className="flex gap-3">
-        <Button icon={<PrinterOutlined />} onClick={onPrint}>Imprimir</Button>
+        <Button icon={<PrinterOutlined />} onClick={onPrint} className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-white">Imprimir</Button>
         {!isCanceled && (
           <Button danger onClick={onCancel}>
             Cancelar

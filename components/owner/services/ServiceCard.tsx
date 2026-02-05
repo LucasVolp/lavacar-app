@@ -66,11 +66,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <Text strong className="text-lg block">
+            <Text strong className="text-lg block dark:text-zinc-100">
               {service.name}
             </Text>
             {service.description && (
-              <Text type="secondary" className="text-sm line-clamp-2">
+              <Text type="secondary" className="text-sm line-clamp-2 dark:text-zinc-400">
                 {service.description}
               </Text>
             )}
@@ -83,12 +83,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           </Tag>
         </div>
         
-        <div className="flex justify-between items-center pt-3 border-t">
-          <div className="flex items-center gap-1 text-gray-500">
+        <div className="flex justify-between items-center pt-3 border-t dark:border-zinc-800">
+          <div className="flex items-center gap-1 text-gray-500 dark:text-zinc-400">
             <ClockCircleOutlined />
             <span>{service.duration} min</span>
           </div>
-          <Text strong className="text-xl text-green-600">
+          <Text strong className="text-xl text-green-600 dark:text-green-400">
             R$ {parseFloat(service.price).toFixed(2)}
           </Text>
         </div>

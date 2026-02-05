@@ -55,7 +55,7 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-sm border-slate-200 rounded-2xl">
+      <Card className="shadow-sm border-slate-200 dark:border-zinc-800 rounded-2xl dark:bg-zinc-900" bordered={false}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <span className="text-xs text-slate-400 uppercase font-bold tracking-wider block mb-1">Status Atual</span>
@@ -73,7 +73,7 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
               size="large" 
               onClick={() => onNextStatus(nextAction.targetStatus)}
               loading={loading}
-              className={nextAction.type === 'primary' ? "bg-slate-900 hover:bg-slate-800" : ""}
+              className={nextAction.type === 'primary' ? "bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:text-black dark:hover:bg-slate-200 border-0" : "dark:bg-zinc-800 dark:text-slate-200 dark:border-zinc-700"}
             >
               {nextAction.label}
             </Button>
@@ -84,7 +84,7 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
           <Steps
             size="small"
             current={currentStatus.stepIndex}
-            className="mb-4"
+            className="mb-4 dark:text-slate-400"
             items={[
               { title: "Pendente" },
               { title: "Confirmado" },
@@ -94,12 +94,12 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
             ]}
           />
         ) : (
-          <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex gap-4">
-            <CloseCircleOutlined className="text-2xl text-red-500 mt-1" />
+          <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30 flex gap-4">
+            <CloseCircleOutlined className="text-2xl text-red-500 dark:text-red-400 mt-1" />
             <div>
-              <h4 className="font-bold text-red-700 m-0">Agendamento Cancelado</h4>
+              <h4 className="font-bold text-red-700 dark:text-red-400 m-0">Agendamento Cancelado</h4>
               {appointment.cancellationReason && (
-                <p className="text-red-600 m-0 mt-1 text-sm">
+                <p className="text-red-600 dark:text-red-300 m-0 mt-1 text-sm">
                   Motivo: {appointment.cancellationReason}
                 </p>
               )}

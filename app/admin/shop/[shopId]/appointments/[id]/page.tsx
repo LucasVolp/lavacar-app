@@ -2,17 +2,19 @@
 
 import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { 
-  Button, 
-  Empty, 
-  Spin, 
-  Row, 
-  Col, 
-  message,
+import {
+  Button,
+  Empty,
+  Spin,
+  Row,
+  Col,
+  message
 } from "antd";
+import { FileTextOutlined } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useAppointment, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
 import dayjs from "dayjs";
+import { sanitizeText } from "@/lib/security";
 
 // Components
 import { AppointmentDetailHeader } from "@/components/admin/shop/appointments/details/AppointmentDetailHeader";
@@ -123,12 +125,19 @@ export default function AppointmentDetailPage() {
                 <AppointmentServicesList services={appointment.services} />
 
 
-            {/* Observations Card (can be componentized if reused, but simple enough here) */}
+            {/* Observations Card */}
             {appointment.notes && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                    <h4 className="text-amber-800 font-bold mb-2">Observações</h4>
-                    <p className="text-amber-900 m-0 leading-relaxed">{appointment.notes}</p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileTextOutlined className="text-amber-600 dark:text-amber-400" />
+                  <h4 className="text-amber-800 dark:text-amber-300 font-bold m-0">
+                    Observações
+                  </h4>
                 </div>
+                <p className="text-amber-900 dark:text-amber-200/90 m-0 leading-relaxed whitespace-pre-wrap">
+                  {sanitizeText(appointment.notes)}
+                </p>
+              </div>
             )}
           </div>
         </Col>

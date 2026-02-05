@@ -23,8 +23,10 @@ export const usersService = {
 
   findAll: async () => {
     try {
-      const response: AxiosResponse<User[]> = await axiosInstance.get(base);
-      return response.data || [];
+      const response: AxiosResponse<{ data: User[]; meta: { total: number } }> = await axiosInstance.get(base, {
+        params: { perPage: 100 }
+      });
+      return response.data?.data || [];
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;

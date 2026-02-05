@@ -1,19 +1,21 @@
 "use client";
 
-import React from "react";
-import { Typography, Spin, Card, Input } from "antd";
-import { TeamOutlined, SearchOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Typography, Spin, Card, Input, Button } from "antd";
+import { TeamOutlined, SearchOutlined, UserAddOutlined } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useOrganizationMembers } from "@/hooks/useOrganizations";
 import { useUsers } from "@/hooks/useUsers";
 import { MembersList, ExtendedMember } from "@/components/organization/members/MembersList";
+import { InviteEmployeeModal } from "@/components/admin/shop/employees";
 
 const { Title, Text } = Typography;
 
 export default function ShopEmployeesPage() {
   const { shop, isLoading: isLoadingShop } = useShopAdmin();
-  const [searchTerm, setSearchTerm] = React.useState("");
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   // Fetch members of the organization that owns this shop
   const { data: members = [], isLoading: isLoadingMembers } = useOrganizationMembers(shop?.organizationId);
   const { data: users = [], isLoading: isLoadingUsers } = useUsers();
@@ -21,7 +23,10 @@ export default function ShopEmployeesPage() {
   const isLoading = isLoadingShop || isLoadingMembers || isLoadingUsers;
 
   const extendedMembers = React.useMemo(() => {
-    return members.map(member => {
+    if (!Array.isArray(members)) return [];
+
+    // Map existing members
+    const mappedMembers = members.map(member => {
       const user = users.find(u => u.id === member.userId);
       return {
         ...member,
@@ -32,6 +37,8 @@ export default function ShopEmployeesPage() {
         } : undefined
       };
     }) as ExtendedMember[];
+
+    return mappedMembers;
   }, [members, users]);
 
   const filteredMembers = extendedMembers.filter(member => {
@@ -63,13 +70,22 @@ export default function ShopEmployeesPage() {
              </Title>
            </div>
            <Text className="text-zinc-500 dark:text-zinc-400 max-w-2xl block mt-2">
-             Gerencie a equipe que tem acesso a este estabelecimento. Os membros são herdados da organização.
+             Gerencie a equipe que tem acesso a este estabelecimento. Convide novos membros ou gerencie as permissões existentes.
            </Text>
         </div>
+        <Button
+          type="primary"
+          size="large"
+          icon={<UserAddOutlined />}
+          onClick={() => setIsInviteModalOpen(true)}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 border-none shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 h-11 px-6 font-medium rounded-xl"
+        >
+          Convidar Funcionário
+        </Button>
       </div>
 
       <div className="space-y-4">
-      <Card bordered={false} className="!rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
+      <Card variant={"outlined"} className="!rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900">
          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
             <Input
               placeholder="Buscar por nome ou email..."
@@ -80,16 +96,21 @@ export default function ShopEmployeesPage() {
               size="large"
               allowClear
             />
-            
-            <div className="flex gap-2">
-               {/* Future: Add Invite Button specific for Shop? Or redirect to Org Members? */}
-               {/* For now, just show the list, maybe a button to go to Org settings */}
+
+            <div className="text-sm text-zinc-500 dark:text-zinc-400">
+              {filteredMembers.length} {filteredMembers.length === 1 ? "membro" : "membros"} encontrado{filteredMembers.length !== 1 && "s"}
             </div>
          </div>
       </Card>
       </div>
-      
+
       <MembersList members={filteredMembers} />
+
+      <InviteEmployeeModal
+        open={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        shopName={shop?.name}
+      />
     </div>
   );
 }

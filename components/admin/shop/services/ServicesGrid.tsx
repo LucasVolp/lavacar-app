@@ -69,22 +69,22 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
             ]}
           >
             <div className="flex justify-between items-start mb-2">
-              <Title level={5} className="!m-0 line-clamp-1" title={service.name}>
+              <Title level={5} className="!m-0 line-clamp-1 dark:text-zinc-100" title={service.name}>
                 {service.name}
               </Title>
               {service.isActive === false && <Tag color="red">Inativo</Tag>}
             </div>
             
-            <Text type="secondary" className="block min-h-[44px] mb-4 line-clamp-2">
+            <Text type="secondary" className="block min-h-[44px] mb-4 line-clamp-2 dark:text-zinc-400">
               {service.description || "Sem descrição"}
             </Text>
             
             <div className="flex justify-between items-center mt-auto">
-              <div className="flex items-center gap-1 text-green-600 font-bold text-lg">
+              <div className="flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-lg">
                 <DollarOutlined />
                 {parseFloat(service.price).toFixed(2)}
               </div>
-              <div className="flex items-center gap-1 text-gray-500">
+              <div className="flex items-center gap-1 text-gray-500 dark:text-zinc-400">
                 <ClockCircleOutlined />
                 {service.duration} min
               </div>

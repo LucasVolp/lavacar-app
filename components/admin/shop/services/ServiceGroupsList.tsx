@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import { 
-  Collapse, 
-  Button, 
-  Badge, 
-  Tag, 
-  Space, 
-  Typography, 
+import {
+  Collapse,
+  Button,
+  Badge,
+  Space,
+  Typography,
   List,
   Switch,
   Empty,
@@ -47,7 +46,7 @@ const ServiceListInGroup: React.FC<ServiceListProps> = ({
   <List
     size="small"
     dataSource={services}
-    locale={{ emptyText: <Text type="secondary" className="text-sm">Nenhum serviço neste grupo</Text> }}
+    locale={{ emptyText: <Text type="secondary" className="text-sm dark:text-zinc-500">Nenhum serviço neste grupo</Text> }}
     renderItem={(service) => (
       <List.Item
         actions={[
@@ -81,18 +80,22 @@ const ServiceListInGroup: React.FC<ServiceListProps> = ({
         <List.Item.Meta
           title={
             <Space>
-              <Text className={service.isActive === false ? "text-gray-400 line-through" : ""}>
+              <Text className={service.isActive === false ? "text-zinc-400 line-through dark:text-zinc-500" : "dark:text-zinc-100"}>
                 {service.name}
               </Text>
-              <Tag color={service.isActive !== false ? "success" : "default"} className="text-xs">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                service.isActive !== false
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+              }`}>
                 {service.isActive !== false ? "Ativo" : "Inativo"}
-              </Tag>
+              </span>
             </Space>
           }
           description={
-            <Space size="middle" className="text-xs">
+            <Space size="middle" className="text-xs dark:text-zinc-400">
               <span><ClockCircleOutlined /> {service.duration} min</span>
-              <span className="text-green-600 font-medium">R$ {parseFloat(service.price).toFixed(2)}</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">R$ {parseFloat(service.price).toFixed(2)}</span>
             </Space>
           }
         />
@@ -159,13 +162,15 @@ export const ServiceGroupsList: React.FC<ServiceGroupsListProps> = ({
               <Space>
                 <FolderOpenOutlined className="text-blue-500" />
                 <Text strong>{group.name}</Text>
-                <Badge 
-                  count={getServicesByGroup(group.id).length} 
-                  style={{ backgroundColor: "#1890ff" }}
+                <Badge
+                  count={getServicesByGroup(group.id).length}
+                  className="[&_.ant-badge-count]:bg-zinc-600 [&_.ant-badge-count]:dark:bg-zinc-500"
                   size="small"
                 />
                 {group.isActive === false && (
-                  <Tag color="default">Inativo</Tag>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                    Inativo
+                  </span>
                 )}
               </Space>
               <Space onClick={(e) => e.stopPropagation()}>
@@ -225,11 +230,11 @@ export const ServiceGroupsList: React.FC<ServiceGroupsListProps> = ({
           label: (
             <div className="flex items-center justify-between w-full pr-4">
               <Space>
-                <FolderOutlined className="text-gray-400" />
+                <FolderOutlined className="text-zinc-400 dark:text-zinc-500" />
                 <Text type="secondary">Sem grupo</Text>
-                <Badge 
-                  count={ungroupedServices.length} 
-                  style={{ backgroundColor: "#8c8c8c" }}
+                <Badge
+                  count={ungroupedServices.length}
+                  className="[&_.ant-badge-count]:bg-zinc-500 [&_.ant-badge-count]:dark:bg-zinc-600"
                   size="small"
                 />
               </Space>

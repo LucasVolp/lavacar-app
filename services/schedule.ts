@@ -23,8 +23,8 @@ export const scheduleService = {
 
   findAll: async () => {
     try {
-      const response: AxiosResponse<Schedule[]> = await axiosInstance.get(base);
-      return response.data || [];
+      const response: AxiosResponse<{ data: Schedule[]; meta: { total: number } }> = await axiosInstance.get(base);
+      return response.data?.data || [];
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
@@ -32,6 +32,24 @@ export const scheduleService = {
         console.error(`Erro ao listar horários (${status || 'desconhecido'}):`, message);
       } else {
         console.error('Erro desconhecido ao listar horários:', error);
+      }
+      throw error;
+    }
+  },
+
+  findByShop: async (shopId: string) => {
+    try {
+      const response: AxiosResponse<{ data: Schedule[]; meta: { total: number } }> = await axiosInstance.get(base, {
+        params: { shopId, perPage: 100 }
+      });
+      return response.data?.data || [];
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao listar horários do shop ${shopId} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao listar horários do shop ${shopId}:`, error);
       }
       throw error;
     }

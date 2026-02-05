@@ -7,8 +7,10 @@ const base = '/organization-members';
 export const organizationMemberService = {
   findByOrganizationId: async (organizationId: string) => {
     try {
-      const response: AxiosResponse<OrganizationMember[]> = await axiosInstance.get(`${base}/organization/${organizationId}`);
-      return response.data;
+      const response: AxiosResponse<{ data: OrganizationMember[]; meta: { total: number } }> = await axiosInstance.get(`${base}/organization/${organizationId}`, {
+        params: { perPage: 100 }
+      });
+      return response.data?.data || [];
     } catch (error: unknown) {
       console.error(`Erro ao buscar membros da organização ${organizationId}:`, error);
       throw error;

@@ -47,27 +47,31 @@ export default function SchedulesPage() {
   // Carregar dados existentes
   useEffect(() => {
     if (schedules.length > 0) {
-      const newFormData = { ...formData };
       const baseDate = new Date();
-      schedules.forEach((schedule) => {
-        if (newFormData[schedule.weekday]) {
-          newFormData[schedule.weekday] = {
-            isOpen: schedule.isOpen === "ACTIVE",
-            startTime: parse(schedule.startTime, "HH:mm", baseDate),
-            endTime: parse(schedule.endTime, "HH:mm", baseDate),
-            hasBreak: !!(schedule.breakStartTime && schedule.breakEndTime),
-            breakStartTime: schedule.breakStartTime
-              ? parse(schedule.breakStartTime, "HH:mm", baseDate)
-              : parse("12:00", "HH:mm", baseDate),
-            breakEndTime: schedule.breakEndTime
-              ? parse(schedule.breakEndTime, "HH:mm", baseDate)
-              : parse("13:00", "HH:mm", baseDate),
-          };
-        }
+      
+      setFormData((prev) => {
+        const next = { ...prev };
+        
+        schedules.forEach((schedule) => {
+          if (next[schedule.weekday]) {
+            next[schedule.weekday] = {
+              isOpen: schedule.isOpen === "ACTIVE",
+              startTime: parse(schedule.startTime, "HH:mm", baseDate),
+              endTime: parse(schedule.endTime, "HH:mm", baseDate),
+              hasBreak: !!(schedule.breakStartTime && schedule.breakEndTime),
+              breakStartTime: schedule.breakStartTime
+                ? parse(schedule.breakStartTime, "HH:mm", baseDate)
+                : parse("12:00", "HH:mm", baseDate),
+              breakEndTime: schedule.breakEndTime
+                ? parse(schedule.breakEndTime, "HH:mm", baseDate)
+                : parse("13:00", "HH:mm", baseDate),
+            };
+          }
+        });
+        
+        return next;
       });
-      setFormData(newFormData);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedules]);
 
   const handleFieldChange = (

@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Table, Tag, Typography, Empty } from "antd";
+import { Table, Typography, Empty } from "antd";
 import { StarOutlined, TrophyOutlined, CalendarOutlined } from "@ant-design/icons";
+import { formatCurrency, sanitizeText } from "@/lib/security";
 
 const { Text } = Typography;
 
@@ -16,7 +17,9 @@ interface InsightsTopServicesProps {
   topServices: TopService[];
 }
 
-export const InsightsTopServices: React.FC<InsightsTopServicesProps> = ({ topServices }) => {
+export const InsightsTopServices: React.FC<InsightsTopServicesProps> = ({
+  topServices
+}) => {
   const columns = [
     {
       title: "Posição",
@@ -25,9 +28,9 @@ export const InsightsTopServices: React.FC<InsightsTopServicesProps> = ({ topSer
       render: (_: unknown, __: unknown, index: number) => (
         <div className="flex items-center gap-2">
           {index === 0 ? (
-            <TrophyOutlined className="text-yellow-500 text-lg" />
+            <TrophyOutlined className="text-amber-500 text-lg" />
           ) : index === 1 ? (
-            <TrophyOutlined className="text-gray-400 text-lg" />
+            <TrophyOutlined className="text-zinc-400 text-lg" />
           ) : index === 2 ? (
             <TrophyOutlined className="text-amber-700 text-lg" />
           ) : (
@@ -36,46 +39,55 @@ export const InsightsTopServices: React.FC<InsightsTopServicesProps> = ({ topSer
             </span>
           )}
         </div>
-      ),
+      )
     },
     {
       title: "Serviço",
       dataIndex: "name",
       key: "name",
-      render: (name: string) => <Text strong className="dark:text-zinc-200">{name}</Text>,
+      render: (name: string) => (
+        <Text strong className="dark:text-zinc-200">
+          {sanitizeText(name)}
+        </Text>
+      )
     },
     {
       title: "Agendamentos",
       dataIndex: "count",
       key: "count",
       render: (count: number) => (
-        <Tag color="blue" icon={<CalendarOutlined />}>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          <CalendarOutlined />
           {count}
-        </Tag>
-      ),
+        </span>
+      )
     },
     {
       title: "Receita",
       dataIndex: "revenue",
       key: "revenue",
       render: (revenue: number) => (
-        <Text strong className="text-green-600 dark:text-green-400">
-          R$ {revenue.toFixed(2)}
+        <Text strong className="text-emerald-600 dark:text-emerald-400">
+          {formatCurrency(revenue)}
         </Text>
-      ),
-    },
+      )
+    }
   ];
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden transition-colors duration-300">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden transition-colors duration-200">
       <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <StarOutlined className="text-yellow-500" />
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">Serviços Mais Populares</span>
+          <StarOutlined className="text-amber-500" />
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+            Serviços Mais Populares
+          </span>
         </div>
-        <Tag color="blue">{topServices.length}</Tag>
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          {topServices.length}
+        </span>
       </div>
-      
+
       <div className="p-4">
         {topServices.length === 0 ? (
           <Empty description="Nenhum dado disponível" />

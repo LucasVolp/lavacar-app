@@ -33,12 +33,13 @@ export const AppointmentCancelModal: React.FC<AppointmentCancelModalProps> = ({
       cancelText="Voltar"
     >
       <div className="space-y-4">
-        <Text>Tem certeza que deseja cancelar este agendamento?</Text>
+        <Text className="dark:text-zinc-200">Tem certeza que deseja cancelar este agendamento?</Text>
         <Input.TextArea
           placeholder="Motivo do cancelamento (opcional)"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={3}
+          className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500"
         />
       </div>
     </Modal>

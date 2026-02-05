@@ -29,10 +29,7 @@ export function useSchedules(enabled = true) {
 export function useShopSchedules(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.byShop(shopId || ""),
-    queryFn: async () => {
-      const allSchedules = await scheduleService.findAll();
-      return allSchedules.filter((schedule) => schedule.shopId === shopId);
-    },
+    queryFn: () => scheduleService.findByShop(shopId!),
     enabled: enabled && !!shopId,
     staleTime: 10 * 60 * 1000,
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Row, Col, Tag } from "antd";
+import { Row, Col } from "antd";
 import { BarChartOutlined } from "@ant-design/icons";
 import { CustomTooltip } from "@/components/ui";
 
@@ -20,7 +20,9 @@ export const InsightsWeeklyDistribution: React.FC<InsightsWeeklyDistributionProp
       <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
         <BarChartOutlined className="text-blue-500" />
         <span className="font-semibold text-zinc-900 dark:text-zinc-100">Agendamentos por Dia da Semana</span>
-        <Tag color="cyan" className="ml-2">Este Mês</Tag>
+        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+          Este Mês
+        </span>
       </div>
 
       <div className="p-6">

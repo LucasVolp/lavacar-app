@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { Form, InputNumber, Button, Row, Col, Divider, Alert, type FormInstance } from "antd";
-import { SaveOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { Form, InputNumber, Button, Row, Col, Divider, type FormInstance } from "antd";
+import { SaveOutlined } from "@ant-design/icons";
 import { UpdateShopDto } from "@/types/shop";
+import { InfoBox } from "@/components/ui";
 
 interface SettingsConfigFormProps {
   form: FormInstance;
@@ -24,21 +25,10 @@ export const SettingsConfigForm: React.FC<SettingsConfigFormProps> = ({
       className="max-w-4xl"
     >
       <div className="mb-8">
-        <Alert
-          title={
-            <span className="text-purple-700 dark:text-purple-300 font-medium">
-              Configurações de Agendamento
-            </span>
-          }
-          description={
-            <span className="text-purple-600 dark:text-purple-400/80 text-sm">
-              Estas configurações definem como os slots de horário são gerados para os clientes. Alterações aqui afetam a disponibilidade futura.
-            </span>
-          }
-          type="info"
-          showIcon
-          icon={<InfoCircleOutlined className="text-purple-500" />}
-          className="mb-8 rounded-lg border-purple-200 bg-purple-50 dark:border-purple-900/30 dark:bg-purple-950/20"
+        <InfoBox
+          title="Configurações de Agendamento"
+          description="Estas configurações definem como os slots de horário são gerados para os clientes. Alterações aqui afetam a disponibilidade futura."
+          variant="info"
         />
       </div>
 

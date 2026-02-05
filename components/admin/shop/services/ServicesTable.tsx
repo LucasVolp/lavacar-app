@@ -37,9 +37,9 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       key: "name",
       render: (text: string, record: Services) => (
         <div>
-          <Text strong>{text}</Text>
+          <Text strong className="dark:text-zinc-100">{text}</Text>
           {record.description && (
-            <Text type="secondary" className="block text-xs line-clamp-1">
+            <Text type="secondary" className="block text-xs line-clamp-1 dark:text-zinc-400">
               {record.description}
             </Text>
           )}
@@ -51,7 +51,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       dataIndex: "price",
       key: "price",
       render: (price: string) => (
-        <Text strong className="text-green-600">
+        <Text strong className="text-green-600 dark:text-green-400">
           R$ {parseFloat(price).toFixed(2)}
         </Text>
       ),
@@ -69,9 +69,15 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       dataIndex: "isActive",
       key: "isActive",
       render: (isActive: boolean) => (
-        <Tag color={isActive !== false ? "success" : "error"}>
+        <span
+          className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+            isActive !== false
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30"
+              : "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
+          }`}
+        >
           {isActive !== false ? "Ativo" : "Inativo"}
-        </Tag>
+        </span>
       ),
       filters: [
         { text: "Ativo", value: true },

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Table, Tag, Avatar, Button, Modal, Form, Select, message } from "antd";
+import { Table, Avatar, Button, Modal, Form, Select, message } from "antd";
 import { UserOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { OrganizationMember } from "@/types/organization";
 import { useUpdateOrganizationMember, useDeleteOrganizationMember } from "@/hooks/useOrganizations";
@@ -95,18 +95,18 @@ export const MembersList: React.FC<MembersListProps> = ({ members }) => {
       dataIndex: "role",
       key: "role",
       render: (role: string) => {
-        let color = "default";
-        if (role === "OWNER") color = "gold";
-        if (role === "ADMIN") color = "purple";
-        if (role === "MANAGER") color = "blue";
+        const roleStyles: Record<string, string> = {
+          OWNER: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+          ADMIN: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+          MANAGER: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+          EMPLOYEE: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
+          USER: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+        };
 
         return (
-          <Tag
-            color={color}
-            className="font-medium border-0 px-3 py-1 bg-opacity-20"
-          >
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${roleStyles[role] || roleStyles.USER}`}>
             {ROLE_MAP[role] || role}
-          </Tag>
+          </span>
         );
       },
     },
@@ -115,9 +115,13 @@ export const MembersList: React.FC<MembersListProps> = ({ members }) => {
       dataIndex: "isActive",
       key: "status",
       render: (isActive: boolean) => (
-        <Tag color={isActive ? "success" : "error"} variant="filled">
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+          isActive
+            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+        }`}>
           {isActive ? "Ativo" : "Inativo"}
-        </Tag>
+        </span>
       ),
     },
     {

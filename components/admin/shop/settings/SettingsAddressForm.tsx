@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { Form, Input, Button, Row, Col, Divider, Alert, type FormInstance } from "antd";
+import { Form, Input, Button, Row, Col, Divider, type FormInstance } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import { UpdateShopDto } from "@/types/shop";
+import { InfoBox } from "@/components/ui";
 
 interface SettingsAddressFormProps {
   form: FormInstance;
@@ -118,20 +119,11 @@ export const SettingsAddressForm: React.FC<SettingsAddressFormProps> = ({
         </Row>
       </div>
 
-      <Alert
-        message={
-          <span className="text-blue-700 dark:text-blue-300 font-medium">
-            Visibilidade
-          </span>
-        }
-        description={
-          <span className="text-blue-600 dark:text-blue-400/80 text-sm">
-            O endereço será exibido para os clientes na página de agendamento e na confirmação.
-          </span>
-        }
-        type="info"
-        showIcon
-        className="mb-6 rounded-lg border-blue-200 bg-blue-50 dark:border-blue-900/30 dark:bg-blue-950/20"
+      <InfoBox
+        title="Visibilidade do Endereço"
+        description="O endereço será exibido para os clientes na página de agendamento e na confirmação."
+        variant="info"
+        className="mb-6"
       />
 
       <Divider className="dark:border-zinc-800" />

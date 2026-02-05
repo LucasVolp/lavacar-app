@@ -141,14 +141,21 @@ export const SettingsInfoForm: React.FC<SettingsInfoFormProps> = ({
             className="w-full"
             popupClassName="dark:bg-zinc-800"
           >
-            {Object.entries(SHOP_STATUS_MAP).map(([key, value]) => (
-              <Select.Option key={key} value={key}>
-                <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full`} style={{ backgroundColor: value.color === 'green' ? '#22c55e' : value.color === 'red' ? '#ef4444' : '#f59e0b' }} />
-                  <span className="dark:text-zinc-200">{value.label}</span>
-                </div>
-              </Select.Option>
-            ))}
+            {Object.entries(SHOP_STATUS_MAP).map(([key, value]) => {
+              let dotColor = '#9ca3af'; // default gray
+              if (key === 'ACTIVE') dotColor = '#22c55e'; // green-500
+              if (key === 'INACTIVE') dotColor = '#ef4444'; // red-500
+              if (key === 'SUSPENDED') dotColor = '#f97316'; // orange-500
+
+              return (
+                <Select.Option key={key} value={key}>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full`} style={{ backgroundColor: dotColor }} />
+                    <span className="dark:text-zinc-200">{value.label}</span>
+                  </div>
+                </Select.Option>
+              );
+            })}
           </Select>
         </Form.Item>
       </div>
