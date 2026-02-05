@@ -16,7 +16,6 @@ import {
   message,
   Form,
   Input,
-  Tooltip,
   Spin,
 } from "antd";
 import {
@@ -38,8 +37,11 @@ import {
 } from "@ant-design/icons";
 import { ShopClient, UpdateShopClientPayload } from "@/types/shopClient";
 import { useDeleteShopClient, useUpdateShopClient } from "@/hooks/useShopClients";
+import { CustomTooltip } from "@/components/ui";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+
+import { formatPhone } from "@/utils/formatters";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -49,6 +51,7 @@ interface ClientDetailDrawerProps {
   open: boolean;
   onClose: () => void;
   shopId: string;
+  initialEditing?: boolean;
 }
 
 interface EditFormValues {
@@ -63,6 +66,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
   open,
   onClose,
   shopId,
+  initialEditing = false,
 }) => {
   const router = useRouter();
   const [form] = Form.useForm<EditFormValues>();
@@ -72,16 +76,6 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
   const updateClient = useUpdateShopClient();
 
   const user = client?.user;
-
-  const formatPhone = (value: string) => {
-    if (!value) return "";
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 10) {
-      return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").trim();
-    } else {
-      return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3").trim();
-    }
-  };
 
   useEffect(() => {
     if (client && open) {
@@ -93,6 +87,16 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
       });
     }
   }, [client, open, form]);
+
+  useEffect(() => {
+    if (open) {
+      // Sincroniza estado de edição baseado na prop quando drawer abre
+      const timeoutId = setTimeout(() => {
+        setIsEditing(initialEditing);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open, initialEditing]);
 
   const handleClose = () => {
     setIsEditing(false);
@@ -154,21 +158,6 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
         return <CloseCircleOutlined className="text-red-500" />;
       default:
         return <ClockCircleOutlined className="text-blue-500" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "COMPLETED":
-        return "success";
-      case "CANCELED":
-        return "error";
-      case "PENDING":
-        return "warning";
-      case "IN_PROGRESS":
-        return "processing";
-      default:
-        return "default";
     }
   };
 
@@ -275,18 +264,18 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                 <Title level={4} className="!text-white !mb-0">
                   {displayName}
                 </Title>
-                {hasCustomData && (
-                  <Tooltip title="Este cliente possui dados personalizados">
-                    <Tag color="gold" className="!m-0">
-                      Personalizado
-                    </Tag>
-                  </Tooltip>
-                )}
               </div>
               {client.customName && (
                 <Text className="text-cyan-200 text-xs block">
                   Nome original: {originalName}
                 </Text>
+              )}
+              {hasCustomData && (
+                <CustomTooltip title="Este cliente possui dados personalizados">
+                  <Tag className="mt-1 !bg-white/20 !text-white !border-0 backdrop-blur-sm">
+                    Personalizado
+                  </Tag>
+                </CustomTooltip>
               )}
               <Text className="text-cyan-100 block mt-1">
                 Cliente desde {dayjs(client.createdAt).format("DD/MM/YYYY")}
@@ -299,6 +288,12 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
               )}
             </div>
           </div>
+          <Button
+            type="text"
+            icon={<EditOutlined className="text-lg" />}
+            onClick={() => setIsEditing(true)}
+            className="!text-white hover:bg-white/20 flex items-center justify-center"
+          />
         </div>
 
         <div className="grid grid-cols-3 gap-4 mt-6">
@@ -323,22 +318,22 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-6 dark:bg-zinc-900">
         {isEditing ? (
           <div className="space-y-4">
             <Card
-            size="small"
-            title={
-              <div className="flex items-center gap-2">
-                <EditOutlined className="text-blue-500" />
-                <span className="font-semibold">Editar Informações do Cliente</span>
-              </div>
-            }
-            className="rounded-xl border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10"
+              size="small"
+              title={
+                <div className="flex items-center gap-2">
+                  <EditOutlined className="text-blue-500 dark:text-blue-400" />
+                  <span className="font-semibold dark:text-white">Editar Informações do Cliente</span>
+                </div>
+              }
+              className="rounded-xl border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10"
             extra={
-              <Tooltip title="Os dados personalizados sobrescrevem as informações originais do usuário apenas para este estabelecimento">
+              <CustomTooltip title="Os dados personalizados sobrescrevem as informações originais do usuário apenas para este estabelecimento">
                 <InfoCircleOutlined className="text-blue-500" />
-              </Tooltip>
+              </CustomTooltip>
             }
           >
             <Spin spinning={updateClient.isPending}>
@@ -349,7 +344,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                     <span className="text-zinc-700 dark:text-zinc-300">
                       Nome personalizado
                       {user.firstName && (
-                        <Text type="secondary" className="ml-2 text-xs">
+                        <Text type="secondary" className="ml-2 text-xs dark:text-zinc-500">
                           Original: {originalName}
                         </Text>
                       )}
@@ -369,7 +364,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                     <span className="text-zinc-700 dark:text-zinc-300">
                       Telefone personalizado
                       {user.phone && (
-                        <Text type="secondary" className="ml-2 text-xs">
+                        <Text type="secondary" className="ml-2 text-xs dark:text-zinc-500">
                           Original: {originalPhone}
                         </Text>
                       )}
@@ -391,7 +386,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                     <span className="text-zinc-700 dark:text-zinc-300">
                       Email personalizado
                       {user.email && (
-                        <Text type="secondary" className="ml-2 text-xs">
+                        <Text type="secondary" className="ml-2 text-xs dark:text-zinc-500">
                           Original: {user.email}
                         </Text>
                       )}
@@ -428,7 +423,12 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                   >
                     Salvar
                   </Button>
-                  <Button icon={<CloseOutlined />} onClick={handleCancelEdit} disabled={updateClient.isPending}>
+                  <Button
+                    icon={<CloseOutlined />}
+                    onClick={handleCancelEdit}
+                    disabled={updateClient.isPending}
+                    className="dark:border-zinc-700 dark:text-zinc-300 dark:hover:text-white dark:hover:border-zinc-500"
+                  >
                     Cancelar
                   </Button>
                 </div>
@@ -438,201 +438,221 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            <Card
-              size="small"
-              title={<span className="font-semibold">Informações de Contato</span>}
-              className="rounded-xl border-zinc-200 dark:border-zinc-800"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    <MailOutlined className="text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="flex-1">
-                    <Text type="secondary" className="text-xs block">
-                      Email
-                      {client.customEmail && (
-                        <Tag color="gold" className="ml-2 !text-xs !px-1 !py-0">
-                          personalizado
-                        </Tag>
-                      )}
-                    </Text>
-                    <Text className="dark:text-white">{displayEmail || "Não informado"}</Text>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between">
+            <div className="space-y-4">
+              <Card
+                size="small"
+                title={<span className="font-semibold dark:text-white">Informações de Contato</span>}
+                className="rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <PhoneOutlined className="text-green-600 dark:text-green-400" />
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <MailOutlined className="text-blue-600 dark:text-blue-400 text-lg" />
                     </div>
-                    <div>
-                      <Text type="secondary" className="text-xs block">
-                        Telefone
-                        {client.customPhone && (
-                          <Tag color="gold" className="ml-2 !text-xs !px-1 !py-0">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Text type="secondary" className="text-xs dark:text-zinc-400">
+                          Email
+                        </Text>
+                        {client.customEmail && (
+                          <Tag className="!text-xs !px-1.5 !py-0 !bg-amber-100 dark:!bg-amber-900/30 !text-amber-700 dark:!text-amber-400 !border-0 rounded-sm">
                             personalizado
                           </Tag>
                         )}
-                      </Text>
-                      <Text className="dark:text-white block">{displayPhone || "Não informado"}</Text>
-                      {client.customPhone && user.phone && (
-                        <Text type="secondary" className="text-xs opacity-70">
-                          Original: {originalPhone}
+                      </div>
+                      <Text className="dark:text-white block">{displayEmail || "Não informado"}</Text>
+                      {client.customEmail && user.email && (
+                        <Text type="secondary" className="text-xs opacity-70 block dark:text-zinc-500">
+                          Original: {user.email}
                         </Text>
                       )}
                     </div>
                   </div>
-                  {displayPhone && (
-                    <Button
-                      type="primary"
-                      icon={<WhatsAppOutlined />}
-                      size="small"
-                      onClick={handleWhatsApp}
-                      className="bg-green-600 hover:!bg-green-500 border-green-600"
-                    >
-                      WhatsApp
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </Card>
 
-            {client.notes && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <PhoneOutlined className="text-green-600 dark:text-green-400 text-lg" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Text type="secondary" className="text-xs dark:text-zinc-400">
+                            Telefone
+                          </Text>
+                          {client.customPhone && (
+                            <Tag className="!text-xs !px-1.5 !py-0 !bg-amber-100 dark:!bg-amber-900/30 !text-amber-700 dark:!text-amber-400 !border-0 rounded-sm">
+                              personalizado
+                            </Tag>
+                          )}
+                        </div>
+                        <Text className="dark:text-white block">{displayPhone || "Não informado"}</Text>
+                        {client.customPhone && user.phone && (
+                          <Text type="secondary" className="text-xs opacity-70 block dark:text-zinc-500">
+                            Original: {originalPhone}
+                          </Text>
+                        )}
+                      </div>
+                    </div>
+                    {displayPhone && (
+                      <Button
+                        type="primary"
+                        icon={<WhatsAppOutlined className="text-lg" />}
+                        onClick={handleWhatsApp}
+                        className="bg-green-600 hover:!bg-green-500 border-green-600 h-10 px-4 flex items-center gap-2"
+                      >
+                        WhatsApp
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              {client.notes && (
+                <Card
+                  size="small"
+                  title={
+                    <div className="flex items-center gap-2">
+                      <FileTextOutlined className="text-amber-500" />
+                      <span className="font-semibold dark:text-white">Observações</span>
+                    </div>
+                  }
+                  className="rounded-xl border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-900/10"
+                >
+                  <Paragraph className="!mb-0 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+                    {client.notes}
+                  </Paragraph>
+                </Card>
+              )}
+            </div>
+
+            <div className="space-y-4">
               <Card
                 size="small"
                 title={
-                  <div className="flex items-center gap-2">
-                    <FileTextOutlined className="text-amber-500" />
-                    <span className="font-semibold">Observações</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold dark:text-white">Veículos</span>
+                    <Tag className="!bg-cyan-100 dark:!bg-cyan-900/30 !text-cyan-700 dark:!text-cyan-400 !border-0">{vehicleCount}</Tag>
                   </div>
                 }
-                className="rounded-xl border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-900/10"
+                className="rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <Paragraph className="!mb-0 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-                  {client.notes}
-                </Paragraph>
+                {vehicleCount === 0 ? (
+                  <Empty description="Nenhum veículo cadastrado" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                ) : (
+                  <div className="space-y-2">
+                    {user.vehicles?.map((vehicle) => (
+                      <div
+                        key={vehicle.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                            <CarOutlined className="text-emerald-600 dark:text-emerald-400 text-lg" />
+                          </div>
+                          <div>
+                            <Text strong className="block dark:text-white">
+                              {vehicle.brand} {vehicle.model}
+                            </Text>
+                            <Text type="secondary" className="text-xs">
+                              {vehicle.year && `${vehicle.year} • `}
+                              {vehicle.color && `${vehicle.color} • `}
+                              {getVehicleTypeLabel(vehicle.type)}
+                            </Text>
+                          </div>
+                        </div>
+                        {vehicle.plate && <Tag className="font-mono uppercase !bg-zinc-100 dark:!bg-zinc-800 !text-zinc-600 dark:!text-zinc-400 border-0">{vehicle.plate}</Tag>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Card>
-            )}
+            </div>
+
+            <div className="space-y-4">
+              <Card
+                size="small"
+                title={
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold dark:text-white">Histórico de Visitas</span>
+                    <Tag className="!bg-blue-100 dark:!bg-blue-900/30 !text-blue-700 dark:!text-blue-400 !border-0">{appointmentCount}</Tag>
+                  </div>
+                }
+                className="rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                {appointmentCount === 0 ? (
+                  <Empty description="Nenhuma visita registrada" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                ) : (
+                  <Timeline
+                    items={user.appointments?.slice(0, 5).map((apt) => ({
+                      dot: getStatusIcon(apt.status),
+                      children: (
+                        <div
+                          key={apt.id}
+                          className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 -m-2 rounded-lg transition-colors"
+                          onClick={() => router.push(`/admin/shop/${shopId}/appointments/${apt.id}`)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <Text strong className="dark:text-white">
+                              {apt.services.map((s) => s.serviceName).join(", ")}
+                            </Text>
+                            <Tag
+                              className={`m-0 border-0 ${
+                                apt.status === "PENDING"
+                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500"
+                                  : apt.status === "COMPLETED"
+                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                    : apt.status === "CANCELED"
+                                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              }`}
+                            >
+                              {getStatusLabel(apt.status)}
+                            </Tag>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                            <span className="flex items-center gap-1">
+                              <CalendarOutlined />
+                              {dayjs(apt.scheduledAt).format("DD/MM/YYYY HH:mm")}
+                            </span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                              R$ {parseFloat(apt.totalPrice).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ),
+                    }))}
+                  />
+                )}
+                {appointmentCount > 5 && (
+                  <Button
+                    type="link"
+                    block
+                    className="mt-2"
+                    onClick={() => router.push(`/admin/shop/${shopId}/appointments?userId=${user.id}`)}
+                  >
+                    Ver todos os {appointmentCount} agendamentos
+                  </Button>
+                )}
+              </Card>
+            </div>
 
             <Card
               size="small"
               title={
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">Veículos</span>
-                  <Tag color="cyan">{vehicleCount}</Tag>
-              </div>
-            }
-            className="rounded-xl border-zinc-200 dark:border-zinc-800"
-          >
-            {vehicleCount === 0 ? (
-              <Empty description="Nenhum veículo cadastrado" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            ) : (
-              <div className="space-y-2">
-                {user.vehicles?.map((vehicle) => (
-                  <div
-                    key={vehicle.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <CarOutlined className="text-emerald-600 dark:text-emerald-400 text-lg" />
-                      </div>
-                      <div>
-                        <Text strong className="block dark:text-white">
-                          {vehicle.brand} {vehicle.model}
-                        </Text>
-                        <Text type="secondary" className="text-xs">
-                          {vehicle.year && `${vehicle.year} • `}
-                          {vehicle.color && `${vehicle.color} • `}
-                          {getVehicleTypeLabel(vehicle.type)}
-                        </Text>
-                      </div>
-                    </div>
-                    {vehicle.plate && <Tag className="font-mono uppercase">{vehicle.plate}</Tag>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          <Card
-            size="small"
-            title={
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">Histórico de Visitas</span>
-                <Tag color="blue">{appointmentCount}</Tag>
-              </div>
-            }
-            className="rounded-xl border-zinc-200 dark:border-zinc-800"
-          >
-            {appointmentCount === 0 ? (
-              <Empty description="Nenhuma visita registrada" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            ) : (
-              <Timeline
-                items={user.appointments?.slice(0, 5).map((apt) => ({
-                  dot: getStatusIcon(apt.status),
-                  children: (
-                    <div
-                      key={apt.id}
-                      className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 -m-2 rounded-lg transition-colors"
-                      onClick={() => router.push(`/admin/shop/${shopId}/appointments/${apt.id}`)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <Text strong className="dark:text-white">
-                          {apt.services.map((s) => s.serviceName).join(", ")}
-                        </Text>
-                        <Tag 
-                          className={`m-0 border-0 ${
-                            apt.status === "PENDING" 
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500" 
-                              : ""
-                          }`}
-                          color={apt.status === "PENDING" ? undefined : getStatusColor(apt.status)}
-                        >
-                          {getStatusLabel(apt.status)}
-                        </Tag>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-zinc-500 mt-1">
-                        <span className="flex items-center gap-1">
-                          <CalendarOutlined />
-                          {dayjs(apt.scheduledAt).format("DD/MM/YYYY HH:mm")}
-                        </span>
-                        <span className="text-emerald-600 font-medium">
-                          R$ {parseFloat(apt.totalPrice).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  ),
-                }))}
-              />
-            )}
-            {appointmentCount > 5 && (
-              <Button
-                type="link"
-                block
-                className="mt-2"
-                onClick={() => router.push(`/admin/shop/${shopId}/appointments?userId=${user.id}`)}
-              >
-                Ver todos os {appointmentCount} agendamentos
-              </Button>
-            )}
-          </Card>
-
-          <Card
-            size="small"
-            title={
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">Avaliações do Cliente</span>
-                <Tag color="gold">{evaluationCount}</Tag>
-              </div>
-            }
-            className="rounded-xl border-zinc-200 dark:border-zinc-800"
-          >
+                  <span className="font-semibold dark:text-white">Avaliações do Cliente</span>
+                  <Tag className="!bg-amber-100 dark:!bg-amber-900/30 !text-amber-700 dark:!text-amber-400 !border-0">{evaluationCount}</Tag>
+                </div>
+              }
+              className="rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900"
+            >
             {evaluationCount === 0 ? (
               <Empty description="Nenhuma avaliação realizada" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {user.evaluations?.map((evaluation) => (
                   <div
                     key={evaluation.id}
@@ -640,7 +660,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                   >
                     <div className="flex items-center justify-between mb-2">
                       <Rate disabled value={evaluation.rating} className="text-sm" />
-                      <Text type="secondary" className="text-xs">
+                      <Text type="secondary" className="text-xs dark:text-zinc-400">
                         {dayjs(evaluation.createdAt).format("DD/MM/YYYY")}
                       </Text>
                     </div>
@@ -653,33 +673,33 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                 ))}
               </div>
             )}
-          </Card>
+            </Card>
 
-          <Divider />
+            <Divider className="dark:border-zinc-700" />
 
-          <div className="flex justify-end gap-3">
-            <Button 
-                icon={<EditOutlined />} 
+            <div className="flex justify-end gap-3">
+              <Button
+                icon={<EditOutlined />}
                 onClick={() => setIsEditing(true)}
-                className="border-zinc-300 dark:border-zinc-700 hover:text-blue-500 hover:border-blue-500 dark:hover:text-blue-400 dark:hover:border-blue-400"
-            >
+                className="border-zinc-300 dark:border-zinc-700 dark:text-zinc-300 hover:text-blue-500 hover:border-blue-500 dark:hover:text-blue-400 dark:hover:border-blue-400"
+              >
                 Editar Cliente
-            </Button>
-            
-            <Popconfirm
-              title="Remover cliente"
-              description="Tem certeza que deseja remover este cliente da sua base?"
-              onConfirm={handleDelete}
-              okText="Sim, remover"
-              cancelText="Cancelar"
-              okButtonProps={{ danger: true }}
-            >
-              <Button danger icon={<DeleteOutlined />} loading={deleteClient.isPending}>
-                Remover Cliente
               </Button>
-            </Popconfirm>
+
+              <Popconfirm
+                title="Remover cliente"
+                description="Tem certeza que deseja remover este cliente da sua base?"
+                onConfirm={handleDelete}
+                okText="Sim, remover"
+                cancelText="Cancelar"
+                okButtonProps={{ danger: true }}
+              >
+                <Button danger icon={<DeleteOutlined />} loading={deleteClient.isPending}>
+                  Remover Cliente
+                </Button>
+              </Popconfirm>
+            </div>
           </div>
-        </div>
         )}
       </div>
     </Drawer>

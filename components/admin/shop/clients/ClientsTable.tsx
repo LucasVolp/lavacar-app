@@ -1,15 +1,19 @@
 "use client";
 
 import React from "react";
-import { Table, Avatar, Typography, Tag, Button, Tooltip } from "antd";
+import { Table, Avatar, Typography, Tag, Button } from "antd";
 import { 
   EyeOutlined, 
   CarOutlined, 
   CalendarOutlined, 
   StarFilled,
-  PhoneOutlined
+  PhoneOutlined,
+  WhatsAppOutlined,
+  EditOutlined
 } from "@ant-design/icons";
 import { ShopClient } from "@/types/shopClient";
+import { formatPhone } from "@/utils/formatters";
+import { CustomTooltip } from "@/components/ui";
 import dayjs from "dayjs";
 import type { ColumnsType } from "antd/es/table";
 
@@ -18,9 +22,10 @@ const { Text } = Typography;
 interface ClientsTableProps {
   clients: ShopClient[];
   onViewClient: (client: ShopClient) => void;
+  onEditClient?: (client: ShopClient) => void;
 }
 
-export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClient }) => {
+export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClient, onEditClient }) => {
   const getAvatarColor = (name: string) => {
     const colors = [
       "#f56a00", "#7265e6", "#ffbf00", "#00a2ae", 
@@ -28,6 +33,14 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
+  };
+
+  const handleWhatsApp = (e: React.MouseEvent, phone: string) => {
+    e.stopPropagation();
+    const cleanPhone = phone?.replace(/\D/g, "");
+    if (cleanPhone) {
+      window.open(`https://wa.me/55${cleanPhone}`, "_blank");
+    }
   };
 
   const columns: ColumnsType<ShopClient> = [
@@ -71,9 +84,20 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
       render: (_, record) => {
         const phone = record.customPhone || record.user?.phone;
         return phone ? (
-          <div className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
-            <PhoneOutlined />
-            {phone}
+          <div className="flex items-center gap-2">
+             <div className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+              <PhoneOutlined />
+              {formatPhone(phone)}
+            </div>
+            <CustomTooltip title="Abrir no WhatsApp">
+              <Button
+                type="text"
+                size="small"
+                icon={<WhatsAppOutlined />}
+                onClick={(e) => handleWhatsApp(e, phone)}
+                className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center justify-center"
+              />
+            </CustomTooltip>
           </div>
         ) : (
           <Text type="secondary">-</Text>
@@ -85,12 +109,12 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
       key: "vehicles",
       align: "center",
       render: (_, record) => (
-        <Tooltip title={record.user?.vehicles?.map(v => `${v.brand} ${v.model}`).join(", ") || "Sem veículos"}>
+        <CustomTooltip title={record.user?.vehicles?.map(v => `${v.brand} ${v.model}`).join(", ") || "Sem veículos"}>
           <div className="flex items-center justify-center gap-1">
             <CarOutlined className="text-emerald-500" />
-            <Text strong>{record.user?.vehicles?.length || 0}</Text>
+            <Text strong className="dark:text-zinc-300">{record.user?.vehicles?.length || 0}</Text>
           </div>
-        </Tooltip>
+        </CustomTooltip>
       ),
     },
     {
@@ -100,7 +124,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
       render: (_, record) => (
         <div className="flex items-center justify-center gap-1">
           <CalendarOutlined className="text-blue-500" />
-          <Text strong>{record.user?.appointments?.length || 0}</Text>
+          <Text strong className="dark:text-zinc-300">{record.user?.appointments?.length || 0}</Text>
         </div>
       ),
     },
@@ -116,7 +140,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
         return (
           <div className="flex items-center justify-center gap-1">
             <StarFilled className="text-amber-500" />
-            <Text strong className="text-amber-600">{avg}</Text>
+            <Text strong className="text-amber-600 dark:text-amber-500">{avg}</Text>
           </div>
         );
       },
@@ -130,14 +154,15 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
         
         return (
           <div className="flex items-center gap-2">
-            <span>{dayjs(lastAppointment.scheduledAt).format("DD/MM/YYYY")}</span>
+            <span className="dark:text-zinc-400">{dayjs(lastAppointment.scheduledAt).format("DD/MM/YYYY")}</span>
             <Tag 
-              color={
-                lastAppointment.status === "COMPLETED" ? "success" :
-                lastAppointment.status === "CANCELED" ? "error" :
-                "processing"
-              }
-              className="m-0"
+              className={`m-0 border-0 ${
+                lastAppointment.status === "COMPLETED" 
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                  : lastAppointment.status === "CANCELED" 
+                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+              }`}
             >
               {lastAppointment.status === "COMPLETED" ? "OK" :
                lastAppointment.status === "CANCELED" ? "Cancelado" : "Pendente"}
@@ -149,20 +174,40 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
     {
       title: "Cliente desde",
       key: "createdAt",
-      render: (_, record) => dayjs(record.createdAt).format("DD/MM/YYYY"),
+      render: (_, record) => <span className="dark:text-zinc-400">{dayjs(record.createdAt).format("DD/MM/YYYY")}</span>,
     },
     {
       title: "",
       key: "actions",
       align: "center",
-      width: 60,
+      width: 100,
       render: (_, record) => (
-        <Button 
-          type="text" 
-          icon={<EyeOutlined />} 
-          onClick={() => onViewClient(record)}
-          className="text-zinc-500 hover:text-cyan-600"
-        />
+        <div className="flex items-center justify-end gap-1">
+          <CustomTooltip title="Ver detalhes">
+            <Button 
+              type="text" 
+              icon={<EyeOutlined />} 
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewClient(record);
+              }}
+              className="text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400"
+            />
+          </CustomTooltip>
+          {onEditClient && (
+            <CustomTooltip title="Editar">
+              <Button 
+                type="text" 
+                icon={<EditOutlined />} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditClient(record);
+                }}
+                className="text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400"
+              />
+            </CustomTooltip>
+          )}
+        </div>
       ),
     },
   ];
@@ -176,10 +221,10 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
         pageSize: 10, 
         showSizeChanger: true,
         showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} clientes`,
-        className: "px-4 py-3"
+        className: "!px-4 !py-4 !mr-4"
       }}
-      className="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 [&_.ant-pagination]:mt-4 [&_.ant-pagination]:mb-2"
-      rowClassName="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer"
+      className="rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 [&_.ant-pagination]:mt-4 [&_.ant-pagination]:mb-2 [&_.ant-table-thead_th]:!bg-zinc-50 dark:[&_.ant-table-thead_th]:!bg-zinc-900 dark:[&_.ant-table-thead_th]:!text-zinc-400 dark:[&_.ant-table-tbody_td]:!border-zinc-800 dark:[&_.ant-table-row:hover_td]:!bg-zinc-800/50"
+      rowClassName="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer dark:bg-zinc-900/50"
       onRow={(record) => ({
         onClick: () => onViewClient(record),
       })}

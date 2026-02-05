@@ -23,6 +23,7 @@ export default function ClientsPage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [selectedClient, setSelectedClient] = useState<ShopClient | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [startInEditMode, setStartInEditMode] = useState(false);
 
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
   
@@ -38,6 +39,13 @@ export default function ClientsPage() {
 
   const handleViewClient = (client: ShopClient) => {
     setSelectedClient(client);
+    setStartInEditMode(false);
+    setDrawerOpen(true);
+  };
+
+  const handleEditClient = (client: ShopClient) => {
+    setSelectedClient(client);
+    setStartInEditMode(true);
     setDrawerOpen(true);
   };
 
@@ -114,6 +122,7 @@ export default function ClientsPage() {
               key={client.id} 
               client={client} 
               onClick={() => handleViewClient(client)}
+              onEdit={() => handleEditClient(client)}
             />
           ))}
         </div>
@@ -121,6 +130,7 @@ export default function ClientsPage() {
         <ClientsTable 
           clients={clients} 
           onViewClient={handleViewClient}
+          onEditClient={handleEditClient}
         />
       )}
 
@@ -144,8 +154,10 @@ export default function ClientsPage() {
         onClose={() => {
           setDrawerOpen(false);
           setSelectedClient(null);
+          setStartInEditMode(false);
         }}
         shopId={shopId}
+        initialEditing={startInEditMode}
       />
     </div>
   );

@@ -1,16 +1,19 @@
 "use client";
 
 import React from "react";
-import { Card, Avatar, Typography, Tag, Tooltip } from "antd";
+import { Card, Avatar, Typography, Tag, Button } from "antd";
 import {
   PhoneOutlined, 
   MailOutlined, 
   CarOutlined,
   CalendarOutlined,
   StarFilled,
-  RightOutlined
+  EditOutlined,
+  WhatsAppOutlined
 } from "@ant-design/icons";
 import { ShopClient } from "@/types/shopClient";
+import { formatPhone } from "@/utils/formatters";
+import { CustomTooltip } from "@/components/ui";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
@@ -18,9 +21,10 @@ const { Text } = Typography;
 interface ClientCardProps {
   client: ShopClient;
   onClick: () => void;
+  onEdit: () => void;
 }
 
-export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick }) => {
+export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit }) => {
   const user = client.user;
   if (!user) return null;
 
@@ -59,6 +63,14 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick }) => {
     return colors[index];
   };
 
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const cleanPhone = phone?.replace(/\D/g, "");
+    if (cleanPhone) {
+      window.open(`https://wa.me/55${cleanPhone}`, "_blank");
+    }
+  };
+
   return (
     <Card
       className="group cursor-pointer rounded-2xl border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 hover:border-cyan-300 dark:hover:border-cyan-700 hover:shadow-lg transition-all duration-300"
@@ -89,49 +101,69 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick }) => {
               )}
             </div>
           </div>
-          <RightOutlined className="text-zinc-300 group-hover:text-cyan-500 transition-colors" />
+          <div className="flex gap-2">
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            />
+          </div>
         </div>
 
         {/* Contato */}
         {phone && (
-          <div className="flex items-center gap-2 mt-3 text-zinc-600 dark:text-zinc-400">
-            <PhoneOutlined />
-            <Text className="dark:text-zinc-400">{phone}</Text>
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+              <PhoneOutlined className="text-lg" />
+              <Text className="dark:text-zinc-400 font-medium">{formatPhone(phone)}</Text>
+            </div>
+            <Button
+              type="primary"
+              icon={<WhatsAppOutlined className="text-xl" />}
+              onClick={handleWhatsApp}
+              className="bg-green-600 hover:!bg-green-500 border-green-600 flex items-center justify-center gap-2 h-10 px-4 rounded-lg shadow-sm"
+            >
+              WhatsApp
+            </Button>
           </div>
         )}
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-3 border-t border-zinc-100 dark:border-zinc-800">
-        <Tooltip title="Veículos cadastrados">
-          <div className="p-3 text-center border-r border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-            <div className="flex items-center justify-center gap-1 text-emerald-600 dark:text-emerald-400">
-              <CarOutlined />
-              <Text strong className="text-emerald-600 dark:text-emerald-400">{vehicleCount}</Text>
+      <div className="grid grid-cols-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
+        <CustomTooltip title="Veículos cadastrados">
+          <div className="py-4 px-3 text-center border-r border-zinc-100 dark:border-zinc-800 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors">
+            <div className="flex items-center justify-center gap-1.5">
+              <CarOutlined className="text-emerald-600 dark:text-emerald-400 text-lg" />
+              <Text strong className="text-lg text-emerald-600 dark:text-emerald-400">{vehicleCount}</Text>
             </div>
-            <div className="text-[10px] text-zinc-400 uppercase font-medium">Veículos</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">Veículos</div>
           </div>
-        </Tooltip>
-        
-        <Tooltip title="Agendamentos realizados">
-          <div className="p-3 text-center border-r border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-            <div className="flex items-center justify-center gap-1 text-blue-600 dark:text-blue-400">
-              <CalendarOutlined />
-              <Text strong className="text-blue-600 dark:text-blue-400">{appointmentCount}</Text>
+        </CustomTooltip>
+
+        <CustomTooltip title="Agendamentos realizados">
+          <div className="py-4 px-3 text-center border-r border-zinc-100 dark:border-zinc-800 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors">
+            <div className="flex items-center justify-center gap-1.5">
+              <CalendarOutlined className="text-blue-600 dark:text-blue-400 text-lg" />
+              <Text strong className="text-lg text-blue-600 dark:text-blue-400">{appointmentCount}</Text>
             </div>
-            <div className="text-[10px] text-zinc-400 uppercase font-medium">Visitas</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">Visitas</div>
           </div>
-        </Tooltip>
-        
-        <Tooltip title={avgRating ? `Média das avaliações: ${avgRating}` : "Sem avaliações"}>
-          <div className="p-3 text-center hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-            <div className="flex items-center justify-center gap-1 text-amber-500">
-              <StarFilled />
-              <Text strong className="text-amber-500">{avgRating || "-"}</Text>
+        </CustomTooltip>
+
+        <CustomTooltip title={avgRating ? `Média das avaliações: ${avgRating}` : "Sem avaliações"}>
+          <div className="py-4 px-3 text-center hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors">
+            <div className="flex items-center justify-center gap-1.5">
+              <StarFilled className="text-amber-500 text-lg" />
+              <Text strong className="text-lg text-amber-500">{avgRating || "-"}</Text>
             </div>
-            <div className="text-[10px] text-zinc-400 uppercase font-medium">Avaliação</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-1">Avaliação</div>
           </div>
-        </Tooltip>
+        </CustomTooltip>
       </div>
 
       {/* Último agendamento */}
@@ -143,12 +175,13 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick }) => {
               <span>Último: {dayjs(lastAppointment.scheduledAt).format("DD/MM/YYYY")}</span>
             </div>
             <Tag 
-              color={
-                lastAppointment.status === "COMPLETED" ? "success" :
-                lastAppointment.status === "CANCELED" ? "error" :
-                "processing"
-              }
-              className="m-0 text-[10px]"
+              className={`m-0 text-[10px] border-0 px-2 py-0.5 rounded-full ${
+                lastAppointment.status === "COMPLETED" 
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                  : lastAppointment.status === "CANCELED" 
+                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+              }`}
             >
               {lastAppointment.status === "COMPLETED" ? "Concluído" :
                lastAppointment.status === "CANCELED" ? "Cancelado" :
