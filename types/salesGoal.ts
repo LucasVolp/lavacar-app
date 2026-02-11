@@ -1,7 +1,7 @@
 import { Organization } from "./organization";
 import { Shop } from "./shop";
 
-export type GoalPeriod = 'WEEKLY' | 'MONTHLY';
+export type GoalPeriod = 'WEEKLY' | 'MONTHLY' | 'CUSTOM';
 
 export interface SalesGoal {
     id: string;
@@ -15,6 +15,8 @@ export interface SalesGoal {
 
     shop?: Shop;
     organization?: Organization;
+
+    currentSales?: number;
 
     createdAt: string;
     updatedAt: string;

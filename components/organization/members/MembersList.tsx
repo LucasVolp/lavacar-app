@@ -17,6 +17,7 @@ export interface ExtendedMember extends OrganizationMember {
 
 interface MembersListProps {
   members: ExtendedMember[];
+  currentUserId?: string;
 }
 
 const ROLE_MAP: Record<string, string> = {
@@ -27,7 +28,7 @@ const ROLE_MAP: Record<string, string> = {
   USER: "Usuário",
 };
 
-export const MembersList: React.FC<MembersListProps> = ({ members }) => {
+export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<ExtendedMember | null>(null);
   const [form] = Form.useForm();
@@ -139,6 +140,17 @@ export const MembersList: React.FC<MembersListProps> = ({ members }) => {
       key: "actions",
       render: (_: unknown, record: ExtendedMember) => {
         const isOwner = record.role === "OWNER";
+        const isCurrentUser = record.userId === currentUserId;
+
+        if (isCurrentUser) {
+          return (
+            <div className="flex gap-2 items-center">
+              <span className="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wide">
+                Você
+              </span>
+            </div>
+          );
+        }
         
         return (
           <div className="flex gap-2">

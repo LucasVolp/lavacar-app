@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { Modal, Form, DatePicker, TimePicker, Button, type FormInstance } from "antd";
+import { Modal, Form, DatePicker, TimePicker, Button, Input, type FormInstance } from "antd";
 import { StopOutlined, ClockCircleOutlined, CalendarOutlined, WarningOutlined } from "@ant-design/icons";
 import { BlockedTime } from "@/types/blockedTime";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 
 const { TextArea } = Input;
-import { Input } from "antd"; // Fix missing import
 
 interface BlockedTimeFormValues {
   type: "FULL_DAY" | "PARTIAL";

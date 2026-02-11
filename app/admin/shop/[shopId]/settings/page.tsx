@@ -1,109 +1,52 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Spin, Form, message } from "antd";
-import { ShopOutlined, EnvironmentOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Spin, message } from "antd";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useUpdateShop } from "@/hooks/useShops";
+import { useShopSchedules } from "@/hooks/useSchedules";
+import { useShopBlockedTimes } from "@/hooks/useBlockedTimes";
+import { useOrganizationMembers } from "@/hooks/useOrganizations";
 import { UpdateShopDto } from "@/types/shop";
 import {
-  SettingsHeader,
-  SettingsInfoForm,
-  SettingsAddressForm,
-  SettingsConfigForm,
-} from "@/components/admin/shop/settings";
+  ShopHeaderProfile,
+  ManagementGrid
+} from "@/components/admin/shop/settings/components";
 
 /**
- * Configurações do Shop - Edição completa
+ * Settings Command Center - Dashboard Administrativa da Loja
+ * Visual style: Professional profile interface with quick management cards
  */
 export default function SettingsPage() {
   const { shop, shopId, isLoading } = useShopAdmin();
   const updateShop = useUpdateShop();
-
-  const [infoForm] = Form.useForm();
-  const [addressForm] = Form.useForm();
-  const [configForm] = Form.useForm();
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"info" | "address" | "scheduling">("info");
 
-  // Carregar dados do shop nos formulários
-  useEffect(() => {
-    if (shop) {
-      infoForm.setFieldsValue({
-        name: shop.name,
-        slug: shop.slug,
-        description: shop.description,
-        phone: shop.phone,
-        email: shop.email,
-        document: shop.document,
-        status: shop.status,
-      });
+  // Fetch related data for management cards
+  const { data: schedulesData } = useShopSchedules(shopId);
+  const { data: blockedTimesData } = useShopBlockedTimes(shopId);
+  const { data: membersData } = useOrganizationMembers(shop?.organizationId || "");
 
-      addressForm.setFieldsValue({
-        zipCode: shop.zipCode,
-        street: shop.street,
-        number: shop.number,
-        complement: shop.complement,
-        neighborhood: shop.neighborhood,
-        city: shop.city,
-        state: shop.state,
-      });
+  // Normalize data - services return arrays directly
+  const schedules = schedulesData ?? [];
+  const blockedTimes = blockedTimesData ?? [];
+  const memberCount = membersData?.length ?? 0;
 
-      configForm.setFieldsValue({
-        slotInterval: shop.slotInterval,
-        bufferBetweenSlots: shop.bufferBetweenSlots,
-        maxAdvanceDays: shop.maxAdvanceDays,
-        minAdvanceMinutes: shop.minAdvanceMinutes,
-      });
-    }
-  }, [shop, infoForm, addressForm, configForm]);
-
-  const handleSaveInfo = async (values: UpdateShopDto) => {
+  const handleSaveProfile = async (values: UpdateShopDto) => {
     setSaving(true);
     try {
       await updateShop.mutateAsync({
         id: shopId,
         payload: values,
       });
-      message.success("Informações atualizadas com sucesso!");
     } catch {
-      message.error("Erro ao atualizar informações. Tente novamente.");
+      message.error("Erro ao atualizar. Tente novamente.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleSaveAddress = async (values: UpdateShopDto) => {
-    setSaving(true);
-    try {
-      await updateShop.mutateAsync({
-        id: shopId,
-        payload: values,
-      });
-      message.success("Endereço atualizado com sucesso!");
-    } catch {
-      message.error("Erro ao atualizar endereço. Tente novamente.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveConfig = async (values: UpdateShopDto) => {
-    setSaving(true);
-    try {
-      await updateShop.mutateAsync({
-        id: shopId,
-        payload: values,
-      });
-      message.success("Configurações atualizadas com sucesso!");
-    } catch {
-      message.error("Erro ao atualizar configurações. Tente novamente.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (isLoading) {
+  if (isLoading || !shop) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Spin size="large" tip="Carregando configurações..." />
@@ -111,61 +54,70 @@ export default function SettingsPage() {
     );
   }
 
-  const tabs = [
-    { id: "info", label: "Informações", icon: <ShopOutlined /> },
-    { id: "address", label: "Endereço", icon: <EnvironmentOutlined /> },
-    { id: "scheduling", label: "Agendamento", icon: <ClockCircleOutlined /> },
-  ];
-
   return (
     <div className="space-y-8 animate-fade-in">
-      <SettingsHeader />
+      {/* Shop Header Profile - View/Edit Mode */}
+      <ShopHeaderProfile
+        shop={shop}
+        onSave={handleSaveProfile}
+        isSaving={saving}
+      />
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar de Navegação */}
-        <div className="w-full lg:w-64 flex-shrink-0">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-2 shadow-sm sticky top-24">
-            <nav className="flex flex-col gap-1">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as "info" | "address" | "scheduling")}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 shadow-sm"
-                      : "text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  <span className={activeTab === tab.id ? "text-blue-500 dark:text-blue-400" : "text-zinc-400"}>
-                    {tab.icon}
-                  </span>
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+      {/* Management Grid - Quick access cards */}
+      <ManagementGrid
+        shopId={shopId}
+        schedules={schedules}
+        blockedTimes={blockedTimes}
+        employeeCount={memberCount}
+      />
+
+      {/* Address Section */}
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            Informações Adicionais
+          </h3>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Scheduling Config Summary */}
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-2">
+              Intervalo de Slots
+            </p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+              {shop.slotInterval} <span className="text-sm font-normal text-zinc-500">min</span>
+            </p>
+          </div>
+
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-2">
+              Agendamento Antecipado
+            </p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+              {shop.maxAdvanceDays} <span className="text-sm font-normal text-zinc-500">dias</span>
+            </p>
+          </div>
+
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-2">
+              Antecedência Mínima
+            </p>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+              {shop.minAdvanceMinutes} <span className="text-sm font-normal text-zinc-500">min</span>
+            </p>
           </div>
         </div>
 
-        {/* Conteúdo Principal */}
-        <div className="flex-1 min-w-0">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
-            {activeTab === "info" && (
-              <div className="animate-fade-in">
-                <SettingsInfoForm form={infoForm} onFinish={handleSaveInfo} saving={saving} />
-              </div>
-            )}
-            {activeTab === "address" && (
-              <div className="animate-fade-in">
-                <SettingsAddressForm form={addressForm} onFinish={handleSaveAddress} saving={saving} />
-              </div>
-            )}
-            {activeTab === "scheduling" && (
-              <div className="animate-fade-in">
-                <SettingsConfigForm form={configForm} onFinish={handleSaveConfig} saving={saving} />
-              </div>
-            )}
-          </div>
-        </div>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-4">
+          Para alterar estas configurações, acesse{" "}
+          <a
+            href={`/admin/shop/${shopId}/settings/advanced`}
+            className="text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+          >
+            Configurações Avançadas
+          </a>.
+        </p>
       </div>
     </div>
   );

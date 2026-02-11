@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Avatar, Row, Col } from "antd";
+import { Avatar, Row, Col, Tooltip } from "antd";
 import {
   UserOutlined,
   CarOutlined,
   PhoneOutlined,
   MailOutlined,
-  IdcardOutlined
+  IdcardOutlined,
+  SwapOutlined
 } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
 import { sanitizeText, sanitizePlate, sanitizePhone } from "@/lib/security";
@@ -20,16 +21,31 @@ interface InfoItemProps {
   icon: React.ReactNode;
   label: string;
   value: string;
+  isOverride?: boolean;
   className?: string;
 }
 
-const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, className = "" }) => (
+/**
+ * InfoItem component with optional override indicator
+ * Shows a subtle badge when displaying override data from ShopClient
+ */
+const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, isOverride = false, className = "" }) => (
   <div className={`flex items-center gap-3 ${className}`}>
     <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400">
       {icon}
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0">{label}</p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0">{label}</p>
+        {isOverride && (
+          <Tooltip title="Dado personalizado pela loja">
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+              <SwapOutlined className="text-[8px]" />
+              Override
+            </span>
+          </Tooltip>
+        )}
+      </div>
       <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-0 truncate">
         {value}
       </p>
@@ -37,21 +53,54 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, className = "" 
   </div>
 );
 
+/**
+ * Helper to get contact data with fallback to shopClient override
+ * Priority: user data > shopClient custom data
+ */
+function getContactWithFallback(
+  userData: string | null | undefined,
+  overrideData: string | null | undefined
+): { value: string | null; isOverride: boolean } {
+  if (userData && userData.trim()) {
+    return { value: userData, isOverride: false };
+  }
+  if (overrideData && overrideData.trim()) {
+    return { value: overrideData, isOverride: true };
+  }
+  return { value: null, isOverride: false };
+}
+
 export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> = ({
   appointment
 }) => {
-  const clientName = appointment.user
-    ? sanitizeText(`${appointment.user.firstName} ${appointment.user.lastName || ''}`.trim())
+  const shopClient = appointment.shopClient;
+
+  // Client name with fallback
+  const clientNameData = getContactWithFallback(
+    appointment.user
+      ? `${appointment.user.firstName} ${appointment.user.lastName || ''}`.trim()
+      : null,
+    shopClient?.customName
+  );
+  const clientName = clientNameData.value
+    ? sanitizeText(clientNameData.value)
     : "Cliente Visitante";
 
-  const clientPhone = appointment.user?.phone
-    ? sanitizePhone(appointment.user.phone)
-    : null;
+  // Phone with fallback to shopClient.customPhone
+  const phoneData = getContactWithFallback(
+    appointment.user?.phone,
+    shopClient?.customPhone
+  );
+  const clientPhone = phoneData.value ? sanitizePhone(phoneData.value) : null;
 
-  const clientEmail = appointment.user?.email
-    ? sanitizeText(appointment.user.email)
-    : null;
+  // Email with fallback to shopClient.customEmail
+  const emailData = getContactWithFallback(
+    appointment.user?.email,
+    shopClient?.customEmail
+  );
+  const clientEmail = emailData.value ? sanitizeText(emailData.value) : null;
 
+  // Vehicle data
   const vehicleBrand = appointment.vehicle?.brand
     ? sanitizeText(appointment.vehicle.brand)
     : null;
@@ -87,10 +136,19 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
               className="bg-gradient-to-br from-blue-500 to-indigo-600 flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <h4 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-1 truncate">
-                {clientName}
-              </h4>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-0 truncate max-w-[180px]">
+                  {clientName}
+                </h4>
+                {clientNameData.isOverride && (
+                  <Tooltip title="Nome personalizado pela loja">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                      <SwapOutlined className="text-[8px]" />
+                    </span>
+                  </Tooltip>
+                )}
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 mt-1">
                 Cliente Recorrente
               </span>
             </div>
@@ -102,6 +160,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
                 icon={<PhoneOutlined />}
                 label="Telefone"
                 value={clientPhone}
+                isOverride={phoneData.isOverride}
               />
             )}
             {clientEmail && (
@@ -109,6 +168,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
                 icon={<MailOutlined />}
                 label="Email"
                 value={clientEmail}
+                isOverride={emailData.isOverride}
               />
             )}
             {!clientPhone && !clientEmail && (

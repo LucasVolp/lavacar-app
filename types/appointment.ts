@@ -5,6 +5,18 @@ import { Checklist } from './checklist';
 
 export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
 
+/**
+ * ShopClient override data for appointment context
+ * Used when the shop has custom contact info for a client
+ */
+export interface AppointmentShopClient {
+    id: string;
+    customName?: string;
+    customPhone?: string;
+    customEmail?: string;
+    notes?: string;
+}
+
 export interface Appointment {
     id: string;
     scheduledAt: string;
@@ -23,6 +35,9 @@ export interface Appointment {
     vehicle?: Vehicle;
     user?: User;
     checklist?: Checklist;
+
+    /** Shop-specific client data with override fields */
+    shopClient?: AppointmentShopClient;
 
     services: AppointmentService[];
 

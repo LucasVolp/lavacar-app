@@ -11,6 +11,8 @@ export interface Shop {
   phone: string;
   email?: string;
   status: ShopStatus;
+  logoUrl?: string;
+  bannerUrl?: string;
 
   // Endereço
   zipCode: string;
@@ -42,6 +44,8 @@ export interface CreateShopDto {
   document?: string;
   phone: string;
   email?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
   zipCode: string;
   street: string;
   number: string;

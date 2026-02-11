@@ -87,6 +87,15 @@ export const salesGoalService = {
 
   update: async (id: string, payload: UpdateSalesGoalPayload) => {
     try {
+      // Defensive Sanitization
+      if (payload.amount !== undefined) {
+        const numericAmount = Number(payload.amount);
+        if (isNaN(numericAmount) || numericAmount < 0) {
+          throw new Error("O valor da meta deve ser um número válido e positivo.");
+        }
+        payload.amount = numericAmount;
+      }
+
       const response: AxiosResponse<SalesGoal> = await axiosInstance.patch(`${base}/${id}`, payload);
       return response.data;
     } catch (error: unknown) {

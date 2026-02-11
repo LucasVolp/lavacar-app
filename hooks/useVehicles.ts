@@ -8,6 +8,7 @@ export const vehicleKeys = {
   lists: () => [...vehicleKeys.all, "list"] as const,
   list: (filters: Record<string, unknown>) => [...vehicleKeys.lists(), filters] as const,
   byUser: (userId: string) => [...vehicleKeys.lists(), { userId }] as const,
+  byPlate: (plate: string) => [...vehicleKeys.all, "plate", plate] as const,
   details: () => [...vehicleKeys.all, "detail"] as const,
   detail: (id: string) => [...vehicleKeys.details(), id] as const,
 };
@@ -92,5 +93,15 @@ export function useDeleteVehicle() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: vehicleKeys.all });
     },
+  });
+}
+
+export function useVehicleByPlate(plate: string | null, enabled = true) {
+  return useQuery({
+    queryKey: vehicleKeys.byPlate(plate || ""),
+    queryFn: () => vehicleService.findByPlate(plate!),
+    enabled: enabled && !!plate && plate.length >= 7,
+    staleTime: 1 * 60 * 1000,
+    retry: false,
   });
 }

@@ -4,3 +4,7 @@ export * from "./UpcomingAppointments";
 export * from "./PerformanceCard";
 export * from "./QuickActionsCard";
 export * from "./SalesGoalWidget";
+export * from "./QuickEntryWidget";
+export * from "./WalkInWizardModal";
+export * from "./PendingAlert";
+export * from "./ResolveModal";

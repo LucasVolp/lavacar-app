@@ -6,6 +6,7 @@ import { TeamOutlined, SearchOutlined, UserAddOutlined } from "@ant-design/icons
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useOrganizationMembers } from "@/hooks/useOrganizations";
 import { useUsers } from "@/hooks/useUsers";
+import { useAuth } from "@/contexts/AuthContext";
 import { MembersList, ExtendedMember } from "@/components/organization/members/MembersList";
 import { InviteEmployeeModal } from "@/components/admin/shop/employees";
 
@@ -13,6 +14,7 @@ const { Title, Text } = Typography;
 
 export default function ShopEmployeesPage() {
   const { shop, isLoading: isLoadingShop } = useShopAdmin();
+  const { user: currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
@@ -104,7 +106,7 @@ export default function ShopEmployeesPage() {
       </Card>
       </div>
 
-      <MembersList members={filteredMembers} />
+      <MembersList members={filteredMembers} currentUserId={currentUser?.id} />
 
       <InviteEmployeeModal
         open={isInviteModalOpen}

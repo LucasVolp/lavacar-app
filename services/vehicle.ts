@@ -53,6 +53,26 @@ export const vehicleService = {
     }
   },
 
+  findByPlate: async (plate: string): Promise<Vehicle | null> => {
+    try {
+      const normalized = plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const response: AxiosResponse<Vehicle> = await axiosInstance.get(`${base}/plate/${normalized}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return null;
+      }
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar veículo por placa (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao buscar veículo por placa:', error);
+      }
+      throw error;
+    }
+  },
+
   update: async (id: string, payload: Partial<Vehicle>) => {
     try {
       const response: AxiosResponse<Vehicle> = await axiosInstance.patch(`${base}/${id}`, payload);
