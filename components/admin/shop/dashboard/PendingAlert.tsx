@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Alert, Button, Badge, Typography } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { Button, Typography } from "antd";
+import { ExclamationCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
 
 const { Text } = Typography;
@@ -23,32 +23,31 @@ export const PendingAlert: React.FC<PendingAlertProps> = ({
   const count = overdueAppointments.length;
 
   return (
-    <Alert
-      type="warning"
-      showIcon
-      banner
-      icon={
-        <Badge count={count} size="small" offset={[2, -2]}>
-          <ExclamationCircleOutlined className="text-amber-500 dark:text-amber-400 text-lg" />
-        </Badge>
-      }
-      message={
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <Text className="text-amber-700 dark:text-amber-300 text-sm font-medium">
-            Existem {count} agendamento{count > 1 ? "s" : ""} pendente{count > 1 ? "s" : ""} de
-            baixa. O faturamento exibido pode estar desatualizado.
-          </Text>
-          <Button
-            type="primary"
-            size="small"
-            className="w-full sm:w-auto !bg-amber-500 hover:!bg-amber-600 !border-0 !text-white !shadow-sm !rounded-lg font-medium flex-shrink-0"
-            onClick={onResolveClick}
-          >
-            Resolver Pendências
-          </Button>
+    <div className="mb-6 rounded-2xl border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 p-4 transition-all duration-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/10">
+            <ExclamationCircleOutlined className="text-xl" />
+          </div>
+          <div className="flex flex-col">
+            <Text className="text-base font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+              Atenção Necessária
+            </Text>
+            <Text className="text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">
+              Existe{count > 1 ? "m" : ""} <span className="font-semibold text-amber-600 dark:text-amber-400">{count} agendamento{count > 1 ? "s" : ""}</span> pendente{count > 1 ? "s" : ""} de baixa. O faturamento pode estar desatualizado.
+            </Text>
+          </div>
         </div>
-      }
-      className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 [&_.ant-alert-message]:flex-1"
-    />
+        
+        <Button
+          type="primary"
+          onClick={onResolveClick}
+          className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 border-none shadow-amber-500/20 shadow-md rounded-xl h-10 px-6 font-medium flex items-center justify-center gap-2 shrink-0 transition-transform active:scale-95"
+        >
+          Resolver Pendências
+          <ArrowRightOutlined className="text-xs" />
+        </Button>
+      </div>
+    </div>
   );
 };

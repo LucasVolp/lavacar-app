@@ -1,21 +1,19 @@
-"use client";
-
 import React from "react";
-import { Typography, Card, List, Tag, Button, Empty, Space } from "antd";
+import { Card, Button, Empty, Tooltip, Badge } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   CarOutlined,
   ShopOutlined,
-  PlusOutlined,
   CloseCircleOutlined,
   CheckCircleOutlined,
   EyeOutlined,
   HistoryOutlined,
+  DollarOutlined,
+  RedoOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
-
-const { Text } = Typography;
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export interface ClientAppointmentFull {
   id: string;
@@ -41,15 +39,8 @@ interface ClientAppointmentsListFullProps {
   onClick?: (id: string) => void;
   isHistory?: boolean;
   isConfirming?: boolean;
+  lastShopInfo?: { name: string; slug: string } | null;
 }
-
-const statusConfig: Record<string, { color: string; label: string }> = {
-  PENDING: { color: "gold", label: "Pendente" },
-  CONFIRMED: { color: "blue", label: "Confirmado" },
-  IN_PROGRESS: { color: "processing", label: "Em Andamento" },
-  COMPLETED: { color: "green", label: "Concluído" },
-  CANCELED: { color: "red", label: "Cancelado" },
-};
 
 export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProps> = ({
   appointments,
@@ -58,146 +49,161 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
   onClick,
   isHistory = false,
   isConfirming = false,
+  lastShopInfo,
 }) => {
   return (
     <Card
       title={
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {isHistory ? (
-              <HistoryOutlined className="text-slate-500" />
-            ) : (
-              <CalendarOutlined className="text-indigo-500" />
-            )}
-            <span>{isHistory ? "Histórico" : "Próximos Agendamentos"}</span>
-          </div>
+        <div className="flex items-center gap-2">
+          {isHistory ? (
+            <HistoryOutlined className="text-zinc-500 dark:text-zinc-400" />
+          ) : (
+            <CalendarOutlined className="text-cyan-500" />
+          )}
+          <span className="font-semibold text-base">
+            {isHistory ? "Histórico" : "Próximos Agendamentos"}
+          </span>
         </div>
       }
-      className="border-slate-200 dark:border-slate-800"
+      className="border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-2xl bg-white dark:bg-zinc-900"
     >
       {appointments.length > 0 ? (
-        <List
-          itemLayout="vertical"
-          dataSource={appointments}
-          renderItem={(item) => {
-            const actions: React.ReactNode[] = [];
-
-            // View details button - always visible
-            actions.push(
-              <Button
-                key="view"
-                type="text"
-                icon={<EyeOutlined />}
-                onClick={() => onClick?.(item.id)}
-              >
-                Ver Detalhes
-              </Button>
-            );
-
-            // Actions for non-completed/canceled appointments
-            if (item.status === "PENDING") {
-              actions.push(
-                <Button
-                  key="confirm"
-                  type="text"
-                  icon={<CheckCircleOutlined />}
-                  onClick={() => onConfirm?.(item.id)}
-                  loading={isConfirming}
-                  className="text-green-600 hover:text-green-700"
-                >
-                  Confirmar
-                </Button>
-              );
-            }
-
-            if (item.status !== "COMPLETED" && item.status !== "CANCELED") {
-              actions.push(
-                <Button
-                  key="cancel"
-                  type="text"
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  onClick={() => onCancel?.(item.id)}
-                >
-                  Cancelar
-                </Button>
-              );
-            }
-
-            if (item.status === "COMPLETED") {
-              actions.push(
-                <Tag key="evaluated" color={item.isEvaluated ? "blue" : "default"}>
-                  {item.isEvaluated ? "Avaliado" : "Não Avaliado"}
-                </Tag>
-              );
-            }
+        <div className="flex flex-col space-y-4">
+          {appointments.map((item) => {
+            const servicesText = item.services?.map((s) => s.name).join(", ") || "Serviço";
 
             return (
-              <List.Item
-                actions={actions}
-                className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 -mx-4 px-4 rounded-lg transition-colors"
+              <div
+                key={item.id}
+                className="group p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 hover:border-cyan-200 dark:hover:border-cyan-800 transition-colors cursor-pointer"
                 onClick={() => onClick?.(item.id)}
               >
-                <List.Item.Meta
-                  avatar={
-                    <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg flex items-center justify-center">
-                      <CalendarOutlined className="text-indigo-500 text-2xl" />
-                    </div>
-                  }
-                  title={
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Text strong className="text-lg">
-                        {item.services.map((s) => s.name).join(", ") || "Serviço"}
-                      </Text>
-                      <Tag color={statusConfig[item.status]?.color || "default"}>
-                        {statusConfig[item.status]?.label || item.status}
-                      </Tag>
-                      <Text strong className="text-green-600">
-                        R$ {item.price.toFixed(2)}
-                      </Text>
-                    </div>
-                  }
-                  description={
-                    <Space direction="vertical" className="w-full">
-                      <div className="flex items-center gap-2">
-                        <ShopOutlined className="text-slate-400" />
-                        <Text type="secondary">{item.shop}</Text>
-                        {item.shopAddress && (
-                          <Text type="secondary" className="text-xs">
-                            • {item.shopAddress}
-                          </Text>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <Text type="secondary">
-                          <ClockCircleOutlined className="mr-1" />
-                          {item.date} às {item.time} ({item.duration}min)
-                        </Text>
-                        <Text type="secondary">
-                          <CarOutlined className="mr-1" />
-                          {item.vehicle} - {item.vehiclePlate}
-                        </Text>
-                      </div>
-                    </Space>
-                  }
-                />
-              </List.Item>
+                {/* Header row: service name + status + price */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="font-semibold text-sm text-zinc-800 dark:text-zinc-100 truncate">
+                      {servicesText}
+                    </span>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm shrink-0">
+                    <DollarOutlined className="mr-0.5" />
+                    R$ {item.price.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Info grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                  <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    <ShopOutlined className="text-cyan-500 shrink-0" />
+                    <span className="truncate">{item.shop}</span>
+                    {item.shopAddress && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
+                        <span className="truncate text-zinc-400 dark:text-zinc-500">{item.shopAddress}</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    <ClockCircleOutlined className="text-cyan-500 shrink-0" />
+                    <span>{item.date} às {item.time}</span>
+                    {item.duration > 0 && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
+                        <span>{item.duration}min</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    <CarOutlined className="text-cyan-500 shrink-0" />
+                    <span className="truncate">{item.vehicle || "Veículo removido"}</span>
+                    {item.vehiclePlate && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
+                        <span className="font-mono uppercase text-[10px]">{item.vehiclePlate}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions row */}
+                <div
+                  className="flex items-center gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-700"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Tooltip title="Ver detalhes">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<EyeOutlined />}
+                      onClick={() => onClick?.(item.id)}
+                      className="!text-xs text-zinc-500 hover:!text-cyan-600"
+                    >
+                      Detalhes
+                    </Button>
+                  </Tooltip>
+
+                  {item.status === "PENDING" && (
+                    <Tooltip title="Confirmar presença">
+                      <Button
+                        type="primary"
+                        size="small"
+                        icon={<CheckCircleOutlined />}
+                        onClick={() => onConfirm?.(item.id)}
+                        loading={isConfirming}
+                        className="!bg-emerald-600 hover:!bg-emerald-500 !border-emerald-600 !shadow-none !text-xs"
+                      >
+                        Confirmar
+                      </Button>
+                    </Tooltip>
+                  )}
+
+                  {item.status !== "COMPLETED" && item.status !== "CANCELED" && (
+                    <Tooltip title="Cancelar agendamento">
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        icon={<CloseCircleOutlined />}
+                        onClick={() => onCancel?.(item.id)}
+                        className="!shadow-none !text-xs"
+                      >
+                        Cancelar
+                      </Button>
+                    </Tooltip>
+                  )}
+
+                  {item.status === "COMPLETED" && (
+                    <Badge
+                      status={item.isEvaluated ? "success" : "default"}
+                      text={
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {item.isEvaluated ? "Avaliado" : "Não Avaliado"}
+                        </span>
+                      }
+                    />
+                  )}
+                </div>
+              </div>
             );
-          }}
-        />
+          })}
+        </div>
       ) : (
         <Empty
           description={
-            isHistory
-              ? "Nenhum agendamento no histórico"
-              : "Nenhum agendamento pendente"
+            <span className="text-zinc-500 dark:text-zinc-400">
+              {isHistory
+                ? "Nenhum agendamento no histórico"
+                : "Nenhum agendamento pendente"}
+            </span>
           }
           image={Empty.PRESENTED_IMAGE_SIMPLE}
+          className="my-8"
         >
-          {!isHistory && (
-            <Link href="/">
-              <Button type="primary" icon={<PlusOutlined />}>
-                Agendar Agora
+          {!isHistory && lastShopInfo && (
+            <Link href={`/shop/${lastShopInfo.slug}/booking`}>
+              <Button type="primary" icon={<RedoOutlined />}>
+                Reagendar Novamente
               </Button>
             </Link>
           )}

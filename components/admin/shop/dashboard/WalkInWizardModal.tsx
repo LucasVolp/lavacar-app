@@ -284,7 +284,7 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
             <CarOutlined />
           </div>
           <div className="flex flex-col">
-            <span>Nova Entrada (Walk-in)</span>
+            <span>Nova Entrada</span>
             <span className="text-xs font-normal text-zinc-500 dark:text-zinc-400 mt-0.5">
               Registre um novo atendimento rapidamente
             </span>

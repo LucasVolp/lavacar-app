@@ -13,6 +13,8 @@ export interface AuthUser {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  hasPassword?: boolean;
+  provider?: string;
 }
 
 export interface LoginCredentials {

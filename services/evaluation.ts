@@ -1,12 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
-import { Evaluation } from '../types/evaluation';
+import { Evaluation, EvaluationWithRelations } from '../types/evaluation';
 import { PaginatedResult } from '@/types/pagination';
 
 const base = '/evaluations';
 
 export interface EvaluationFilters {
   shopId?: string;
+  userId?: string;
   rating?: number;
   page?: number;
   perPage?: number;
@@ -29,7 +30,7 @@ export const evaluationService = {
     }
   },
 
-  findAll: async (filters?: EvaluationFilters): Promise<PaginatedResult<Evaluation>> => {
+  findAll: async (filters?: EvaluationFilters): Promise<PaginatedResult<EvaluationWithRelations>> => {
     try {
       const params = new URLSearchParams();
       if (filters) {
@@ -39,7 +40,7 @@ export const evaluationService = {
           }
         });
       }
-      const response: AxiosResponse<PaginatedResult<Evaluation>> = await axiosInstance.get(base, { params });
+      const response: AxiosResponse<PaginatedResult<EvaluationWithRelations>> = await axiosInstance.get(base, { params });
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

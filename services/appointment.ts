@@ -25,7 +25,7 @@ export interface CreateAppointmentRequest {
 export interface AppointmentFilters {
   shopId?: string;
   userId?: string;
-  status?: AppointmentStatus;
+  status?: AppointmentStatus | AppointmentStatus[];
   startDate?: string;
   endDate?: string;
   page?: number;
@@ -55,7 +55,11 @@ export const appointmentService = {
       if (filters) {
         Object.entries(filters).forEach(([k, v]) => {
           if (v !== undefined && v !== null && v !== '') {
-            params.append(k, String(v));
+            if (Array.isArray(v)) {
+              params.append(k, v.join(','));
+            } else {
+              params.append(k, String(v));
+            }
           }
         });
       }

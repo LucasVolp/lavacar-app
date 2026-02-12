@@ -6,6 +6,7 @@ import { CalendarOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import 'dayjs/locale/pt-br';
 import { Shop } from "@/types/shop";
+import { useAuth } from "@/contexts/AuthContext";
 
 dayjs.locale('pt-br');
 
@@ -17,13 +18,13 @@ interface DashboardHeaderProps {
   revenue: number;
 }
 
-
-
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   shop,
   totalAppointments,
   revenue,
 }) => {
+  const { user } = useAuth();
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-white to-zinc-100 dark:from-zinc-900 dark:to-black rounded-3xl p-8 border border-zinc-200 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20 transition-all duration-300">
       <div className="absolute top-0 right-0 p-3 opacity-5 pointer-events-none text-zinc-900 dark:text-white">
@@ -39,7 +40,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </span>
             </div>
             <Title level={2} className="!text-zinc-900 dark:!text-white !mb-1 !font-bold tracking-tight">
-              Olá {}! Bem-vindo ao {shop?.name}
+               Olá, {user?.firstName || "Usuário"}! Bem-vindo ao {shop?.name}
             </Title>
             <Text className="text-zinc-500 dark:text-zinc-400 text-lg">
               {dayjs().format("dddd, DD [de] MMMM [de] YYYY")}

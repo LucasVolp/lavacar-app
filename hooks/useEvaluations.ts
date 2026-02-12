@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { evaluationService, EvaluationFilters } from "@/services/evaluation";
+import type { CreateEvaluationPayload } from "@/types/evaluation";
 
 export function useShopEvaluations(shopId: string | null, filters: Omit<EvaluationFilters, 'shopId'> = {}, enabled = true) {
   const queryFilters = { ...filters, shopId: shopId! };
@@ -50,6 +51,17 @@ export function useCuratedReviews(
   };
 }
 
+export function useUserEvaluations(userId: string | null, filters: Omit<EvaluationFilters, 'userId'> = {}, enabled = true) {
+  const queryFilters = { ...filters, userId: userId! };
+  return useQuery({
+    queryKey: ["evaluations", "user", userId, filters],
+    queryFn: () => evaluationService.findAll(queryFilters),
+    enabled: enabled && !!userId,
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useEvaluationSummary(shopId: string | null, enabled = true) {
   const { data: evaluationsData, ...rest } = useShopEvaluations(shopId, {}, enabled);
   const evaluations = evaluationsData?.data ?? [];
@@ -82,6 +94,18 @@ export function useDeleteEvaluation() {
     mutationFn: (id: string) => evaluationService.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+    },
+  });
+}
+
+export function useCreateEvaluation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateEvaluationPayload) => evaluationService.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
 }

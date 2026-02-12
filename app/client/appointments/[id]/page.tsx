@@ -38,30 +38,30 @@ const { TextArea } = Input;
 
 const statusConfig: Record<
   string,
-  { color: string; label: string; icon: React.ReactNode }
+  { className: string; label: string; icon: React.ReactNode }
 > = {
   PENDING: {
-    color: "gold",
+    className: "bg-amber-100/50 text-amber-700 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30 dark:shadow-[0_0_10px_rgba(245,158,11,0.2)]",
     label: "Pendente",
     icon: <ExclamationCircleOutlined />,
   },
   CONFIRMED: {
-    color: "blue",
+    className: "bg-blue-100/50 text-blue-700 border border-blue-300 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 dark:shadow-[0_0_10px_rgba(59,130,246,0.2)]",
     label: "Confirmado",
     icon: <CheckCircleOutlined />,
   },
   IN_PROGRESS: {
-    color: "processing",
+    className: "bg-indigo-100/50 text-indigo-700 border border-indigo-300 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 dark:shadow-[0_0_10px_rgba(99,102,241,0.2)]",
     label: "Em Andamento",
     icon: <ClockCircleOutlined />,
   },
   COMPLETED: {
-    color: "green",
+    className: "bg-emerald-100/50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 dark:shadow-[0_0_10px_rgba(16,185,129,0.2)]",
     label: "Concluído",
     icon: <CheckCircleOutlined />,
   },
   CANCELED: {
-    color: "red",
+    className: "bg-red-100/50 text-red-700 border border-red-300 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 dark:shadow-[0_0_10px_rgba(239,68,68,0.2)]",
     label: "Cancelado",
     icon: <CloseCircleOutlined />,
   },
@@ -191,20 +191,20 @@ export default function AppointmentDetailPage() {
             <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => router.push("/client/appointments")}
-            className="dark:bg-slate-800 dark:border-slate-700"
+            className="dark:bg-zinc-800 dark:border-zinc-700"
             >
             Voltar
             </Button>
             <div>
-            <h1 className="text-2xl font-bold m-0 dark:text-slate-100">Agendamento #{appointment.id.substring(0, 6)}</h1>
-            <p className="text-slate-500 m-0 text-sm">
+            <h1 className="text-2xl font-bold m-0 dark:text-zinc-100">Agendamento #{appointment.id.substring(0, 6)}</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 m-0 text-sm">
                 Criado em {dayjs(appointment.createdAt).format("DD/MM/YYYY [às] HH:mm")}
             </p>
             </div>
         </div>
         
         <div className="flex items-center gap-3">
-             <Tag color={status.color} icon={status.icon} className="px-3 py-1 text-sm font-medium rounded-full border-0 m-0">
+             <Tag icon={status.icon} className={`px-3 py-1 text-sm font-medium rounded-full border m-0 ${status.className}`}>
                 {status.label}
             </Tag>
             
@@ -221,7 +221,7 @@ export default function AppointmentDetailPage() {
                  </Button>
             )}
             {canModify && (
-               <Tooltip title="Cancelar agendamento" color="#ef4444">
+               <Tooltip title="Cancelar agendamento">
                 <Button 
                     type="text"
                     danger
@@ -241,29 +241,29 @@ export default function AppointmentDetailPage() {
         <div className="lg:col-span-2 flex flex-col gap-8">
           
           {/* Date & Time Card */}
-          <Card className="border-slate-200 dark:border-slate-800 dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+          <Card className="border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex flex-col items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/10">
-                <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+              <div className="w-20 h-20 bg-cyan-50 dark:bg-cyan-900/20 rounded-2xl flex flex-col items-center justify-center shrink-0 border border-cyan-100 dark:border-cyan-500/10">
+                <span className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
                   {scheduledDate.format("DD")}
                 </span>
-                <span className="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-cyan-500 dark:text-cyan-400 uppercase tracking-wider">
                   {scheduledDate.format("MMM")}
                 </span>
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold m-0 text-slate-800 dark:text-slate-100 capitalize">
+                <h3 className="text-xl font-bold m-0 text-zinc-800 dark:text-zinc-100 capitalize">
                   {scheduledDate.format("dddd")}
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 m-0 mb-3">
+                <p className="text-zinc-500 dark:text-zinc-400 m-0 mb-3">
                     {scheduledDate.format("DD [de] MMMM [de] YYYY")}
                 </p>
-                <div className="flex flex-wrap items-center gap-4 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700/50">
+                <div className="flex flex-wrap items-center gap-4 text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-lg border border-zinc-100 dark:border-zinc-700/50">
                   <span className="flex items-center gap-2 font-medium">
-                    <ClockCircleOutlined className="text-indigo-500" />
+                    <ClockCircleOutlined className="text-cyan-500" />
                     {scheduledDate.format("HH:mm")} - {endDate.format("HH:mm")}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 hidden sm:block" />
+                  <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 hidden sm:block" />
                   <span className="text-sm">
                      Duração estimada: <span className="font-semibold">{formatDuration(appointment.totalDuration)}</span>
                   </span>
@@ -275,21 +275,21 @@ export default function AppointmentDetailPage() {
           {/* Shop Card */}
           <Card
             title={
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                <ShopOutlined className="text-indigo-500" />
+              <div className="flex items-center gap-2 text-zinc-800 dark:text-zinc-100">
+                <ShopOutlined className="text-cyan-500" />
                 <span>Estabelecimento</span>
               </div>
             }
-            className="border-slate-200 dark:border-slate-800 dark:bg-slate-900 shadow-sm rounded-2xl"
+            className="border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm rounded-2xl"
           >
             {appointment.shop ? (
               <div className="flex items-start gap-4">
                   <div className="mt-1">
-                      <EnvironmentOutlined className="text-xl text-slate-400" />
+                      <EnvironmentOutlined className="text-xl text-zinc-400" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold m-0 text-slate-800 dark:text-slate-100">{appointment.shop.name}</h4>
-                    <div className="text-slate-500 dark:text-slate-400 mt-2 space-y-1">
+                    <h4 className="text-lg font-bold m-0 text-zinc-800 dark:text-zinc-100">{appointment.shop.name}</h4>
+                    <div className="text-zinc-500 dark:text-zinc-400 mt-2 space-y-1">
                         {address?.line1 && <p className="m-0">{address.line1}</p>}
                         {address?.line2 && <p className="m-0">{address.line2}</p>}
                         {address?.line3 && <p className="m-0">{address.line3}</p>}
@@ -297,7 +297,7 @@ export default function AppointmentDetailPage() {
                   </div>
               </div>
             ) : (
-              <p className="text-slate-500 italic">Informações do estabelecimento não disponíveis</p>
+              <p className="text-zinc-500 italic">Informações do estabelecimento não disponíveis</p>
             )}
           </Card>
 
@@ -305,35 +305,35 @@ export default function AppointmentDetailPage() {
            <Link href={appointment.vehicle ? `/client/vehicles/${appointment.vehicle.id}` : '#'} className={!appointment.vehicle ? 'pointer-events-none' : ''}>
             <Card
                 title={
-                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                    <CarOutlined className="text-indigo-500" />
+                <div className="flex items-center gap-2 text-zinc-800 dark:text-zinc-100">
+                    <CarOutlined className="text-cyan-500" />
                     <span>Veículo</span>
                 </div>
                 }
-                extra={appointment.vehicle && <RightOutlined className="text-slate-400" />}
-                className="border-slate-200 dark:border-slate-800 dark:bg-slate-900 shadow-sm rounded-2xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors cursor-pointer group"
+                extra={appointment.vehicle && <RightOutlined className="text-zinc-400" />}
+                className="border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm rounded-2xl hover:border-cyan-300 dark:hover:border-cyan-700 transition-colors cursor-pointer group"
             >
                 {appointment.vehicle ? (
                 <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 transition-colors">
-                      <CarOutlined className="text-3xl text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                    <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center group-hover:bg-cyan-50 dark:group-hover:bg-cyan-900/20 transition-colors">
+                      <CarOutlined className="text-3xl text-zinc-400 group-hover:text-cyan-500 transition-colors" />
                     </div>
                     <div>
-                    <h4 className="font-bold text-lg m-0 text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    <h4 className="font-bold text-lg m-0 text-zinc-800 dark:text-zinc-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                         {appointment.vehicle.brand} {appointment.vehicle.model}
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
-                        <Tag className="font-mono m-0 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                        <Tag className="font-mono m-0 bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300">
                             {appointment.vehicle.plate}
                         </Tag>
-                        <span className="text-slate-400 text-sm">
+                        <span className="text-zinc-400 text-sm">
                              {appointment.vehicle.color && appointment.vehicle.year ? `${appointment.vehicle.color} • ${appointment.vehicle.year}` : ''}
                         </span>
                     </div>
                     </div>
                 </div>
                 ) : (
-                <p className="text-slate-500 italic">Veículo não disponível</p>
+                <p className="text-zinc-500 italic">Veículo não disponível</p>
                 )}
             </Card>
            </Link>
@@ -344,32 +344,32 @@ export default function AppointmentDetailPage() {
             {/* Services Summary */}
             <Card
                 title={
-                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                    <CalendarOutlined className="text-indigo-500" />
+                <div className="flex items-center gap-2 text-zinc-800 dark:text-zinc-100">
+                    <CalendarOutlined className="text-cyan-500" />
                     <span>Resumo do Serviço</span>
                 </div>
                 }
-                className="border-slate-200 dark:border-slate-800 dark:bg-slate-900 shadow-sm rounded-2xl"
+                className="border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm rounded-2xl"
             >
                 <div className="space-y-4">
                     {appointment.services.map((service, index) => (
                         <div
                         key={index}
-                        className="flex justify-between items-start pb-4 border-b border-dashed border-slate-100 dark:border-slate-800 last:border-0 last:pb-0"
+                        className="flex justify-between items-start pb-4 border-b border-dashed border-zinc-100 dark:border-zinc-800 last:border-0 last:pb-0"
                         >
                         <div>
-                            <p className="font-medium m-0 text-slate-700 dark:text-slate-200">{service.serviceName}</p>
-                            <p className="text-xs text-slate-400 m-0 mt-1">{service.duration} min</p>
+                            <p className="font-medium m-0 text-zinc-700 dark:text-zinc-200">{service.serviceName}</p>
+                            <p className="text-xs text-zinc-400 m-0 mt-1">{service.duration} min</p>
                         </div>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">
                             R$ {Number(service.servicePrice).toFixed(2)}
                         </span>
                         </div>
                     ))}
                     
-                    <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800">
                         <div className="flex justify-between items-center text-lg">
-                            <span className="font-bold text-slate-800 dark:text-slate-100">Total Estimado</span>
+                            <span className="font-bold text-zinc-800 dark:text-zinc-100">Total Estimado</span>
                             <span className="font-bold text-green-600 dark:text-green-500">
                                 R$ {Number(appointment.totalPrice).toFixed(2)}
                             </span>
@@ -404,7 +404,7 @@ export default function AppointmentDetailPage() {
           loading: cancelAppointment.isPending,
         }}
       >
-        <p className="mb-4 text-slate-600 dark:text-slate-300">
+        <p className="mb-4 text-zinc-600 dark:text-zinc-300">
           Tem certeza que deseja cancelar este agendamento? Esta ação não pode
           ser desfeita e liberará o horário para outros clientes.
         </p>
@@ -413,7 +413,7 @@ export default function AppointmentDetailPage() {
           value={cancelReason}
           onChange={(e) => setCancelReason(e.target.value)}
           rows={3}
-          className="dark:bg-slate-800 dark:border-slate-700"
+          className="dark:bg-zinc-800 dark:border-zinc-700"
         />
       </Modal>
     </div>

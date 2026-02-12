@@ -1,20 +1,13 @@
 "use client";
 
 import React from "react";
-import { Typography, Card, Space, Button } from "antd";
-import { CarOutlined, RightOutlined } from "@ant-design/icons";
+import { Card, Button, Empty } from "antd";
+import { CarOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import { VehicleCard } from "@/components/client/VehicleCard";
+import type { VehicleCardData } from "@/components/client/VehicleCard";
 
-const { Text } = Typography;
-
-export interface Vehicle {
-  id: string;
-  plate: string;
-  brand: string;
-  model: string;
-  color: string;
-  year: number;
-}
+export type Vehicle = VehicleCardData;
 
 interface VehiclesListProps {
   vehicles: Vehicle[];
@@ -25,50 +18,36 @@ export const VehiclesList: React.FC<VehiclesListProps> = ({ vehicles }) => {
     <Card
       title={
         <div className="flex items-center gap-2">
-          <CarOutlined className="text-indigo-500 text-lg" />
-          <span className="font-semibold text-lg">Meus Veículos</span>
+          <CarOutlined className="text-cyan-500 text-lg" />
+          <span className="font-semibold text-base">Meus Veículos</span>
         </div>
       }
       extra={
         <Link href="/client/vehicles">
-          <Button type="text" size="small" className="text-slate-500 hover:text-indigo-500 font-medium">
+          <Button type="link" size="small" className="font-medium">
             Gerenciar
           </Button>
         </Link>
       }
-      className="border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl overflow-hidden"
+      className="border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-2xl bg-white dark:bg-zinc-900"
     >
-      <Space direction="vertical" className="w-full" size="middle">
-        {vehicles.length === 0 ? (
-           <div className="text-center py-6 text-slate-500">
-             Nenhum veículo cadastrado.
-           </div>
-        ) : (
-          vehicles.map((vehicle) => (
-            <div
-              key={vehicle.id}
-              className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-[#27272a] rounded-xl hover:bg-slate-100 dark:hover:bg-[#3f3f46] transition-all duration-300 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
-            >
-              <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center shrink-0">
-                <CarOutlined className="text-indigo-500 text-xl" />
-              </div>
-              <div className="flex-grow min-w-0">
-                <Text strong className="block text-base mb-1 truncate">
-                  {vehicle.brand} {vehicle.model}
-                </Text>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <span className="bg-white dark:bg-[#18181b] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 font-mono">
-                        {vehicle.plate}
-                    </span>
-                    <span>•</span>
-                    <span className="capitalize">{vehicle.color}</span>
-                </div>
-              </div>
-              <RightOutlined className="text-slate-400" />
-            </div>
-          ))
-        )}
-      </Space>
+      {vehicles.length === 0 ? (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <span className="text-zinc-500 dark:text-zinc-400">
+              Nenhum veículo cadastrado
+            </span>
+          }
+          className="my-4"
+        />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {vehicles.map((vehicle) => (
+            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+          ))}
+        </div>
+      )}
     </Card>
   );
 };

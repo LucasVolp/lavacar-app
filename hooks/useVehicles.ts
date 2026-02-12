@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { vehicleService } from "@/services/vehicle";
-import { CreateVehiclePayload, UpdateVehiclePayload } from "@/types/vehicle";
+import { CreateVehiclePayload, UpdateVehiclePayload, Vehicle } from "@/types/vehicle";
 
 // Query Keys
 export const vehicleKeys = {
@@ -19,23 +19,25 @@ export const vehicleKeys = {
 export function useVehicles(enabled = true) {
   return useQuery({
     queryKey: vehicleKeys.lists(),
-    queryFn: () => vehicleService.findAll(),
+    queryFn: async (): Promise<Vehicle[]> => {
+      const result = await vehicleService.findAll();
+      return result.data ?? [];
+    },
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 /**
  * Hook para buscar veículos de um usuário específico
- * Nota: O backend deve filtrar automaticamente pelo token JWT
+ * Usa o filtro userId do backend para buscar apenas os veículos do usuário.
  */
 export function useUserVehicles(userId: string | null, enabled = true) {
   return useQuery({
     queryKey: vehicleKeys.byUser(userId || ""),
-    queryFn: async () => {
-      const allVehicles = await vehicleService.findAll();
-      // Filtra pelo userId no frontend caso o backend não faça
-      return allVehicles.filter((vehicle) => vehicle.userId === userId);
+    queryFn: async (): Promise<Vehicle[]> => {
+      const result = await vehicleService.findAll({ userId: userId!, perPage: 100 });
+      return result.data ?? [];
     },
     enabled: enabled && !!userId,
     staleTime: 5 * 60 * 1000,

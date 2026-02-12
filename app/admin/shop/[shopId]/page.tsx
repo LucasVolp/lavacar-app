@@ -9,7 +9,7 @@ import {
   ContactsOutlined,
 } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
-import { useAppointments } from "@/hooks/useAppointments";
+import { useShopAppointments, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
 import { useServicesByShop } from "@/hooks/useServices";
 import { useShopSchedules } from "@/hooks/useSchedules";
 import { useBlockedTimesByShop } from "@/hooks/useBlockedTimes";
@@ -37,6 +37,7 @@ import {
   PendingAlert,
   ResolveModal,
 } from "@/components/admin/shop/dashboard";
+import { ActiveServicesWidget } from "@/components/admin/shop/dashboard/ActiveServicesWidget";
 import type { Appointment } from "@/types/appointment";
 import type { Services } from "@/types/services";
 import type { Vehicle } from "@/types/vehicle";
@@ -57,7 +58,20 @@ export default function ShopDashboardPage() {
   const {
     data: appointmentsData,
     isLoading: isLoadingAppointments,
-  } = useAppointments({ shopId, perPage: 500 }, !!shopId);
+  } = useShopAppointments(shopId, { perPage: 500 }, !!shopId);
+
+  // Fetch specifically pending/confirmed/waiting/in_progress appointments to ensure we catch overdue ones
+  // even if there are many completed appointments cluttering the main list
+  const { data: activeStatusData } = useShopAppointments(
+    shopId,
+    { 
+      status: ["PENDING", "WAITING", "CONFIRMED", "IN_PROGRESS"],
+      perPage: 200 
+    },
+    !!shopId
+  );
+
+  const updateStatus = useUpdateAppointmentStatus();
 
   const { data: servicesData } = useServicesByShop(shopId, { perPage: 500 });
   const { data: schedules = [] } = useShopSchedules(shopId);
@@ -68,6 +82,11 @@ export default function ShopDashboardPage() {
     () => appointmentsData?.data ?? [],
     [appointmentsData]
   );
+  const activeStatusAppointments: Appointment[] = useMemo(
+    () => activeStatusData?.data ?? [],
+    [activeStatusData]
+  );
+  
   const services: Services[] = useMemo(
     () => servicesData?.data ?? [],
     [servicesData]
@@ -85,6 +104,22 @@ export default function ShopDashboardPage() {
     () => appointments.filter((apt) => isSameDay(parseISO(apt.scheduledAt), today)),
     [appointments, today]
   );
+
+  const activeAppointments = useMemo(
+    () => todayAppointments.filter((a) => a.status === "IN_PROGRESS"),
+    [todayAppointments]
+  );
+
+  const handleCompleteService = async (id: string) => {
+    try {
+      await updateStatus.mutateAsync({
+        id,
+        status: "COMPLETED",
+      });
+    } catch (error) {
+      console.error("Failed to complete service", error);
+    }
+  };
 
   const weekAppointments = useMemo(
     () =>
@@ -155,14 +190,15 @@ export default function ShopDashboardPage() {
   // Agendamentos atrasados: status pendente/aguardando/confirmado com horário de término já passado
   const overdueAppointments = useMemo(() => {
     const now = new Date();
-    return todayAppointments.filter((apt) => {
+    // Use activeStatusAppointments instead of appointments to ensure we have them all
+    return activeStatusAppointments.filter((apt) => {
       const isPendingStatus = ["PENDING", "WAITING", "CONFIRMED"].includes(
         apt.status
       );
       const isOverdue = apt.endTime && isBefore(parseISO(apt.endTime), now);
       return isPendingStatus && isOverdue;
     });
-  }, [todayAppointments]);
+  }, [activeStatusAppointments]);
 
   const handleOpenWizard = useCallback(
     (plate: string, vehicle: Vehicle | null, user: User | null) => {
@@ -255,6 +291,12 @@ export default function ShopDashboardPage() {
           weekRevenue: stats.weekRevenue,
           weekAppointmentsCount: stats.weekAppointmentsCount,
         }}
+      />
+
+      <ActiveServicesWidget 
+        appointments={activeAppointments} 
+        onComplete={handleCompleteService}
+        isLoading={updateStatus.isPending}
       />
 
       <Row gutter={[24, 24]}>

@@ -14,13 +14,14 @@ export const appointmentKeys = {
   detail: (id: string) => [...appointmentKeys.details(), id] as const,
 };
 
-export function useAppointments(filters: AppointmentFilters = {}, enabled = true) {
+export function useAppointments(filters: AppointmentFilters = {}, enabled = true, options?: { refetchInterval?: number }) {
   return useQuery({
     queryKey: appointmentKeys.list(filters),
     queryFn: () => appointmentService.findAll(filters),
     enabled,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
+    refetchInterval: options?.refetchInterval,
   });
 }
 
@@ -32,6 +33,7 @@ export function useShopAppointments(shopId: string | null, filters: Omit<Appoint
     enabled: enabled && !!shopId,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
+    refetchInterval: 15000, // Poll every 15 seconds
   });
 }
 
@@ -43,6 +45,7 @@ export function useUserAppointments(userId: string | null, filters: Omit<Appoint
     enabled: enabled && !!userId,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
+    refetchInterval: 60000, // Poll every 60 seconds for real-time updates
   });
 }
 

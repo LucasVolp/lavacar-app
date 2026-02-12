@@ -260,7 +260,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
           <div className="relative z-10">
             <Input.Search
               size="large"
-              placeholder="Digitar Placa (Walk-in)..."
+              placeholder="Digitar Placa..."
               maxLength={7}
               value={plateInput}
               onChange={handleInputChange}

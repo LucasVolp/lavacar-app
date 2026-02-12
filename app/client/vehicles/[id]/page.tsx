@@ -51,26 +51,26 @@ export default function VehicleDetailPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
+    <div className="max-w-3xl mx-auto py-8 px-4 animate-fade-in">
       <div className="flex items-center gap-4 mb-8">
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => router.back()}
-          className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
+          className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300"
         >
           Voltar
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold m-0 dark:text-slate-100">{vehicle.brand} {vehicle.model}</h1>
-          <p className="text-slate-500 m-0 dark:text-slate-400">Gerencie as informações deste veículo</p>
+          <h1 className="text-2xl font-bold m-0 dark:text-zinc-100">{vehicle.brand} {vehicle.model}</h1>
+          <p className="text-zinc-500 m-0 dark:text-zinc-400">Gerencie as informações deste veículo</p>
         </div>
       </div>
 
-      <Card className="border-slate-200 dark:border-slate-800 dark:bg-slate-900 shadow-sm">
+      <Card className="border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm rounded-2xl">
         <div className="flex flex-col md:flex-row gap-8 items-start">
           <div className="w-full md:w-auto flex justify-center">
-            <div className="w-48 h-48 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700">
-               <CarOutlined className="text-6xl text-slate-300 dark:text-slate-600" />
+            <div className="w-48 h-48 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center border-2 border-dashed border-zinc-200 dark:border-zinc-700">
+               <CarOutlined className="text-6xl text-zinc-300 dark:text-zinc-600" />
             </div>
           </div>
 
@@ -82,7 +82,7 @@ export default function VehicleDetailPage() {
                 labelStyle={{ width: '140px', fontWeight: 500 }}
             >
               <Descriptions.Item label="Placa">
-                <Tag className="font-mono text-base px-2 py-1 m-0 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                <Tag className="font-mono text-base px-2 py-1 m-0 bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
                     {vehicle.plate}
                 </Tag>
               </Descriptions.Item>

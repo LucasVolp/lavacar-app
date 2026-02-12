@@ -16,6 +16,7 @@ import {
   HomeOutlined,
   MoonOutlined,
   SunOutlined,
+  StarOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -92,6 +93,11 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           key: "/client/history",
           icon: <HistoryOutlined style={{ fontSize: "18px", color: "#64748b" }} />,
           label: <span className="font-medium">Histórico</span>,
+        },
+        {
+          key: "/client/evaluations",
+          icon: <StarOutlined style={{ fontSize: "18px", color: "#f59e0b" }} />,
+          label: <span className="font-medium">Minhas Avaliações</span>,
         },
       ],
     },

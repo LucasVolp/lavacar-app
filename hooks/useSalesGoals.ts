@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { salesGoalService } from "@/services/salesGoal";
-import { CreateSalesGoalPayload, UpdateSalesGoalPayload } from "@/types/salesGoal";
+import { CreateSalesGoalPayload, UpdateSalesGoalPayload, SalesGoal } from "@/types/salesGoal";
 
 // Query Keys
 export const salesGoalKeys = {

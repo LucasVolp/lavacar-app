@@ -181,6 +181,11 @@ export default function ThemeAwareConfigProvider({
             itemSelectedBg: isDarkMode ? "rgba(99, 102, 241, 0.2)" : "rgba(99, 102, 241, 0.1)",
             itemSelectedColor: colors.primary,
           },
+          Tooltip: {
+            colorBgSpotlight: isDarkMode ? '#18181b' : '#ffffff',
+            colorTextLightSolid: isDarkMode ? '#ffffff' : '#000000',
+            fontSize: 12,
+          },
         },
       }}
     >

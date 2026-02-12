@@ -1,8 +1,15 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { Vehicle } from '../types/vehicle';
+import { PaginatedResult } from '@/types/pagination';
 
 const base = '/vehicle';
+
+export interface VehicleFilters {
+  userId?: string;
+  page?: number;
+  perPage?: number;
+}
 
 export const vehicleService = {
   create: async (payload: Partial<Vehicle>) => {
@@ -21,10 +28,18 @@ export const vehicleService = {
     }
   },
 
-  findAll: async () => {
+  findAll: async (filters?: VehicleFilters): Promise<PaginatedResult<Vehicle>> => {
     try {
-      const response: AxiosResponse<Vehicle[]> = await axiosInstance.get(base);
-      return response.data || [];
+      const params = new URLSearchParams();
+      if (filters) {
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
+      const response: AxiosResponse<PaginatedResult<Vehicle>> = await axiosInstance.get(base, { params });
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;

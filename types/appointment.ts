@@ -35,6 +35,11 @@ export interface Appointment {
     vehicle?: Vehicle;
     user?: User;
     checklist?: Checklist;
+    evaluation?: {
+        id: string;
+        rating: number;
+        comment?: string;
+    };
 
     /** Shop-specific client data with override fields */
     shopClient?: AppointmentShopClient;

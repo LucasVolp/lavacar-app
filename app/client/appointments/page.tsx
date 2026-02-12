@@ -42,20 +42,20 @@ export default function ClientAppointmentsPage() {
       id: app.id,
       shop: app.shop?.name || "Loja desconhecida",
       shopAddress: app.shop
-        ? `${app.shop.street}, ${app.shop.neighborhood}`
+        ? [app.shop.street, app.shop.neighborhood].filter(Boolean).join(", ")
         : "",
-      services: app.services?.map((s: { serviceName?: string; name?: string } | string) => ({
-        name: typeof s === 'string' ? s : (s.serviceName || s.name || "Serviço"),
-      })) || [],
+      services: app.services?.map((s) => ({
+        name: s.serviceName || "Serviço",
+      })) ?? [],
       vehicle: app.vehicle
-        ? `${app.vehicle.brand} ${app.vehicle.model}`
+        ? `${app.vehicle.brand ?? 'Veículo'} ${app.vehicle.model ?? ''}`
         : "Veículo removido",
       vehiclePlate: app.vehicle?.plate || "",
       date: dayjs(app.scheduledAt).format("DD/MM/YYYY"),
       time: dayjs(app.scheduledAt).format("HH:mm"),
       scheduledAt: app.scheduledAt,
-      duration: app.totalDuration,
-      price: parseFloat(app.totalPrice),
+      duration: app.totalDuration ?? 0,
+      price: parseFloat(app.totalPrice) || 0,
       status: app.status,
       createdAt: dayjs(app.createdAt).format("DD/MM/YYYY"),
     }));
@@ -79,6 +79,21 @@ export default function ClientAppointmentsPage() {
           dayjs(b.scheduledAt).valueOf() - dayjs(a.scheduledAt).valueOf()
       );
   }, [appointments]);
+
+  // Determine last shop for rebooking
+  const lastShopInfo = useMemo(() => {
+    // Sort all appointments by date desc
+    const sorted = [...(appointmentsResult?.data ?? [])].sort((a, b) => 
+      dayjs(b.scheduledAt).valueOf() - dayjs(a.scheduledAt).valueOf()
+    );
+    const lastCompleted = sorted.find(a => a.status === 'COMPLETED');
+    
+    if (!lastCompleted || !lastCompleted.shop) return null;
+    return {
+      name: lastCompleted.shop.name,
+      slug: lastCompleted.shop.slug
+    };
+  }, [appointmentsResult]);
 
   const displayedAppointments = useMemo(() => {
     const list =
@@ -157,6 +172,7 @@ export default function ClientAppointmentsPage() {
         onClick={handleClick}
         isHistory={activeTab === "history"}
         isConfirming={updateStatus.isPending}
+        lastShopInfo={lastShopInfo}
       />
 
       <Modal

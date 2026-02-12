@@ -9,6 +9,24 @@ export interface Evaluation {
     updatedAt: string;
 }
 
+/**
+ * Evaluation with nested appointment relations,
+ * as returned by the backend findAll endpoint.
+ */
+export interface EvaluationWithRelations extends Evaluation {
+    user?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+    };
+    appointment?: {
+        id: string;
+        services?: { serviceName: string }[];
+        vehicle?: { brand: string; model: string; plate: string };
+        shop?: { id: string; name: string };
+    };
+}
+
 export interface CreateEvaluationPayload {
     rating: number;
     comment?: string;
