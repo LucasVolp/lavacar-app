@@ -78,7 +78,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                 placeholder="Início"
                 className="w-24"
                 allowClear={false}
-                popupClassName="dark:bg-zinc-800"
               />
               <span className="text-zinc-400 text-xs">às</span>
               <TimePicker
@@ -88,7 +87,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                 placeholder="Fim"
                 className="w-24"
                 allowClear={false}
-                popupClassName="dark:bg-zinc-800"
               />
             </div>
           </Col>
@@ -126,7 +124,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                     className="w-20"
                     size="small"
                     allowClear={false}
-                    popupClassName="dark:bg-zinc-800"
                   />
                   <span className="text-zinc-400 text-xs">-</span>
                   <TimePicker
@@ -137,7 +134,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
                     className="w-20"
                     size="small"
                     allowClear={false}
-                    popupClassName="dark:bg-zinc-800"
                   />
                 </div>
               )}

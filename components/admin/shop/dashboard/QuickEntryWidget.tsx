@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Card, Input, Typography, Spin, App, Button } from "antd";
+import { Card, Input, Typography, Spin, App } from "antd";
 import {
   SearchOutlined,
   CarOutlined,
@@ -269,16 +269,9 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
               value={plateInput}
               onChange={handleInputChange}
               onSearch={handleSearch}
-              enterButton={
-                <Button className="!h-12 px-5 font-semibold rounded-r-lg">
-                  <span className="flex items-center gap-1">
-                    <SearchOutlined />
-                    Buscar
-                  </span>
-                </Button>
-              }
+              enterButton="Buscar"
               loading={vehicleQuery.isFetching || updateStatus.isPending}
-              className="[&_.ant-input-group-addon]:!p-0 [&_.ant-input-wrapper]:!h-12 [&_input]:!h-12"
+              className="[&_.ant-btn]:!h-12 [&_.ant-btn]:!px-6 [&_.ant-btn]:!font-semibold [&_input]:!h-12"
               styles={{
                 input: {
                   fontFamily: "monospace",

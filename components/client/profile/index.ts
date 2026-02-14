@@ -1,6 +1,5 @@
-export { ProfileHeader } from "./ProfileHeader";
-export { ProfileInfoForm } from "./ProfileInfoForm";
-export type { UserProfile } from "./ProfileInfoForm";
-export { PasswordForm } from "./PasswordForm";
-export { ClientNotificationSettingsForm } from "./ClientNotificationSettingsForm";
-export type { ClientNotificationSettings } from "./ClientNotificationSettingsForm";
+export { ClientProfilePageHeader } from "./ClientProfilePageHeader";
+export { ClientProfileIdentityCard } from "./ClientProfileIdentityCard";
+export { ClientProfileSecurityCard } from "./ClientProfileSecurityCard";
+export { ClientProfileInfoCard } from "./ClientProfileInfoCard";
+export { ClientProfilePasswordCard } from "./ClientProfilePasswordCard";

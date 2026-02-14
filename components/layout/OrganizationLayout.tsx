@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Layout, Menu, Typography, Badge, Button, Avatar, Dropdown } from "antd";
+import { Layout, Menu, Typography, Button, Avatar, Dropdown, Breadcrumb } from "antd";
 import {
   AppstoreOutlined,
   ShopOutlined,
@@ -10,7 +10,6 @@ import {
   TeamOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  BellOutlined,
   LogoutOutlined,
   UserOutlined,
   MoonOutlined,
@@ -138,23 +137,28 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
   if (!mounted) return null; // Prevent hydration mismatch
 
   return (
-    <Layout className="min-h-screen">
+    <Layout className="min-h-screen" hasSider>
       {/* Sidebar */}
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
-        width={280}
+        width={260}
         collapsedWidth={80}
-        className="fixed left-0 top-0 h-screen z-50 shadow-lg border-r"
+        className="z-50 shadow-lg border-r"
         style={{ 
           borderColor: borderColor,
-          backgroundColor: isDarkMode ? '#18181b' : '#ffffff' 
+          backgroundColor: isDarkMode ? '#18181b' : '#ffffff',
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          left: 0,
+          overflow: "hidden",
         }}
         theme={isDarkMode ? "dark" : "light"}
       >
         {/* Logo / Org Header */}
-        <div className="h-16 flex items-center gap-3 px-4 border-b" style={{ borderColor }}>
+        <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
             <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold overflow-hidden relative">
               {organization?.logoUrl ? (
                 <Image 
@@ -181,13 +185,13 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
         </div>
 
         {/* Menu */}
-        <div className="h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ height: "calc(100vh - 64px)" }}>
           <Menu
             mode="inline"
             selectedKeys={getSelectedKeys()}
             onClick={handleMenuClick}
             items={menuItems}
-            className="border-none"
+            className="border-none bg-transparent"
             style={{ paddingTop: "8px", paddingBottom: "16px" }}
             theme={isDarkMode ? "dark" : "light"}
           />
@@ -198,7 +202,7 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
       <Layout style={{ transition: "all 0.2s" }}>
         {/* Header */}
         <AntHeader
-          className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}
+          className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}
           style={{ 
             borderBottom: `1px solid ${borderColor}`,
             padding: '0 24px',
@@ -212,8 +216,31 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
               onClick={() => setCollapsed(!collapsed)}
               className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
             />
-            {/* Breadcrumb or Page Title could go here */}
-            <Text strong className="hidden sm:block text-lg">Painel da Organização</Text>
+            <Breadcrumb
+              className="hidden md:block"
+              items={[
+                { title: <HomeOutlined /> },
+                {
+                  title: (
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                      {organization?.name || "Organização"}
+                    </span>
+                  ),
+                },
+                {
+                  title: (
+                    <span className="text-zinc-500">
+                      {
+                        (menuItems
+                          .flatMap((item) => ((item && "children" in item && item.children) ? item.children : [item]))
+                          .find((item) => item?.key === pathname) as { label: React.ReactNode } | undefined)
+                          ?.label
+                      }
+                    </span>
+                  ),
+                },
+              ]}
+            />
           </div>
 
           <div className="flex items-center gap-3">
@@ -224,16 +251,7 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
               onClick={() => setTheme(isDarkMode ? "light" : "dark")}
               className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
             />
-            
-            <Badge count={3} size="small" offset={[-2, 2]}>
-              <Button 
-                 type="text" 
-                 shape="circle" 
-                 icon={<BellOutlined />} 
-                 className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              />
-            </Badge>
-            
+
             <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-800 mx-1" />
 
             <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">

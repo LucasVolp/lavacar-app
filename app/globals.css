@@ -258,6 +258,50 @@ body {
   background: #2a2a2a !important;
 }
 
+/* Dark mode consistency for TimePicker panel */
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-time-panel {
+  background-color: #1f1f1f !important;
+  border-color: #424242 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-time-panel-column {
+  border-inline-start-color: #424242 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-time-panel-cell .ant-picker-time-panel-cell-inner {
+  color: #d4d4d8 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-time-panel-cell:hover .ant-picker-time-panel-cell-inner {
+  background: #2a2a2a !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-time-panel-cell-selected .ant-picker-time-panel-cell-inner {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-footer {
+  background-color: #1f1f1f !important;
+  border-top-color: #424242 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-footer a,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-footer button {
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-now-btn {
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-ok button {
+  background: #6366f1 !important;
+  border-color: #6366f1 !important;
+  color: #ffffff !important;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {

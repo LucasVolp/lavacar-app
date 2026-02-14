@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Layout, Menu, Typography, Badge, Button, Avatar, Dropdown, Tooltip, Breadcrumb } from "antd";
+import { Layout, Menu, Typography, Button, Avatar, Dropdown, Tooltip, Breadcrumb } from "antd";
 import {
   DashboardOutlined,
   CalendarOutlined,
@@ -12,7 +12,6 @@ import {
   TeamOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  BellOutlined,
   LogoutOutlined,
   UserOutlined,
   MoonOutlined,
@@ -336,16 +335,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
               onClick={() => setTheme(isDarkMode ? "light" : "dark")}
               className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
             />
-            
-            <Badge count={3} size="small" offset={[-2, 2]}>
-              <Button 
-                 type="text" 
-                 shape="circle" 
-                 icon={<BellOutlined />} 
-                 className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              />
-            </Badge>
-            
+
             <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-800 mx-1" />
 
             <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">

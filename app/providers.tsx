@@ -4,9 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, useEffect, ReactNode } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
-import { Locale } from "antd/lib/locale";
+import type { Locale } from "antd/lib/locale";
 import { App, ConfigProvider } from "antd";
-import ptBR from "antd/lib/locale/pt_BR";
+import ptBR from "antd/locale/pt_BR";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ShopProvider } from "@/contexts/ShopContext";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
@@ -128,6 +128,8 @@ export default function ThemeAwareConfigProvider({
           colorBgLayout: isDarkMode ? colors.dark.bgLayout : colors.light.bgLayout,
           colorBorder: isDarkMode ? colors.dark.border : colors.light.border,
           colorBorderSecondary: isDarkMode ? colors.dark.borderSecondary : colors.light.borderSecondary,
+          controlItemBgActive: isDarkMode ? "rgba(99, 102, 241, 0.35)" : undefined,
+          controlItemBgHover: isDarkMode ? "#2a2a2a" : undefined,
         },
         components: {
           Layout: {
@@ -175,6 +177,7 @@ export default function ThemeAwareConfigProvider({
             cellActiveWithRangeBg: isDarkMode ? "rgba(99, 102, 241, 0.35)" : "rgba(99, 102, 241, 0.14)",
             cellHoverWithRangeBg: isDarkMode ? "rgba(99, 102, 241, 0.26)" : "rgba(99, 102, 241, 0.10)",
             cellRangeBorderColor: isDarkMode ? "#818cf8" : "#6366f1",
+            controlItemBgActive: isDarkMode ? "rgba(99, 102, 241, 0.4)" : undefined,
           },
           Modal: {
             contentBg: isDarkMode ? colors.dark.bgContainer : colors.light.bgContainer,
