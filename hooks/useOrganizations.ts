@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { organizationService } from "@/services/organizations";
 import { organizationMemberService } from "@/services/organization-members";
+import type { OrganizationInsightsPeriod } from "@/types/organization";
 
 /**
  * Hook para buscar todas as organizações
@@ -22,6 +23,18 @@ export function useOrganization(id: string | undefined) {
     queryFn: () => organizationService.findById(id!),
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useOrganizationDashboardMetrics(
+  organizationId: string | undefined,
+  filters?: { period?: OrganizationInsightsPeriod; startDate?: string; endDate?: string },
+) {
+  return useQuery({
+    queryKey: ["organizations", organizationId, "dashboard-metrics", filters],
+    queryFn: () => organizationService.findDashboardMetrics(organizationId!, filters),
+    enabled: !!organizationId,
+    staleTime: 60 * 1000,
   });
 }
 

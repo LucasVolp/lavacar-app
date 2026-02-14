@@ -1,62 +1,75 @@
 "use client";
 
 import React from "react";
-import { DollarOutlined, ClockCircleOutlined, ShopOutlined } from "@ant-design/icons";
+import { CalendarOutlined, DollarOutlined, ShopOutlined, UserOutlined } from "@ant-design/icons";
+import type { OrganizationDashboardMetrics } from "@/types/organization";
 
 interface StatsOverviewProps {
   shopsCount: number;
+  metrics: OrganizationDashboardMetrics["summary"];
 }
 
-export const StatsOverview: React.FC<StatsOverviewProps> = ({ shopsCount }) => {
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+
+export const StatsOverview: React.FC<StatsOverviewProps> = ({ shopsCount, metrics }) => {
+  const toneStyles: Record<string, string> = {
+    emerald: "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500",
+    blue: "bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500",
+    amber: "bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500",
+    indigo: "bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-500",
+  };
+
+  const cards = [
+    {
+      title: "Faturamento",
+      value: formatCurrency(metrics.totalRevenue),
+      subtitle: `${metrics.completedAppointments} concluídos`,
+      icon: <DollarOutlined className="text-xl" />,
+      tone: "emerald",
+    },
+    {
+      title: "Agendamentos",
+      value: String(metrics.totalAppointments),
+      subtitle: `${metrics.inProgressNow} em andamento agora`,
+      icon: <CalendarOutlined className="text-xl" />,
+      tone: "blue",
+    },
+    {
+      title: "Clientes",
+      value: String(metrics.uniqueClients),
+      subtitle: `${metrics.newClients} novos / ${metrics.recurringClients} recorrentes`,
+      icon: <UserOutlined className="text-xl" />,
+      tone: "amber",
+    },
+    {
+      title: "Estabelecimentos",
+      value: String(shopsCount),
+      subtitle: "Cadastrados na organização",
+      icon: <ShopOutlined className="text-xl" />,
+      tone: "indigo",
+    },
+  ] as const;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Revenue Card (Placeholder) */}
-      <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group shadow-sm dark:shadow-none">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
-            <DollarOutlined className="text-xl" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {cards.map((card) => (
+        <div
+          key={card.title}
+          className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group shadow-sm dark:shadow-none"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center ${toneStyles[card.tone]}`}
+            >
+              {card.icon}
+            </div>
+            <span className="font-medium text-zinc-500 dark:text-zinc-400">{card.title}</span>
           </div>
-          <span className="font-medium text-zinc-500 dark:text-zinc-400">Faturamento</span>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">{card.value}</div>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 m-0">{card.subtitle}</p>
         </div>
-        <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight">
-          --
-          <span className="text-sm font-normal text-zinc-500 dark:text-zinc-600 block mt-1">
-            Dados indisponíveis
-          </span>
-        </div>
-      </div>
-
-      {/* Pending Actions (Placeholder) */}
-      <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group shadow-sm dark:shadow-none">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500">
-            <ClockCircleOutlined className="text-xl" />
-          </div>
-          <span className="font-medium text-zinc-500 dark:text-zinc-400">Demandas</span>
-        </div>
-        <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight">
-          0
-          <span className="text-sm font-normal text-zinc-500 dark:text-zinc-600 block mt-1">
-            Nenhuma pendência
-          </span>
-        </div>
-      </div>
-
-      {/* Active Shops */}
-      <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group shadow-sm dark:shadow-none">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-500">
-            <ShopOutlined className="text-xl" />
-          </div>
-          <span className="font-medium text-zinc-500 dark:text-zinc-400">Estabelecimentos</span>
-        </div>
-        <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1 tracking-tight">
-          {shopsCount}
-          <span className="text-sm font-normal text-zinc-500 dark:text-zinc-600 block mt-1">
-            Cadastrados
-          </span>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };

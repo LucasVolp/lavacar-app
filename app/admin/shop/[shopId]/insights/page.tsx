@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Spin, Tabs } from "antd";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useAppointments } from "@/hooks/useAppointments";
@@ -16,15 +16,43 @@ import {
   InsightsTips,
   InsightsOpportunityCards,
   InsightsClientMix,
+  ShopInsightsPeriod,
 } from "@/components/admin/shop/insights";
 import { Appointment } from "@/types/appointment";
 import { Services } from "@/types/services";
 
 export default function InsightsPage() {
   const { shop, shopId, isLoading: isLoadingShop } = useShopAdmin();
+  const [period, setPeriod] = useState<ShopInsightsPeriod>("30d");
+
+  const getPeriodRange = (selectedPeriod: ShopInsightsPeriod) => {
+    const now = dayjs();
+    switch (selectedPeriod) {
+      case "7d":
+        return {
+          startDate: now.subtract(6, "day").startOf("day").toISOString(),
+          endDate: now.endOf("day").toISOString(),
+        };
+      case "90d":
+        return {
+          startDate: now.subtract(3, "month").startOf("day").toISOString(),
+          endDate: now.endOf("day").toISOString(),
+        };
+      case "lifetime":
+        return {};
+      case "30d":
+      default:
+        return {
+          startDate: now.subtract(29, "day").startOf("day").toISOString(),
+          endDate: now.endOf("day").toISOString(),
+        };
+    }
+  };
+
+  const periodRange = getPeriodRange(period);
 
   const { data: appointmentsData, isLoading: isLoadingAppointments } = useAppointments(
-    { shopId, perPage: 5000 },
+    { shopId, perPage: 5000, ...periodRange },
     !!shopId
   );
 
@@ -296,6 +324,8 @@ export default function InsightsPage() {
         shop={shop}
         monthRevenue={metrics.month.revenue}
         revenueGrowth={metrics.month.revenueGrowth}
+        period={period}
+        onPeriodChange={setPeriod}
       />
 
       <Tabs

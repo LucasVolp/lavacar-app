@@ -1,28 +1,34 @@
 "use client";
 
 import React from "react";
-import { Typography } from "antd";
+import { Select, Typography } from "antd";
 import {
   LineChartOutlined,
   RiseOutlined,
   FallOutlined,
-  BarChartOutlined
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { Shop } from "@/types/shop";
 import { formatCurrency, sanitizeText } from "@/lib/security";
 
 const { Title, Text } = Typography;
 
+export type ShopInsightsPeriod = "7d" | "30d" | "90d" | "lifetime";
+
 interface InsightsHeaderProps {
   shop: Shop | null;
   monthRevenue: number;
   revenueGrowth: number;
+  period: ShopInsightsPeriod;
+  onPeriodChange: (period: ShopInsightsPeriod) => void;
 }
 
 export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
   shop,
   monthRevenue,
-  revenueGrowth
+  revenueGrowth,
+  period,
+  onPeriodChange,
 }) => {
   const shopName = shop?.name ? sanitizeText(shop.name) : "Estabelecimento";
   const isPositiveGrowth = revenueGrowth >= 0;
@@ -30,13 +36,11 @@ export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 relative overflow-hidden transition-colors duration-300">
-      {/* Background Pattern */}
       <div className="absolute -top-6 -right-6 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
         <BarChartOutlined style={{ fontSize: "220px" }} />
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
-        {/* Left Section - Title */}
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/25">
@@ -48,26 +52,33 @@ export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
           </div>
           <Text className="text-zinc-500 dark:text-zinc-400">
             Análise de performance de{" "}
-            <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-              {shopName}
-            </span>
+            <span className="font-semibold text-zinc-700 dark:text-zinc-300">{shopName}</span>
           </Text>
         </div>
 
-        {/* Right Section - KPIs */}
-        <div className="flex flex-col items-center lg:items-end">
-          {/* Main Revenue Value - Hero Typography */}
+        <div className="flex flex-col items-center lg:items-end gap-3">
+          <Select
+            value={period}
+            className="w-48"
+            onChange={(value) => onPeriodChange(value as ShopInsightsPeriod)}
+            options={[
+              { value: "7d", label: "Últimos 7 dias" },
+              { value: "30d", label: "Últimos 30 dias" },
+              { value: "90d", label: "Últimos 3 meses" },
+              { value: "lifetime", label: "Todo o período" },
+            ]}
+          />
+
           <div className="text-center lg:text-right">
             <p className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-medium mb-1">
-              Receita do Mês
+              Receita do Período
             </p>
             <div className="text-4xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-zinc-100 leading-none tracking-tight">
               {formatCurrency(monthRevenue)}
             </div>
           </div>
 
-          {/* Growth Indicator - Centered Below */}
-          <div className="mt-4 flex items-center justify-center lg:justify-end">
+          <div className="flex items-center justify-center lg:justify-end">
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
                 isPositiveGrowth
@@ -75,13 +86,9 @@ export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
                   : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
               }`}
             >
-              {isPositiveGrowth ? (
-                <RiseOutlined className="text-lg" />
-              ) : (
-                <FallOutlined className="text-lg" />
-              )}
+              {isPositiveGrowth ? <RiseOutlined className="text-lg" /> : <FallOutlined className="text-lg" />}
               <span className="text-lg font-bold">{formattedGrowth}%</span>
-              <span className="text-xs opacity-75">vs mês anterior</span>
+              <span className="text-xs opacity-75">vs período anterior</span>
             </div>
           </div>
         </div>

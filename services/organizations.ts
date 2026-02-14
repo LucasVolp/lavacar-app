@@ -1,8 +1,18 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
-import { Organization } from '../types/organization';
+import {
+  Organization,
+  OrganizationDashboardMetrics,
+  OrganizationInsightsPeriod,
+} from '../types/organization';
 
 const base = '/organizations';
+
+export interface OrganizationDashboardMetricsFilters {
+  period?: OrganizationInsightsPeriod;
+  startDate?: string;
+  endDate?: string;
+}
 
 export const organizationService = {
   create: async (payload: Partial<Organization>) => {
@@ -48,6 +58,31 @@ export const organizationService = {
         console.error(`Erro ao buscar organização ${id} (${status || 'desconhecido'}):`, message);
       } else {
         console.error(`Erro desconhecido ao buscar organização ${id}:`, error);
+      }
+      throw error;
+    }
+  },
+
+  findDashboardMetrics: async (
+    id: string,
+    filters: OrganizationDashboardMetricsFilters = {},
+  ) => {
+    try {
+      const response: AxiosResponse<OrganizationDashboardMetrics> = await axiosInstance.get(
+        `${base}/${id}/dashboard-metrics`,
+        { params: filters },
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(
+          `Erro ao buscar métricas da organização ${id} (${status || 'desconhecido'}):`,
+          message,
+        );
+      } else {
+        console.error(`Erro desconhecido ao buscar métricas da organização ${id}:`, error);
       }
       throw error;
     }
