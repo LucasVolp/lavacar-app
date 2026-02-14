@@ -22,8 +22,11 @@ interface KeyMetricsData {
     revenue: number;
   };
   month: {
+    revenue: number;
     avgTicket: number;
     avgDuration: number;
+    revenueGrowth: number;
+    avgTicketGrowth: number;
   };
 }
 
@@ -80,6 +83,20 @@ const MetricCard: React.FC<MetricCardProps> = ({
 export const InsightsKeyMetrics: React.FC<InsightsKeyMetricsProps> = ({
   metrics
 }) => {
+  const growthBadge = (value: number) => {
+    const isPositive = value >= 0;
+    const icon = isPositive ? "↗" : "↘";
+    const color = isPositive
+      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+      : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${color}`}>
+        {icon} {Math.abs(value).toFixed(1)}% vs mês anterior
+      </span>
+    );
+  };
+
   return (
     <Row gutter={[16, 16]}>
       <Col xs={24} sm={12} lg={6}>
@@ -108,16 +125,19 @@ export const InsightsKeyMetrics: React.FC<InsightsKeyMetricsProps> = ({
           icon={<DollarOutlined className="text-xl text-emerald-600 dark:text-emerald-400" />}
           iconBg="bg-emerald-100 dark:bg-emerald-900/30"
           accentColor="!border-l-emerald-500"
-          title="Receita Hoje"
-          value={formatCurrency(metrics.today.revenue)}
-          tooltip="Receita total de agendamentos concluídos hoje"
+          title="Receita do Mês"
+          value={formatCurrency(metrics.month.revenue)}
+          tooltip="Receita de agendamentos concluídos no mês atual"
           subtitle={
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0">
-              Semana:{" "}
-              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                {formatCurrency(metrics.week.revenue)}
-              </span>
-            </p>
+            <div className="flex flex-col gap-1.5">
+              {growthBadge(metrics.month.revenueGrowth)}
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0">
+                Hoje:{" "}
+                <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                  {formatCurrency(metrics.today.revenue)}
+                </span>
+              </p>
+            </div>
           }
         />
       </Col>
@@ -131,9 +151,7 @@ export const InsightsKeyMetrics: React.FC<InsightsKeyMetricsProps> = ({
           value={formatCurrency(metrics.month.avgTicket)}
           tooltip="Valor médio por atendimento este mês"
           subtitle={
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0">
-              Média do mês atual
-            </p>
+            growthBadge(metrics.month.avgTicketGrowth)
           }
         />
       </Col>

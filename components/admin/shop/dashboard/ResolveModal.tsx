@@ -13,6 +13,8 @@ import { useUpdateAppointmentStatus } from "@/hooks/useAppointments";
 import { Appointment } from "@/types/appointment";
 import { formatCurrency } from "@/lib/security";
 import { format, parseISO } from "date-fns";
+import { StatusBadge } from "@/components/ui";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 const { Text } = Typography;
 
@@ -21,18 +23,6 @@ interface ResolveModalProps {
   onClose: () => void;
   overdueAppointments: Appointment[];
 }
-
-const statusColors: Record<string, string> = {
-  PENDING: "orange",
-  WAITING: "cyan",
-  CONFIRMED: "blue",
-};
-
-const statusLabels: Record<string, string> = {
-  PENDING: "Pendente",
-  WAITING: "Aguardando",
-  CONFIRMED: "Confirmado",
-};
 
 function getClientName(appointment: Appointment): string {
   if (appointment.user?.firstName) {
@@ -138,12 +128,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                       </Text>
                     </div>
                   </div>
-                  <Tag
-                    color={statusColors[apt.status] || "default"}
-                    className="m-0 px-3 py-0.5 rounded-full border-0 font-medium flex-shrink-0"
-                  >
-                    {statusLabels[apt.status] || apt.status}
-                  </Tag>
+                  <StatusBadge status={apt.status} className="m-0 px-3 py-0.5 rounded-full font-medium flex-shrink-0" />
                 </div>
 
                 {/* Vehicle + Time */}
@@ -151,7 +136,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                   {apt.vehicle && (
                     <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300">
                       <CarOutlined className="text-emerald-500 dark:text-emerald-400" />
-                      <span className="uppercase font-medium">{apt.vehicle.plate}</span>
+                      <span className="uppercase font-medium">{formatVehiclePlate(apt.vehicle.plate)}</span>
                       <span className="text-zinc-400 dark:text-zinc-500">-</span>
                       <span>{apt.vehicle.model}</span>
                     </div>

@@ -28,7 +28,6 @@ interface AppointmentCardProps {
   services: { name: string; price: string }[];
   vehicleInfo: string;
   scheduledAt: string;
-  endTime?: string;
   totalPrice: string;
   totalDuration: number;
   status: string;
@@ -44,7 +43,6 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
   services,
   vehicleInfo,
   scheduledAt,
-  endTime,
   totalPrice,
   totalDuration,
   status,

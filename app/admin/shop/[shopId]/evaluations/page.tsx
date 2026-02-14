@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Typography, Select, message, Pagination } from "antd";
 import { StarOutlined } from "@ant-design/icons";
-import { useShopEvaluations, useEvaluationSummary, useDeleteEvaluation } from "@/hooks/useEvaluations";
+import { useShopEvaluations, useShopEvaluationStats, useDeleteEvaluation } from "@/hooks/useEvaluations";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { EvaluationStats } from "@/components/admin/shop/evaluations/EvaluationStats";
 import { EvaluationList } from "@/components/admin/shop/evaluations/EvaluationList";
@@ -23,7 +23,7 @@ export default function ShopEvaluationsPage() {
   };
 
   const { data: evaluationsData, isLoading } = useShopEvaluations(shopId, filters);
-  const { data: stats } = useEvaluationSummary(shopId);
+  const { data: stats, isLoading: isStatsLoading } = useShopEvaluationStats(shopId);
   const deleteEvaluation = useDeleteEvaluation();
 
   const evaluations = evaluationsData?.data ?? [];
@@ -69,7 +69,7 @@ export default function ShopEvaluationsPage() {
        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
            <div className="lg:col-span-4 xl:col-span-3 space-y-4">
                <div className="space-y-4 sticky top-24">
-                   {stats && <EvaluationStats stats={stats} isLoading={isLoading} />}
+                   {stats && <EvaluationStats stats={stats} isLoading={isStatsLoading} />}
                </div>
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm sticky top-24 space-y-4">
                        <Title level={5} className="!m-0 !text-zinc-800 dark:!text-zinc-200">Filtros</Title>

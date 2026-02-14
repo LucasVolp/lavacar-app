@@ -25,6 +25,12 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Quando o payload é FormData, remover o Content-Type padrão
+    // para que o browser/Axios defina multipart/form-data com boundary correto.
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error) => {

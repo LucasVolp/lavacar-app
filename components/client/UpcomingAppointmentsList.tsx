@@ -6,6 +6,7 @@ import { CalendarOutlined, RedoOutlined, RightOutlined } from "@ant-design/icons
 import Link from "next/link";
 import { AppointmentCard } from "./AppointmentCard";
 import type { Appointment } from "@/types/appointment";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 interface UpcomingAppointmentsListProps {
   appointments: Appointment[];
@@ -111,7 +112,7 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
               }
               vehicleInfo={
                 appointment.vehicle
-                  ? `${appointment.vehicle.brand ?? ""} ${appointment.vehicle.model ?? ""}`.trim() || appointment.vehicle.plate
+                  ? `${appointment.vehicle.brand ?? ""} ${appointment.vehicle.model ?? ""}`.trim() || formatVehiclePlate(appointment.vehicle.plate)
                   : "—"
               }
               scheduledAt={appointment.scheduledAt}

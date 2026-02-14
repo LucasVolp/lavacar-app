@@ -33,48 +33,25 @@ import {
   useCancelAppointment,
 } from "@/hooks/useAppointments";
 import { useAuth } from "@/contexts/AuthContext";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 const { TextArea } = Input;
 
-const statusConfig: Record<
-  string,
-  { className: string; label: string; icon: React.ReactNode }
-> = {
-  PENDING: {
-    className: "bg-amber-100/50 text-amber-700 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30 dark:shadow-[0_0_10px_rgba(245,158,11,0.2)]",
-    label: "Pendente",
-    icon: <ExclamationCircleOutlined />,
-  },
-  CONFIRMED: {
-    className: "bg-blue-100/50 text-blue-700 border border-blue-300 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 dark:shadow-[0_0_10px_rgba(59,130,246,0.2)]",
-    label: "Confirmado",
-    icon: <CheckCircleOutlined />,
-  },
-  IN_PROGRESS: {
-    className: "bg-indigo-100/50 text-indigo-700 border border-indigo-300 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 dark:shadow-[0_0_10px_rgba(99,102,241,0.2)]",
-    label: "Em Andamento",
-    icon: <ClockCircleOutlined />,
-  },
-  COMPLETED: {
-    className: "bg-emerald-100/50 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 dark:shadow-[0_0_10px_rgba(16,185,129,0.2)]",
-    label: "Concluído",
-    icon: <CheckCircleOutlined />,
-  },
-  CANCELED: {
-    className: "bg-red-100/50 text-red-700 border border-red-300 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 dark:shadow-[0_0_10px_rgba(239,68,68,0.2)]",
-    label: "Cancelado",
-    icon: <CloseCircleOutlined />,
-  },
-};
-
 // Helper to format duration
 const formatDuration = (minutes: number) => {
-    const hrs = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hrs > 0) {
-        return `${hrs}h${mins > 0 ? ` ${mins}min` : ''}`;
-    }
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hrs <= 0) {
     return `${mins}min`;
+  }
+
+  if (mins === 0) {
+    return `${hrs}h`;
+  }
+
+  return `${hrs}:${String(mins).padStart(2, "0")}h`;
 };
 
 export default function AppointmentDetailPage() {
@@ -151,7 +128,6 @@ export default function AppointmentDetailPage() {
     );
   }
 
-  const status = statusConfig[appointment.status] || statusConfig.PENDING;
   const scheduledDate = dayjs(appointment.scheduledAt);
   const endDate = dayjs(appointment.endTime);
   const isPast = scheduledDate.isBefore(dayjs());
@@ -204,9 +180,10 @@ export default function AppointmentDetailPage() {
         </div>
         
         <div className="flex items-center gap-3">
-             <Tag icon={status.icon} className={`px-3 py-1 text-sm font-medium rounded-full border m-0 ${status.className}`}>
-                {status.label}
-            </Tag>
+            <StatusBadge
+              status={appointment.status}
+              className="px-3 py-1 text-sm font-medium m-0"
+            />
             
             {/* Action Buttons in Header */}
             {canModify && appointment.status === "PENDING" && (
@@ -324,7 +301,7 @@ export default function AppointmentDetailPage() {
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
                         <Tag className="font-mono m-0 bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300">
-                            {appointment.vehicle.plate}
+                            {formatVehiclePlate(appointment.vehicle.plate)}
                         </Tag>
                         <span className="text-zinc-400 text-sm">
                              {appointment.vehicle.color && appointment.vehicle.year ? `${appointment.vehicle.color} • ${appointment.vehicle.year}` : ''}

@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 export interface ClientAppointmentFull {
   id: string;
@@ -120,7 +121,7 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                     {item.vehiclePlate && (
                       <>
                         <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
-                        <span className="font-mono uppercase text-[10px]">{item.vehiclePlate}</span>
+                        <span className="font-mono uppercase text-[10px]">{formatVehiclePlate(item.vehiclePlate)}</span>
                       </>
                     )}
                   </div>

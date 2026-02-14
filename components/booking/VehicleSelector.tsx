@@ -3,6 +3,7 @@
 import { Empty } from "antd";
 import { CarOutlined, PlusOutlined, CheckCircleFilled } from "@ant-design/icons";
 import { Vehicle } from "@/types/vehicle";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 interface VehicleSelectorProps {
   vehicles: Vehicle[];
@@ -93,7 +94,7 @@ export function VehicleSelector({
                 </div>
                 <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-mono transition-colors duration-300">
                   <span className="bg-slate-50 dark:bg-[#09090b] px-2 py-0.5 rounded border border-slate-200 dark:border-[#27272a]">
-                    {vehicle.plate}
+                    {formatVehiclePlate(vehicle.plate)}
                   </span>
                   {(vehicle.year || vehicle.color) && (
                      <span className="text-slate-500 dark:text-slate-500">

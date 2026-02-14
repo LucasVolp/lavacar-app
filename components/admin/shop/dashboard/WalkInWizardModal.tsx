@@ -21,6 +21,8 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
   CheckOutlined,
+  CheckCircleOutlined,
+  FileAddOutlined,
 } from "@ant-design/icons";
 import { useServicesByShop } from "@/hooks/useServices";
 import { useCreateVehicle } from "@/hooks/useVehicles";
@@ -37,11 +39,13 @@ import {
   formatCurrency,
 } from "@/lib/security";
 import { maskPhone, unmask } from "@/lib/masks";
+import { validateUUID } from "@/utils/validators";
 import { addMinutes } from "date-fns";
 
 import type { Vehicle } from "@/types/vehicle";
 import type { User } from "@/types/user";
 import type { Services } from "@/types/services";
+import { ChecklistModal } from "@/components/modals/ChecklistModal";
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -94,6 +98,8 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [createdAppointmentId, setCreatedAppointmentId] = useState<string | null>(null);
+  const [checklistModalOpen, setChecklistModalOpen] = useState(false);
 
   const [vehicleForm] = Form.useForm<VehicleFormValues>();
   const [clientForm] = Form.useForm<ClientFormValues>();
@@ -118,6 +124,8 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
       setSelectedServiceIds([]);
       setNotes("");
       setSubmitting(false);
+      setCreatedAppointmentId(null);
+      setChecklistModalOpen(false);
 
       vehicleForm.setFieldsValue({
         plate: initialPlate,
@@ -255,14 +263,29 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
         serviceIds: servicePayload,
       });
 
+      const appointmentIdCandidates = [
+        appointment?.id,
+        (appointment as unknown as { appointmentId?: string })?.appointmentId,
+        (appointment as unknown as { data?: { id?: string } })?.data?.id,
+      ];
+      const createdId =
+        appointmentIdCandidates.find(
+          (id): id is string => typeof id === "string" && validateUUID(id.trim())
+        ) ?? null;
+
+      if (!createdId) {
+        throw new Error("ID do agendamento nao retornado pelo backend.");
+      }
+
       // Step 5: Update status to IN_PROGRESS
       await updateStatus.mutateAsync({
-        id: appointment.id,
+        id: createdId,
         status: "IN_PROGRESS",
       });
 
-      message.success("Atendimento registrado com sucesso!");
-      onClose();
+      message.success("Sucesso! Agendamento criado.");
+      setCreatedAppointmentId(createdId);
+      setCurrentStep(3);
     } catch {
       message.error("Erro ao registrar atendimento. Tente novamente.");
     } finally {
@@ -275,6 +298,8 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
     { title: "Cliente", icon: <UserOutlined /> },
     { title: "Serviços", icon: <ToolOutlined /> },
   ];
+
+  const stepsCurrent = Math.min(currentStep, stepItems.length - 1);
 
   return (
     <Modal
@@ -300,7 +325,7 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
       styles={{ body: { padding: "24px" } }}
     >
       <Steps
-        current={currentStep}
+        current={stepsCurrent}
         items={stepItems}
         className="mb-6"
         size="small"
@@ -534,10 +559,25 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
         )}
       </div>
 
+      {/* Step 3: Success */}
+      <div style={{ display: currentStep === 3 ? "block" : "none" }}>
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 p-5">
+          <div className="flex items-center gap-3 mb-2">
+            <CheckCircleOutlined className="text-xl text-emerald-600 dark:text-emerald-400" />
+            <Title level={4} className="!m-0 !text-emerald-700 dark:!text-emerald-300">
+              Sucesso! Agendamento Criado
+            </Title>
+          </div>
+          <Text className="text-zinc-700 dark:text-zinc-300">
+            O atendimento foi iniciado e você pode registrar a vistoria agora.
+          </Text>
+        </div>
+      </div>
+
       {/* Footer Buttons */}
       <div className="flex justify-between mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800">
         <Button
-          disabled={currentStep === 0 || submitting}
+          disabled={currentStep === 0 || currentStep === 3 || submitting}
           onClick={handlePrev}
           icon={<ArrowLeftOutlined />}
           className="!rounded-lg"
@@ -546,9 +586,11 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
         </Button>
 
         <Space>
-          <Button onClick={onClose} disabled={submitting} className="!rounded-lg">
-            Cancelar
-          </Button>
+          {currentStep < 3 && (
+            <Button onClick={onClose} disabled={submitting} className="!rounded-lg">
+              Cancelar
+            </Button>
+          )}
 
           {currentStep < 2 ? (
             <Button
@@ -559,7 +601,7 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
               Próximo
               <ArrowRightOutlined />
             </Button>
-          ) : (
+          ) : currentStep === 2 ? (
             <Button
               type="primary"
               onClick={handleSubmit}
@@ -570,9 +612,32 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
             >
               Confirmar Entrada
             </Button>
-          )}
+          ) : currentStep === 3 ? (
+            <>
+              <Button
+                type="primary"
+                icon={<FileAddOutlined />}
+                onClick={() => setChecklistModalOpen(true)}
+                disabled={!createdAppointmentId}
+                className="!rounded-lg"
+              >
+                Realizar Vistoria Agora
+              </Button>
+              <Button onClick={onClose} className="!rounded-lg">
+                Finalizar
+              </Button>
+            </>
+          ) : null}
         </Space>
       </div>
+
+      {createdAppointmentId && (
+        <ChecklistModal
+          appointmentId={createdAppointmentId}
+          open={checklistModalOpen}
+          onClose={() => setChecklistModalOpen(false)}
+        />
+      )}
     </Modal>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
-import { Avatar } from "antd";
-import { StarFilled } from "@ant-design/icons";
+import { Avatar, Image } from "antd";
+import { StarFilled, PictureOutlined } from "@ant-design/icons";
 import { Evaluation } from "@/types/evaluation";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -51,6 +51,25 @@ function ReviewCard({ review }: { review: Evaluation }) {
       <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm mb-0 transition-colors duration-300">
         &ldquo;{review.comment}&rdquo;
       </p>
+
+      {/* Photos */}
+      {review.photos && review.photos.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <Image.PreviewGroup>
+            {review.photos.map((photo, idx) => (
+              <Image
+                key={idx}
+                src={photo}
+                alt={`Foto ${idx + 1}`}
+                width={48}
+                height={48}
+                className="rounded-lg object-cover border border-slate-200 dark:border-[#27272a]"
+                fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+"
+              />
+            ))}
+          </Image.PreviewGroup>
+        </div>
+      )}
     </div>
   );
 }

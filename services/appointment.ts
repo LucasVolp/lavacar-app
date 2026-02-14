@@ -30,6 +30,7 @@ export interface AppointmentFilters {
   endDate?: string;
   page?: number;
   perPage?: number;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const appointmentService = {

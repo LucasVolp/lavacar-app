@@ -5,3 +5,5 @@ export * from "./InsightsTopServices";
 export * from "./InsightsPeakHours";
 export * from "./InsightsWeeklyDistribution";
 export * from "./InsightsTips";
+export * from "./InsightsOpportunityCards";
+export * from "./InsightsClientMix";

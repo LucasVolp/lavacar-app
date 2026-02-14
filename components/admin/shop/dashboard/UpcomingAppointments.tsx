@@ -1,22 +1,80 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, Button, Badge, Empty, Typography, Tag, Pagination } from "antd";
-import { CalendarOutlined, RightOutlined, CarOutlined, UserOutlined, PhoneOutlined } from "@ant-design/icons";
+import { Card, Button, Empty, Typography, Pagination, Spin, Avatar } from "antd";
+import {
+  CalendarOutlined,
+  RightOutlined,
+  CarOutlined,
+  UserOutlined,
+  PhoneOutlined,
+  FileAddOutlined,
+  FileImageOutlined,
+} from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { useGetChecklist } from "@/hooks/useChecklist";
+import { ChecklistModal } from "@/components/modals/ChecklistModal";
+import { StatusBadge } from "@/components/ui";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 const { Text } = Typography;
 
 interface UpcomingAppointmentsProps {
   appointments: Appointment[];
   shopId: string;
+  clientPictureByUserId?: Record<string, string>;
 }
+
+interface AppointmentChecklistActionProps {
+  appointmentId: string;
+}
+
+const AppointmentChecklistAction: React.FC<AppointmentChecklistActionProps> = ({
+  appointmentId,
+}) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const { data: checklist, isLoading } = useGetChecklist(appointmentId);
+
+  if (isLoading) {
+    return <Spin size="small" />;
+  }
+
+  const hasChecklist = !!checklist;
+
+  return (
+    <>
+      <Button
+        size="middle"
+        icon={hasChecklist ? <FileImageOutlined /> : <FileAddOutlined />}
+        onClick={(event) => {
+          event.stopPropagation();
+          setModalOpen(true);
+        }}
+        className={`h-9 px-4 font-medium rounded-lg ${ 
+          hasChecklist
+            ? "border-zinc-300 dark:border-zinc-700 dark:text-zinc-200"
+            : "border-indigo-300 text-indigo-600 dark:border-indigo-500/40 dark:text-indigo-300"
+        }`}
+      >
+        {hasChecklist ? "Ver Vistoria" : "Adicionar Vistoria"}
+      </Button>
+
+      <ChecklistModal
+        appointmentId={appointmentId}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        readOnly={hasChecklist}
+      />
+    </>
+  );
+};
 
 export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
   appointments,
   shopId,
+  clientPictureByUserId = {},
 }) => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,26 +83,6 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const currentAppointments = appointments.slice(startIndex, endIndex);
-
-  const statusColors: Record<string, string> = {
-    PENDING: "orange",
-    CONFIRMED: "blue",
-    WAITING: "cyan",
-    IN_PROGRESS: "purple",
-    COMPLETED: "green",
-    CANCELED: "red",
-    NO_SHOW: "default",
-  };
-
-  const statusLabels: Record<string, string> = {
-    PENDING: "Pendente",
-    CONFIRMED: "Confirmado",
-    WAITING: "Aguardando",
-    IN_PROGRESS: "Em Andamento",
-    COMPLETED: "Concluído",
-    CANCELED: "Cancelado",
-    NO_SHOW: "Não Compareceu",
-  };
 
   return (
     <Card
@@ -58,7 +96,12 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
             <span className="font-bold text-lg dark:text-white">Próximos Agendamentos</span>
             <span className="text-xs text-zinc-500 font-normal">Agendamentos futuros</span>
           </div>
-          <Badge count={appointments.length} className="ml-2 bg-indigo-500" />
+          <div className="ml-2 inline-flex items-center gap-2 rounded-xl border border-indigo-200/80 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1">
+            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wide">Total</span>
+            <span className="text-lg leading-none font-black text-indigo-700 dark:text-indigo-200">
+              {appointments.length}
+            </span>
+          </div>
         </div>
       }
       extra={
@@ -120,9 +163,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Tag color={statusColors[appointment.status]} className="m-0 px-3 py-1 rounded-full border-0 font-medium">
-                      {statusLabels[appointment.status]}
-                    </Tag>
+                    <StatusBadge status={appointment.status} className="px-3 py-1 rounded-full font-medium" />
                     <RightOutlined className="text-zinc-300 group-hover:text-indigo-400 transition-colors hidden sm:block" />
                   </div>
                 </div>
@@ -131,19 +172,31 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                 <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-zinc-200 dark:border-zinc-700">
                   {/* Cliente */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                      <UserOutlined className="text-indigo-600 dark:text-indigo-400 text-sm" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <Text className="text-zinc-700 dark:text-zinc-200 font-medium block truncate">
-                        {appointment.user?.firstName} {appointment.user?.lastName || ''}
-                      </Text>
-                      {appointment.user?.phone && (
-                        <Text type="secondary" className="text-xs flex items-center gap-1">
-                          <PhoneOutlined /> {appointment.user.phone}
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        router.push(`/admin/shop/${shopId}/clients`);
+                      }}
+                      className="flex items-center gap-2 min-w-0 flex-1 text-left p-0 bg-transparent border-0 cursor-pointer"
+                    >
+                      <Avatar
+                        size={32}
+                        src={appointment.user?.picture || clientPictureByUserId[appointment.userId]}
+                        icon={!appointment.user?.picture ? <UserOutlined className="text-indigo-600 dark:text-indigo-400 text-sm" /> : undefined}
+                        className="bg-indigo-100 dark:bg-indigo-900/30 flex-shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <Text className="text-zinc-700 dark:text-zinc-200 font-medium block truncate hover:text-indigo-600 dark:hover:text-indigo-400">
+                          {appointment.user?.firstName} {appointment.user?.lastName || ''}
                         </Text>
-                      )}
-                    </div>
+                        {appointment.user?.phone && (
+                          <Text type="secondary" className="text-xs flex items-center gap-1">
+                            <PhoneOutlined /> {appointment.user.phone}
+                          </Text>
+                        )}
+                      </div>
+                    </button>
                   </div>
 
                   {/* Veículo */}
@@ -156,10 +209,17 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                         {appointment.vehicle?.brand} {appointment.vehicle?.model}
                       </Text>
                       <Text type="secondary" className="text-xs uppercase tracking-wide">
-                        {appointment.vehicle?.plate}
+                        {formatVehiclePlate(appointment.vehicle?.plate)}
                       </Text>
                     </div>
                   </div>
+                </div>
+
+                <div
+                  className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-700 flex justify-end"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <AppointmentChecklistAction appointmentId={appointment.id} />
                 </div>
               </div>
             );

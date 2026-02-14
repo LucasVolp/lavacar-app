@@ -14,6 +14,7 @@ import { useServicesByShop } from "@/hooks/useServices";
 import { useShopSchedules } from "@/hooks/useSchedules";
 import { useBlockedTimesByShop } from "@/hooks/useBlockedTimes";
 import { useShopClientsCount } from "@/hooks/useShopClients";
+import { useShopClientsByShop } from "@/hooks/useShopClients";
 import {
   isSameDay,
   isAfter,
@@ -77,6 +78,7 @@ export default function ShopDashboardPage() {
   const { data: schedules = [] } = useShopSchedules(shopId);
   const { data: blockedTimes = [] } = useBlockedTimesByShop(shopId);
   const { data: clientsCount = 0 } = useShopClientsCount(shopId);
+  const { data: shopClientsData } = useShopClientsByShop(shopId, { perPage: 500 }, !!shopId);
 
   const appointments: Appointment[] = useMemo(
     () => appointmentsData?.data ?? [],
@@ -90,6 +92,16 @@ export default function ShopDashboardPage() {
   const services: Services[] = useMemo(
     () => servicesData?.data ?? [],
     [servicesData]
+  );
+  const clients = useMemo(() => shopClientsData?.data ?? [], [shopClientsData]);
+  const clientPictureByUserId = useMemo(
+    () =>
+      Object.fromEntries(
+        clients
+          .filter((client) => client.user?.id)
+          .map((client) => [client.user!.id, client.user?.picture || ""])
+      ),
+    [clients]
   );
 
   const isLoading = isLoadingShop || isLoadingAppointments;
@@ -304,6 +316,7 @@ export default function ShopDashboardPage() {
           <UpcomingAppointments
             appointments={upcomingAppointments}
             shopId={shopId}
+            clientPictureByUserId={clientPictureByUserId}
           />
         </Col>
 

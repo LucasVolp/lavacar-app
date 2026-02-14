@@ -11,6 +11,7 @@ import {
 import dayjs from "dayjs";
 import type { Appointment } from "@/types/appointment";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 interface HistoryItemProps {
   appointment: Appointment;
@@ -61,7 +62,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ appointment, onReview 
                 <>
                   <span className="w-1 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700 shrink-0" />
                   <span className="font-mono uppercase text-[10px]">
-                    {appointment.vehicle.plate}
+                    {formatVehiclePlate(appointment.vehicle.plate)}
                   </span>
                 </>
               )}

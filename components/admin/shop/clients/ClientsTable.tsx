@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Table, Avatar, Typography, Tag, Button } from "antd";
+import { Table, Avatar, Typography, Button } from "antd";
 import { 
   EyeOutlined, 
   CarOutlined, 
@@ -13,7 +13,7 @@ import {
 } from "@ant-design/icons";
 import { ShopClient } from "@/types/shopClient";
 import { formatPhone } from "@/utils/formatters";
-import { CustomTooltip } from "@/components/ui";
+import { CustomTooltip, StatusBadge } from "@/components/ui";
 import dayjs from "dayjs";
 import type { ColumnsType } from "antd/es/table";
 
@@ -155,18 +155,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
         return (
           <div className="flex items-center gap-2">
             <span className="dark:text-zinc-400">{dayjs(lastAppointment.scheduledAt).format("DD/MM/YYYY")}</span>
-            <Tag 
-              className={`m-0 border-0 ${
-                lastAppointment.status === "COMPLETED" 
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                  : lastAppointment.status === "CANCELED" 
-                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              }`}
-            >
-              {lastAppointment.status === "COMPLETED" ? "OK" :
-               lastAppointment.status === "CANCELED" ? "Cancelado" : "Pendente"}
-            </Tag>
+            <StatusBadge status={lastAppointment.status} className="m-0" />
           </div>
         );
       },

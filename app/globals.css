@@ -211,6 +211,53 @@ body {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Dark mode consistency for DatePicker/RangePicker (panel + range selection) */
+[data-theme="dark"] .ant-picker {
+  background-color: #1f1f1f !important;
+  border-color: #424242 !important;
+}
+
+[data-theme="dark"] .ant-picker input {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .ant-picker .ant-picker-suffix,
+[data-theme="dark"] .ant-picker .ant-picker-clear {
+  color: #a6a6a6 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel {
+  background-color: #1f1f1f !important;
+  border-color: #424242 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-header,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-content th,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-in-range::before {
+  background: rgba(99, 102, 241, 0.26) !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell-range-start .ant-picker-cell-inner,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell-range-end .ant-picker-cell-inner {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell-range-hover-start::after,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell-range-hover-end::after,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell-range-hover::after {
+  border-color: #818cf8 !important;
+}
+
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-cell:hover .ant-picker-cell-inner {
+  background: #2a2a2a !important;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {

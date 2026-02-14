@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { Button, Input, Form, message, Avatar, Upload, Typography } from "antd";
-import type { UploadProps, UploadFile } from "antd";
+import type { UploadProps } from "antd";
+import Image from "next/image";
 import {
   EditOutlined,
   CheckOutlined,
@@ -153,9 +154,12 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     label: string
   ): Promise<boolean> => {
     return new Promise((resolve) => {
-      const img = new Image();
+      // Create a temporary object URL to load the image
+      const objectUrl = URL.createObjectURL(file);
+      const img = new window.Image();
+      
       img.onload = () => {
-        URL.revokeObjectURL(img.src);
+        URL.revokeObjectURL(objectUrl);
         if (img.width > maxWidth || img.height > maxHeight) {
           message.error(`${label}: dimensões máximas ${maxWidth}x${maxHeight}px`);
           resolve(false);
@@ -163,11 +167,14 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
           resolve(true);
         }
       };
+      
       img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
         message.error(`${label}: erro ao carregar imagem`);
         resolve(false);
       };
-      img.src = URL.createObjectURL(file);
+      
+      img.src = objectUrl;
     });
   };
 
@@ -254,10 +261,12 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
       {/* Banner */}
       <div className="relative h-32 md:h-44 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
         {(isEditing ? bannerPreview : shop.bannerUrl) && (
-          <img
-            src={isEditing ? bannerPreview : shop.bannerUrl}
+          <Image
+            src={isEditing ? bannerPreview : shop.bannerUrl || ""}
             alt="Banner"
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            className="object-cover"
+            unoptimized
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -429,18 +438,22 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
                     `}
                   >
                     {logoPreview ? (
-                      <div className="p-2">
-                        <img
+                      <div className="p-2 relative w-20 h-20 mx-auto">
+                        <Image
                           src={logoPreview}
                           alt="Logo preview"
-                          className="w-20 h-20 mx-auto object-cover rounded-xl"
+                          fill
+                          className="object-cover rounded-xl"
+                          unoptimized
                         />
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                          Clique ou arraste para substituir
-                        </p>
                       </div>
                     ) : (
                       <UploadButton loading={logoLoading} label="Upload Logo" />
+                    )}
+                    {logoPreview && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                          Clique ou arraste para substituir
+                        </p>
                     )}
                   </Upload.Dragger>
                 </div>
@@ -465,18 +478,22 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
                     `}
                   >
                     {bannerPreview ? (
-                      <div className="p-2">
-                        <img
+                      <div className="p-2 relative w-full h-16 mx-auto">
+                        <Image
                           src={bannerPreview}
                           alt="Banner preview"
-                          className="w-full h-16 mx-auto object-cover rounded-lg"
+                          fill
+                          className="object-cover rounded-lg"
+                          unoptimized
                         />
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                          Clique ou arraste para substituir
-                        </p>
                       </div>
                     ) : (
                       <UploadButton loading={bannerLoading} label="Upload Banner" />
+                    )}
+                     {bannerPreview && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                          Clique ou arraste para substituir
+                        </p>
                     )}
                   </Upload.Dragger>
                 </div>

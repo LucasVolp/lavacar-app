@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Spin, Tag, Rate } from "antd";
-import { StarOutlined, ShopOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { Spin, Tag, Rate, Image } from "antd";
+import { StarOutlined, ShopOutlined, ClockCircleOutlined, PictureOutlined } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserEvaluations } from "@/hooks/useEvaluations";
 import dayjs from "dayjs";
@@ -103,6 +103,31 @@ export default function MyEvaluationsPage() {
                   <p className="text-slate-700 dark:text-slate-300 m-0 leading-relaxed italic">
                     &quot;{review.comment}&quot;
                   </p>
+                </div>
+              )}
+
+              {/* Photos */}
+              {review.photos && review.photos.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mb-2">
+                    <PictureOutlined className="text-xs" />
+                    <span>Fotos ({review.photos.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Image.PreviewGroup>
+                      {review.photos.map((photo, idx) => (
+                        <Image
+                          key={idx}
+                          src={photo}
+                          alt={`Foto ${idx + 1}`}
+                          width={72}
+                          height={72}
+                          className="rounded-xl object-cover border border-slate-200 dark:border-[#27272a]"
+                          fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjcyIiBoZWlnaHQ9IjcyIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNjY2MiIGZvbnQtc2l6ZT0iMTAiPkVycm88L3RleHQ+PC9zdmc+"
+                        />
+                      ))}
+                    </Image.PreviewGroup>
+                  </div>
                 </div>
               )}
 

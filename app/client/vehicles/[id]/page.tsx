@@ -6,6 +6,7 @@ import { Button, Card, Descriptions, Spin, Result, Tag, message } from "antd";
 import { ArrowLeftOutlined, CarOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useVehicle, useDeleteVehicle } from "@/hooks/useVehicles";
 import { CustomPopconfirm } from "@/components/ui";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -83,7 +84,7 @@ export default function VehicleDetailPage() {
             >
               <Descriptions.Item label="Placa">
                 <Tag className="font-mono text-base px-2 py-1 m-0 bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
-                    {vehicle.plate}
+                    {formatVehiclePlate(vehicle.plate)}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Marca">{vehicle.brand}</Descriptions.Item>

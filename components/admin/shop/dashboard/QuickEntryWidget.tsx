@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Card, Input, Typography, Spin, App } from "antd";
+import { Card, Input, Typography, Spin, App, Button } from "antd";
 import {
   SearchOutlined,
   CarOutlined,
@@ -14,6 +14,8 @@ import { sanitizePlate } from "@/lib/security";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { StatusBadge } from "@/components/ui";
+import { formatVehiclePlate, normalizeVehiclePlate } from "@/utils/vehiclePlate";
 
 import type { Appointment, AppointmentStatus } from "@/types/appointment";
 import type { Vehicle } from "@/types/vehicle";
@@ -50,7 +52,6 @@ interface QuickEntryWidgetProps {
 
 export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
   // shopId available for future use (e.g., scoped queries)
-  shopId: _shopId,
   todayAppointments,
   onOpenWizard,
 }) => {
@@ -61,7 +62,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
 
   const debouncedPlate = useDebouncedValue(plateInput, 400);
 
-  const sanitizedDebounced = sanitizePlate(debouncedPlate).replace(/-/g, "");
+  const sanitizedDebounced = normalizeVehiclePlate(sanitizePlate(debouncedPlate));
   const shouldFetchVehicle =
     sanitizedDebounced.length === 7 && PLATE_REGEX.test(sanitizedDebounced);
 
@@ -136,6 +137,9 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
             <div>
               <Text strong>Status:</Text> <Text>{appointment.status}</Text>
             </div>
+            <div>
+              <StatusBadge status={appointment.status} />
+            </div>
           </div>
         ),
         okText: "Iniciar Atendimento",
@@ -164,7 +168,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
 
   const handleSearch = useCallback(
     async (value: string) => {
-      const sanitized = sanitizePlate(value).replace(/-/g, "");
+      const sanitized = normalizeVehiclePlate(sanitizePlate(value));
 
       if (!PLATE_REGEX.test(sanitized)) {
         message.warning(
@@ -176,7 +180,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
       // Step A: Check for existing appointment today
       const existingAppointment = todayAppointments.find(
         (appointment) =>
-          appointment.vehicle?.plate === sanitized &&
+          normalizeVehiclePlate(appointment.vehicle?.plate) === sanitized &&
           ACTIONABLE_STATUSES.includes(appointment.status),
       );
 
@@ -266,21 +270,23 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
               onChange={handleInputChange}
               onSearch={handleSearch}
               enterButton={
-                <span className="flex items-center gap-1">
-                  <SearchOutlined />
-                  Buscar
-                </span>
+                <Button className="h-12 px-5 font-semibold rounded-r-lg">
+                  <span className="flex items-center gap-1">
+                    <SearchOutlined />
+                    Buscar
+                  </span>
+                </Button>
               }
               loading={vehicleQuery.isFetching || updateStatus.isPending}
               className="quick-entry-search"
-              style={{ minHeight: 44 }}
+              style={{ minHeight: 48 }}
               styles={{
                 input: {
                   fontFamily: "monospace",
                   fontSize: 18,
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
-                  minHeight: 44,
+                  minHeight: 48,
                 },
               }}
             />
@@ -312,7 +318,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
 
           {/* Hint text */}
           <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-600 relative z-10">
-            Digite a placa e pressione Enter para buscar ou iniciar atendimento.
+            Digite a placa ({formatVehiclePlate("ABC1234")} ou {formatVehiclePlate("ABC1D23")}) e pressione Enter para buscar ou iniciar atendimento.
           </div>
         </div>
       </Card>

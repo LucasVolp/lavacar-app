@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Button, Tooltip } from "antd";
+import React, { useState, useMemo, useCallback } from "react";
+import { Button, Tooltip, Select, Pagination, Space } from "antd";
 import {
   LeftOutlined,
   RightOutlined,
   CalendarOutlined,
   UserOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
-import { Appointment } from "@/types/appointment";
+import { Appointment, AppointmentStatus } from "@/types/appointment";
 import { useRouter } from "next/navigation";
 import {
   format,
@@ -27,6 +28,8 @@ import {
 import { ptBR } from "date-fns/locale";
 import { sanitizeText, formatCurrency } from "@/lib/security";
 
+const SIDEBAR_PAGE_SIZE = 5;
+
 interface AppointmentsCalendarProps {
   appointmentsByDate: Record<string, Appointment[]>;
   statusConfig: Record<string, { color: string; label: string; icon: React.ReactNode; bgColor: string }>;
@@ -42,27 +45,70 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // Sidebar pagination & filter state
+  const [sidebarPage, setSidebarPage] = useState(1);
+  const [sidebarStatus, setSidebarStatus] = useState<AppointmentStatus | null>(null);
+
+  const selectedDateKey = format(selectedDate, "yyyy-MM-dd");
+  const selectedDayAppointments = useMemo(
+    () => (appointmentsByDate[selectedDateKey] || []).slice(),
+    [appointmentsByDate, selectedDateKey]
+  );
+
+  const filteredSidebarAppointments = useMemo(() => {
+    const filtered = sidebarStatus
+      ? selectedDayAppointments.filter((apt) => apt.status === sidebarStatus)
+      : selectedDayAppointments;
+
+    return filtered.sort(
+      (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+    );
+  }, [selectedDayAppointments, sidebarStatus]);
+
+  const sidebarMeta = useMemo(() => {
+    const total = filteredSidebarAppointments.length;
+    const totalPages = Math.max(1, Math.ceil(total / SIDEBAR_PAGE_SIZE));
+
+    return {
+      total,
+      totalPages,
+      page: sidebarPage,
+      perPage: SIDEBAR_PAGE_SIZE,
+    };
+  }, [filteredSidebarAppointments.length, sidebarPage]);
+
+  const sidebarAppointments = useMemo(() => {
+    const start = (sidebarPage - 1) * SIDEBAR_PAGE_SIZE;
+    return filteredSidebarAppointments.slice(start, start + SIDEBAR_PAGE_SIZE);
+  }, [filteredSidebarAppointments, sidebarPage]);
+
+  // Reset sidebar pagination when date or filter changes
+  const handleDateSelect = useCallback((day: Date) => {
+    setSelectedDate(day);
+    setSidebarPage(1);
+  }, []);
+
+  const handleStatusChange = useCallback((value: string) => {
+    setSidebarStatus(value === "all" ? null : (value as AppointmentStatus));
+    setSidebarPage(1);
+  }, []);
+
   // Generate calendar grid days
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart); // defaults to Sunday
+    const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
 
     return eachDayOfInterval({ start: startDate, end: endDate });
   }, [currentMonth]);
-
-  const selectedDateKey = format(selectedDate, "yyyy-MM-dd");
-  const selectedDayAppointments = (appointmentsByDate[selectedDateKey] || []).sort(
-    (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
-  );
 
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const goToToday = () => {
     const now = new Date();
     setCurrentMonth(now);
-    setSelectedDate(now);
+    handleDateSelect(now);
   };
 
   return (
@@ -108,7 +154,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
             return (
               <div
                 key={day.toISOString()}
-                onClick={() => setSelectedDate(day)}
+                onClick={() => handleDateSelect(day)}
                 className={`
                   relative rounded-xl p-1.5 cursor-pointer transition-all duration-200 flex flex-col
                   border
@@ -184,9 +230,9 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
             <p className="text-zinc-500 dark:text-zinc-400 m-0">
                 {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
             </p>
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-                    {selectedDayAppointments.length} agendamentos
+                    {sidebarMeta?.total ?? 0} agendamentos
                 </span>
                 {isToday(selectedDate) && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
@@ -194,21 +240,47 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                     </span>
                 )}
             </div>
+
+            {/* Sidebar Status Filter */}
+            <div className="mt-4">
+                <Select
+                    value={sidebarStatus || "all"}
+                    onChange={handleStatusChange}
+                    className="w-full"
+                    size="small"
+                    suffixIcon={<FilterOutlined className="text-zinc-400" />}
+                    options={[
+                        { value: "all", label: "Todos os status" },
+                        ...Object.entries(statusConfig).map(([key, cfg]) => ({
+                            value: key,
+                            label: (
+                                <Space size={4}>
+                                    {cfg.icon}
+                                    {cfg.label}
+                                </Space>
+                            ),
+                        })),
+                    ]}
+                />
+            </div>
         </div>
 
         {/* List */}
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            {selectedDayAppointments.length === 0 ? (
+            {sidebarAppointments.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 opacity-60">
                     <CalendarOutlined className="text-5xl mb-4" />
                     <p className="text-lg font-medium">Sem agendamentos</p>
+                    {sidebarStatus && (
+                        <p className="text-sm mt-1">Nenhum resultado para este filtro</p>
+                    )}
                 </div>
             ) : (
                 <div className="space-y-0 relative">
                     {/* Vertical Timeline Line */}
                     <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-zinc-200 dark:bg-zinc-700 z-0" />
 
-                    {selectedDayAppointments.map((apt) => {
+                    {sidebarAppointments.map((apt) => {
                         const status = statusConfig[apt.status];
                         const time = format(parseISO(apt.scheduledAt), "HH:mm");
 
@@ -228,7 +300,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2">
                                             <span className="text-lg font-bold text-zinc-800 dark:text-zinc-100 tracking-tight">
-                                                {time}
+                                                {time} - {format(parseISO(apt.endTime), "HH:mm")}
                                             </span>
                                             <span className="text-xs text-zinc-400 dark:text-zinc-500 font-medium bg-zinc-50 dark:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-100 dark:border-zinc-700">
                                                 {apt.totalDuration} min
@@ -241,7 +313,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                                         </Tooltip>
                                     </div>
 
-                                    {/* Service List (First 2) */}
+                                    {/* Service List */}
                                     <div className="mb-3">
                                         <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                                             {sanitizeText(apt.services[0]?.serviceName)}
@@ -272,6 +344,21 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                 </div>
             )}
         </div>
+
+        {/* Pagination Footer */}
+        {sidebarMeta && sidebarMeta.totalPages > 1 && (
+            <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex justify-center">
+                <Pagination
+                    current={sidebarPage}
+                    pageSize={SIDEBAR_PAGE_SIZE}
+                    total={sidebarMeta.total}
+                    onChange={(p) => setSidebarPage(p)}
+                    size="small"
+                    simple
+                    showSizeChanger={false}
+                />
+            </div>
+        )}
       </div>
     </div>
   );

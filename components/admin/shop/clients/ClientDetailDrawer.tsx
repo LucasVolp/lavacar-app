@@ -37,11 +37,12 @@ import {
 } from "@ant-design/icons";
 import { ShopClient, UpdateShopClientPayload } from "@/types/shopClient";
 import { useDeleteShopClient, useUpdateShopClient } from "@/hooks/useShopClients";
-import { CustomTooltip } from "@/components/ui";
+import { CustomTooltip, StatusBadge } from "@/components/ui";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 
 import { formatPhone } from "@/utils/formatters";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -159,19 +160,6 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
       default:
         return <ClockCircleOutlined className="text-blue-500" />;
     }
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      COMPLETED: "Concluído",
-      CANCELED: "Cancelado",
-      PENDING: "Pendente",
-      IN_PROGRESS: "Em andamento",
-      CONFIRMED: "Confirmado",
-      WAITING: "Aguardando",
-      NO_SHOW: "Não compareceu",
-    };
-    return labels[status] || status;
   };
 
   const handleDelete = async () => {
@@ -294,6 +282,17 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
             onClick={() => setIsEditing(true)}
             className="!text-white hover:bg-white/20 flex items-center justify-center"
           />
+        </div>
+
+        <div className="mt-4">
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => router.push(`/admin/shop/${shopId}/clients/${client.id}`)}
+            className="w-full !bg-white !text-indigo-700 !border-0 !font-semibold !rounded-xl !h-11 hover:!bg-indigo-50 !shadow-md transition-all"
+          >
+            Ver Perfil Completo & Histórico ↗
+          </Button>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mt-6">
@@ -563,7 +562,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                             </Text>
                           </div>
                         </div>
-                        {vehicle.plate && <Tag className="font-mono uppercase !bg-zinc-100 dark:!bg-zinc-800 !text-zinc-600 dark:!text-zinc-400 border-0">{vehicle.plate}</Tag>}
+                        {vehicle.plate && <Tag className="font-mono uppercase !bg-zinc-100 dark:!bg-zinc-800 !text-zinc-600 dark:!text-zinc-400 border-0">{formatVehiclePlate(vehicle.plate)}</Tag>}
                       </div>
                     ))}
                   </div>
@@ -598,19 +597,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                             <Text strong className="dark:text-white">
                               {apt.services.map((s) => s.serviceName).join(", ")}
                             </Text>
-                            <Tag
-                              className={`m-0 border-0 ${
-                                apt.status === "PENDING"
-                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500"
-                                  : apt.status === "COMPLETED"
-                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                    : apt.status === "CANCELED"
-                                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                              }`}
-                            >
-                              {getStatusLabel(apt.status)}
-                            </Tag>
+                            <StatusBadge status={apt.status} className="m-0" />
                           </div>
                           <div className="flex items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                             <span className="flex items-center gap-1">
@@ -631,7 +618,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                     type="link"
                     block
                     className="mt-2"
-                    onClick={() => router.push(`/admin/shop/${shopId}/appointments?userId=${user.id}`)}
+                    onClick={() => router.push(`/admin/shop/${shopId}/clients/${client.id}?tab=timeline`)}
                   >
                     Ver todos os {appointmentCount} agendamentos
                   </Button>

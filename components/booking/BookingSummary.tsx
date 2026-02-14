@@ -11,6 +11,7 @@ import {
 import { Services } from "@/types/services";
 import { Vehicle } from "@/types/vehicle";
 import { formatDateInTimezone } from "@/utils/dateUtils";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 const { Title, Text } = Typography;
 
@@ -77,7 +78,7 @@ export function BookingSummary({
               {selectedVehicle.brand} {selectedVehicle.model}
             </Text>
             <br />
-            <Text type="secondary">Placa: {selectedVehicle.plate}</Text>
+            <Text type="secondary">Placa: {formatVehiclePlate(selectedVehicle.plate)}</Text>
           </div>
         ) : (
           <div className="pl-6">

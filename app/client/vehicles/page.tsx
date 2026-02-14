@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserVehicles, useDeleteVehicle } from "@/hooks/useVehicles";
 import { AddVehicleModal } from "@/components/booking/AddVehicleModal";
 import { CustomPopconfirm } from "@/components/ui";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 export default function VehiclesPage() {
   const { user } = useAuth();
@@ -98,7 +99,7 @@ export default function VehiclesPage() {
                     </h3>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <Tag className="font-mono uppercase !text-[10px] !m-0 !px-1.5 !py-0 border-zinc-200 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                        {vehicle.plate}
+                        {formatVehiclePlate(vehicle.plate)}
                       </Tag>
                       {vehicle.color && (
                         <>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, Tag, Switch } from "antd";
-import { EditOutlined, DeleteOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, ClockCircleOutlined, PictureOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { Services } from "@/types/services";
 import { CustomTooltip, CustomPopconfirm } from "@/components/ui";
@@ -30,6 +30,24 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       className={`h-full transition-all duration-200 hover:shadow-lg ${
         service.isActive === false ? "opacity-70 grayscale-[30%]" : ""
       }`}
+      cover={
+        service.photoUrl ? (
+          <div className="relative h-32 overflow-hidden">
+            <img
+              src={service.photoUrl}
+              alt={service.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        ) : (
+          <div className="h-20 bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-center">
+            <PictureOutlined className="text-xl text-zinc-300 dark:text-zinc-600" />
+          </div>
+        )
+      }
       style={{
         borderTop: `4px solid ${service.isActive !== false ? "#52c41a" : "#d9d9d9"}`,
       }}

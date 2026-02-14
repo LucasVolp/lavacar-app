@@ -4,6 +4,7 @@ import React from "react";
 import { Tag } from "antd";
 import { CarOutlined, RightOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 export interface VehicleCardData {
   id: string;
@@ -32,7 +33,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
           </span>
           <div className="flex items-center gap-1.5 mt-0.5">
             <Tag className="font-mono uppercase !text-[9px] !m-0 !px-1.5 !py-0 !leading-relaxed rounded border bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:border-zinc-600">
-              {vehicle.plate ?? "---"}
+              {formatVehiclePlate(vehicle.plate) || "---"}
             </Tag>
             {vehicle.color && vehicle.color !== "-" && (
               <span className="text-[10px] text-zinc-400 capitalize truncate">

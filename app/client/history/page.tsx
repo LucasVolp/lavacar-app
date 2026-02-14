@@ -35,7 +35,7 @@ export default function HistoryPage() {
     setReviewModal({ open: true, appointmentId, serviceName });
   };
 
-  const handleSubmitReview = (data: { appointmentId: string; rating: number; comment?: string }) => {
+  const handleSubmitReview = (data: { appointmentId: string; rating: number; comment?: string; photos?: string[] }) => {
     if (!user?.id) return;
 
     createEvaluation.mutate(
@@ -44,6 +44,7 @@ export default function HistoryPage() {
         userId: user.id,
         rating: data.rating,
         comment: data.comment,
+        photos: data.photos,
       },
       {
         onSuccess: () => {

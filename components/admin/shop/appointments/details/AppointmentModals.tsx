@@ -1,12 +1,16 @@
 import React from "react";
-import { Modal, Input } from "antd";
+import { Modal, Input, Button } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 interface AppointmentModalsProps {
   cancelVisible: boolean;
   confirmVisible: boolean;
+  checklistWarningVisible: boolean;
   onCancelClose: () => void;
   onConfirmClose: () => void;
+  onChecklistWarningClose: () => void;
+  onOpenChecklist: () => void;
+  onChecklistProceed: () => void;
   onCancelConfirm: () => void;
   onStatusConfirm: () => void;
   cancelReason: string;
@@ -19,8 +23,12 @@ interface AppointmentModalsProps {
 export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
   cancelVisible,
   confirmVisible,
+  checklistWarningVisible,
   onCancelClose,
   onConfirmClose,
+  onChecklistWarningClose,
+  onOpenChecklist,
+  onChecklistProceed,
   onCancelConfirm,
   onStatusConfirm,
   cancelReason,
@@ -68,6 +76,29 @@ export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
           </p>
           <p className="text-slate-600 dark:text-slate-300 font-medium mt-2">
             Tem certeza que deseja marcar como &quot;{nextStatusLabel}&quot; agora?
+          </p>
+        </div>
+      </Modal>
+
+      <Modal
+        title={<span className="text-amber-600 dark:text-amber-500"><ExclamationCircleOutlined /> Vistoria não realizada</span>}
+        open={checklistWarningVisible}
+        onCancel={onChecklistWarningClose}
+        footer={(
+          <div className="flex flex-col sm:flex-row justify-end gap-2">
+            <Button onClick={onOpenChecklist}>
+              Adicionar Vistoria
+            </Button>
+            <Button type="primary" onClick={onChecklistProceed} className="bg-amber-500 hover:bg-amber-600 border-amber-500">
+              Prosseguir sem vistoria
+            </Button>
+          </div>
+        )}
+        centered
+      >
+        <div className="py-2">
+          <p className="text-slate-600 dark:text-slate-300 m-0">
+            Este agendamento ainda não possui vistoria registrada. É recomendado realizar a vistoria antes de iniciar o atendimento.
           </p>
         </div>
       </Modal>

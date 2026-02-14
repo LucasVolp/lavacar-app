@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Modal, Rate, Input, message } from "antd";
-import { StarFilled } from "@ant-design/icons";
+import { Modal, Rate, Input, message, Button, Image } from "antd";
+import { StarFilled, PlusOutlined, DeleteOutlined, PictureOutlined } from "@ant-design/icons";
 
 interface ReviewModalProps {
   open: boolean;
   appointmentId: string;
   serviceName: string;
-  onSubmit: (data: { appointmentId: string; rating: number; comment?: string }) => void;
+  onSubmit: (data: { appointmentId: string; rating: number; comment?: string; photos?: string[] }) => void;
   onCancel: () => void;
   loading?: boolean;
 }
@@ -21,6 +21,8 @@ const ratingLabels: Record<number, string> = {
   5: "Excelente",
 };
 
+const MAX_PHOTOS = 5;
+
 export const ReviewModal: React.FC<ReviewModalProps> = ({
   open,
   appointmentId,
@@ -31,6 +33,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [newPhotoUrl, setNewPhotoUrl] = useState("");
 
   const handleOk = () => {
     if (rating === 0) {
@@ -38,16 +42,45 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       return;
     }
 
+    const validPhotos = photoUrls.filter((url) => url.trim().length > 0);
+
     onSubmit({
       appointmentId,
       rating,
       comment: comment.trim() || undefined,
+      photos: validPhotos.length > 0 ? validPhotos : undefined,
     });
   };
 
   const handleAfterClose = () => {
     setRating(0);
     setComment("");
+    setPhotoUrls([]);
+    setNewPhotoUrl("");
+  };
+
+  const handleAddPhoto = () => {
+    const trimmed = newPhotoUrl.trim();
+    if (!trimmed) return;
+
+    try {
+      new URL(trimmed);
+    } catch {
+      message.warning("Informe uma URL válida.");
+      return;
+    }
+
+    if (photoUrls.length >= MAX_PHOTOS) {
+      message.warning(`Máximo de ${MAX_PHOTOS} fotos permitidas.`);
+      return;
+    }
+
+    setPhotoUrls((prev) => [...prev, trimmed]);
+    setNewPhotoUrl("");
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotoUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -67,6 +100,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       confirmLoading={loading}
       okButtonProps={{ disabled: rating === 0 }}
       destroyOnClose
+      width={560}
     >
       <div className="flex flex-col gap-5 py-4">
         <div>
@@ -107,6 +141,59 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
             showCount
             className="rounded-xl"
           />
+        </div>
+
+        {/* Photo URLs section */}
+        <div>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
+            <PictureOutlined className="mr-1" />
+            Fotos do serviço <span className="text-zinc-400 dark:text-zinc-500">(opcional, máx. {MAX_PHOTOS})</span>
+          </p>
+
+          {photoUrls.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              <Image.PreviewGroup>
+                {photoUrls.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <Image
+                      src={url}
+                      alt={`Foto ${index + 1}`}
+                      width={80}
+                      height={80}
+                      className="rounded-lg object-cover border border-zinc-200 dark:border-zinc-700"
+                      fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNjY2MiIGZvbnQtc2l6ZT0iMTIiPkVycm88L3RleHQ+PC9zdmc+"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePhoto(index)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <DeleteOutlined className="text-[10px]" />
+                    </button>
+                  </div>
+                ))}
+              </Image.PreviewGroup>
+            </div>
+          )}
+
+          {photoUrls.length < MAX_PHOTOS && (
+            <div className="flex gap-2">
+              <Input
+                value={newPhotoUrl}
+                onChange={(e) => setNewPhotoUrl(e.target.value)}
+                placeholder="Cole a URL da imagem..."
+                onPressEnter={handleAddPhoto}
+                className="rounded-lg"
+              />
+              <Button
+                icon={<PlusOutlined />}
+                onClick={handleAddPhoto}
+                disabled={!newPhotoUrl.trim()}
+              >
+                Adicionar
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </Modal>

@@ -2,6 +2,7 @@ export interface Services {
     id: string;
     name: string;
     description?: string;
+    photoUrl?: string;
     price: string;
     duration: number;
     isActive?: boolean;
@@ -16,6 +17,7 @@ export interface Services {
 export interface CreateServicePayload {
     name: string;
     description?: string;
+    photoUrl?: string;
     price: number;
     duration: number;
     isActive?: boolean;
@@ -27,6 +29,7 @@ export interface CreateServicePayload {
 export interface UpdateServicePayload {
     name?: string;
     description?: string;
+    photoUrl?: string;
     price?: number;
     duration?: number;
     isActive?: boolean;

@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import { Table, Tag, Space, Button, Typography, Card } from "antd";
+import { Table, Space, Button, Typography, Card, Avatar } from "antd";
 import { 
   EditOutlined, 
   DeleteOutlined, 
   StopOutlined, 
   CheckCircleOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 import { Services } from "@/types/services";
 import { CustomTooltip } from "@/components/ui";
@@ -36,13 +37,22 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       dataIndex: "name",
       key: "name",
       render: (text: string, record: Services) => (
-        <div>
-          <Text strong className="dark:text-zinc-100">{text}</Text>
-          {record.description && (
-            <Text type="secondary" className="block text-xs line-clamp-1 dark:text-zinc-400">
-              {record.description}
-            </Text>
-          )}
+        <div className="flex items-center gap-3">
+          <Avatar
+            shape="square"
+            size={40}
+            src={record.photoUrl || undefined}
+            icon={!record.photoUrl ? <PictureOutlined /> : undefined}
+            className="flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+          />
+          <div>
+            <Text strong className="dark:text-zinc-100">{text}</Text>
+            {record.description && (
+              <Text type="secondary" className="block text-xs line-clamp-1 dark:text-zinc-400">
+                {record.description}
+              </Text>
+            )}
+          </div>
         </div>
       ),
     },

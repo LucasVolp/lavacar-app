@@ -11,7 +11,8 @@ import {
   SwapOutlined
 } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
-import { sanitizeText, sanitizePlate, sanitizePhone } from "@/lib/security";
+import { sanitizeText, sanitizePhone } from "@/lib/security";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 interface AppointmentClientVehicleProps {
   appointment: Appointment;
@@ -110,7 +111,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
     : null;
 
   const vehiclePlate = appointment.vehicle?.plate
-    ? sanitizePlate(appointment.vehicle.plate)
+    ? formatVehiclePlate(appointment.vehicle.plate)
     : null;
 
   const vehicleColor = appointment.vehicle?.color

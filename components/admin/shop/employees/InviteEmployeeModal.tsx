@@ -8,6 +8,7 @@ import {
   Button,
   message,
   Avatar,
+  Radio,
 } from "antd";
 import {
   UserAddOutlined,
@@ -46,6 +47,7 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
   shopName,
 }) => {
   const [form] = Form.useForm();
+  const selectedRole = Form.useWatch("role", form);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [invitedEmail, setInvitedEmail] = useState("");
@@ -156,40 +158,40 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
               }
               rules={[{ required: true, message: "Selecione uma função" }]}
             >
-              <div className="space-y-3">
+              <Radio.Group className="w-full flex flex-col gap-3">
                 {ROLE_OPTIONS.map((option) => (
-                  <label
-                    key={option.value}
-                    className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      form.getFieldValue("role") === option.value
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-500"
-                        : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-800/50"
-                    }`}
-                    onClick={() => form.setFieldsValue({ role: option.value })}
-                  >
-                    <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      form.getFieldValue("role") === option.value
-                        ? "border-indigo-500 bg-indigo-500"
-                        : "border-zinc-300 dark:border-zinc-600"
-                    }`}>
-                      {form.getFieldValue("role") === option.value && (
-                        <div className="w-2 h-2 rounded-full bg-white" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {option.icon}
-                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                          {option.label}
-                        </span>
+                  <Radio key={option.value} value={option.value} className="!flex !items-start !p-0 !m-0 w-full [&>.ant-radio]:hidden">
+                    <div
+                      className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 w-full ${
+                        selectedRole === option.value
+                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-500"
+                          : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-800/50"
+                      }`}
+                    >
+                      <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                        selectedRole === option.value
+                          ? "border-indigo-500 bg-indigo-500"
+                          : "border-zinc-300 dark:border-zinc-600"
+                      }`}>
+                        {selectedRole === option.value && (
+                          <div className="w-2 h-2 rounded-full bg-white" />
+                        )}
                       </div>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                        {option.description}
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {option.icon}
+                          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                            {option.label}
+                          </span>
+                        </div>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                          {option.description}
+                        </p>
+                      </div>
                     </div>
-                  </label>
+                  </Radio>
                 ))}
-              </div>
+              </Radio.Group>
             </Form.Item>
 
             {/* Info Box */}

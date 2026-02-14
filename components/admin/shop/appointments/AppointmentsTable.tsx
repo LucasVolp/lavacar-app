@@ -213,11 +213,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
             />
           )
         }}
-        pagination={{
-          pageSize: 15,
-          showSizeChanger: true,
-          showTotal: (total) => `${total} agendamento(s)`
-        }}
+        pagination={false}
         rowClassName={(record) => {
           if (record.status === "CANCELED" || record.status === "NO_SHOW") {
             return "opacity-50";

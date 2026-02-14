@@ -10,7 +10,6 @@ import {
   Avatar,
   message,
   Upload,
-  Divider,
   Tag,
   Modal,
   Alert,
@@ -32,6 +31,27 @@ import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
 
 dayjs.locale("pt-br");
+
+interface ProfileFormValues {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+}
+
+interface PasswordFormValues {
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 export default function ClientProfilePage() {
   const { user, refreshUser, isLoading: authLoading, logout } = useAuth();
@@ -56,7 +76,7 @@ export default function ClientProfilePage() {
     }
   }, [user, form]);
 
-  const handleSaveProfile = async (values: any) => {
+  const handleSaveProfile = async (values: ProfileFormValues) => {
     if (!user) return;
     try {
       await updateUser.mutateAsync({
@@ -69,16 +89,17 @@ export default function ClientProfilePage() {
       });
       await refreshUser();
       message.success("Perfil atualizado com sucesso!");
-    } catch (error: any) {
-      message.error(error.response?.data?.message || "Erro ao atualizar perfil");
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      message.error(apiError.response?.data?.message || "Erro ao atualizar perfil");
     }
   };
 
-  const handleChangePassword = async (values: any) => {
+  const handleChangePassword = async (values: PasswordFormValues) => {
     if (!user) return;
     setIsChangingPassword(true);
     try {
-      const payload: any = {
+      const payload: { password?: string } = {
         password: values.newPassword,
       };
       
@@ -92,8 +113,9 @@ export default function ClientProfilePage() {
       });
       message.success("Senha alterada com sucesso!");
       passwordForm.resetFields();
-    } catch (error: any) {
-      message.error(error.response?.data?.message || "Erro ao alterar senha");
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      message.error(apiError.response?.data?.message || "Erro ao alterar senha");
     } finally {
       setIsChangingPassword(false);
     }

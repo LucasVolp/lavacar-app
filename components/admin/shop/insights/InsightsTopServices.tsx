@@ -24,20 +24,15 @@ export const InsightsTopServices: React.FC<InsightsTopServicesProps> = ({
     {
       title: "Posição",
       key: "position",
-      width: 80,
+      width: 100,
       render: (_: unknown, __: unknown, index: number) => (
         <div className="flex items-center gap-2">
-          {index === 0 ? (
-            <TrophyOutlined className="text-amber-500 text-lg" />
-          ) : index === 1 ? (
-            <TrophyOutlined className="text-zinc-400 text-lg" />
-          ) : index === 2 ? (
-            <TrophyOutlined className="text-amber-700 text-lg" />
-          ) : (
-            <span className="text-zinc-500 dark:text-zinc-400 font-medium">
-              {index + 1}º
-            </span>
-          )}
+          <span className={`font-medium ${index < 3 ? 'text-zinc-900 dark:text-zinc-100 font-bold' : 'text-zinc-500 dark:text-zinc-400'}`}>
+            {index + 1}º
+          </span>
+          {index === 0 && <TrophyOutlined className="text-amber-500 text-lg" />}
+          {index === 1 && <TrophyOutlined className="text-zinc-400 text-lg" />}
+          {index === 2 && <TrophyOutlined className="text-amber-700 text-lg" />}
         </div>
       )
     },

@@ -165,6 +165,17 @@ export default function ThemeAwareConfigProvider({
             colorBorder: isDarkMode ? colors.dark.border : colors.light.border,
             optionSelectedBg: isDarkMode ? colors.dark.hoverBg : colors.light.hoverBg,
           },
+          DatePicker: {
+            colorBgContainer: isDarkMode ? "#1f1f1f" : colors.light.bgContainer,
+            colorText: isDarkMode ? "#ffffff" : colors.light.textBase,
+            colorIcon: isDarkMode ? "#a6a6a6" : colors.light.textSecondary,
+            colorBgElevated: isDarkMode ? "#1f1f1f" : colors.light.bgElevated,
+            colorBorder: isDarkMode ? "#424242" : colors.light.border,
+            cellHoverBg: isDarkMode ? "#2a2a2a" : "#f5f5f5",
+            cellActiveWithRangeBg: isDarkMode ? "rgba(99, 102, 241, 0.35)" : "rgba(99, 102, 241, 0.14)",
+            cellHoverWithRangeBg: isDarkMode ? "rgba(99, 102, 241, 0.26)" : "rgba(99, 102, 241, 0.10)",
+            cellRangeBorderColor: isDarkMode ? "#818cf8" : "#6366f1",
+          },
           Modal: {
             contentBg: isDarkMode ? colors.dark.bgContainer : colors.light.bgContainer,
             headerBg: isDarkMode ? colors.dark.bgContainer : colors.light.bgContainer,

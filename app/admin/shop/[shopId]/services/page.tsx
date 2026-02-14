@@ -99,6 +99,7 @@ export default function ServicesPage() {
       form.setFieldsValue({
         name: service.name,
         description: service.description,
+        photoUrl: service.photoUrl || undefined,
         price: parseFloat(service.price),
         duration: service.duration,
         isActive: service.isActive !== false,
@@ -121,6 +122,7 @@ export default function ServicesPage() {
   const handleSubmit = async (values: {
     name: string;
     description?: string;
+    photoUrl?: string;
     price: number;
     duration: number;
     isActive: boolean;
@@ -128,11 +130,11 @@ export default function ServicesPage() {
   }) => {
     try {
       if (editingService) {
-        const payload: UpdateServicePayload = { ...values, groupId: values.groupId || undefined };
+        const payload: UpdateServicePayload = { ...values, groupId: values.groupId || undefined, photoUrl: values.photoUrl || undefined };
         await updateService.mutateAsync({ id: editingService.id, payload });
         message.success("Serviço atualizado com sucesso!");
       } else {
-        const payload: CreateServicePayload = { ...values, shopId, groupId: values.groupId || undefined };
+        const payload: CreateServicePayload = { ...values, shopId, groupId: values.groupId || undefined, photoUrl: values.photoUrl || undefined };
         await createService.mutateAsync(payload);
         message.success("Serviço criado com sucesso!");
       }

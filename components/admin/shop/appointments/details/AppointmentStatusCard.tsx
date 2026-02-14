@@ -1,15 +1,13 @@
 import React from "react";
-import { Card, Tag, Steps, Button } from "antd";
+import { Card, Steps, Button } from "antd";
 import { 
-  ClockCircleOutlined, 
   CheckCircleOutlined, 
   EnvironmentOutlined, 
-  CarOutlined, 
   CloseCircleOutlined, 
-  ExclamationCircleOutlined,
   PlayCircleOutlined
 } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 interface AppointmentStatusCardProps {
   appointment: Appointment;
@@ -17,14 +15,14 @@ interface AppointmentStatusCardProps {
   loading?: boolean;
 }
 
-const statusConfig: Record<string, { color: string; label: string; icon: React.ReactNode; stepIndex: number }> = {
-  PENDING: { color: "orange", label: "Pendente", icon: <ClockCircleOutlined />, stepIndex: 0 },
-  CONFIRMED: { color: "blue", label: "Confirmado", icon: <CheckCircleOutlined />, stepIndex: 1 },
-  WAITING: { color: "cyan", label: "Aguardando", icon: <EnvironmentOutlined />, stepIndex: 2 },
-  IN_PROGRESS: { color: "purple", label: "Em Andamento", icon: <CarOutlined />, stepIndex: 3 },
-  COMPLETED: { color: "green", label: "Concluído", icon: <CheckCircleOutlined />, stepIndex: 4 },
-  CANCELED: { color: "red", label: "Cancelado", icon: <CloseCircleOutlined />, stepIndex: -1 },
-  NO_SHOW: { color: "default", label: "Não Compareceu", icon: <ExclamationCircleOutlined />, stepIndex: -1 },
+const statusConfig: Record<string, { stepIndex: number }> = {
+  PENDING: { stepIndex: 0 },
+  CONFIRMED: { stepIndex: 1 },
+  WAITING: { stepIndex: 2 },
+  IN_PROGRESS: { stepIndex: 3 },
+  COMPLETED: { stepIndex: 4 },
+  CANCELED: { stepIndex: -1 },
+  NO_SHOW: { stepIndex: -1 },
 };
 
 export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({ 
@@ -32,7 +30,7 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
   onNextStatus, 
   loading 
 }) => {
-  const currentStatus = statusConfig[appointment.status];
+  const currentStatus = statusConfig[appointment.status] || statusConfig.PENDING;
   const isCanceled = ["CANCELED", "NO_SHOW"].includes(appointment.status);
 
   // Logic for the single dynamic button
@@ -59,10 +57,7 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <span className="text-xs text-slate-400 uppercase font-bold tracking-wider block mb-1">Status Atual</span>
-            <Tag color={currentStatus.color} className="px-3 py-1.5 text-sm flex items-center gap-2 w-fit rounded-lg border-0">
-              <span className="mr-2">{currentStatus.icon}</span>
-              {currentStatus.label}
-            </Tag>
+            <StatusBadge status={appointment.status} className="px-3 py-1.5 text-sm w-fit rounded-lg" />
           </div>
           
           {/* Dynamic Action Button */}

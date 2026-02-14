@@ -9,6 +9,7 @@ import {
   CheckCircleOutlined,
   StarOutlined,
 } from "@ant-design/icons";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 export const OwnerBenefits = () => {
   return (
@@ -148,7 +149,7 @@ const AppCarousel = () => {
             </div>
             <div className="flex-1">
               <div className="text-sm font-bold text-base-content">{item.car}</div>
-              <div className="text-xs text-base-content/50">{item.plate}</div>
+              <div className="text-xs text-base-content/50">{formatVehiclePlate(item.plate)}</div>
             </div>
             <div className={`text-[10px] px-2 py-0.5 rounded-full bg-${item.color}-500/10 text-${item.color}-500 font-medium border border-${item.color}-500/20`}>
               {item.status}

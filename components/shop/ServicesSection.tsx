@@ -5,6 +5,7 @@ import {
   ArrowRightOutlined,
   FireFilled,
   ThunderboltFilled,
+  PictureOutlined,
 } from "@ant-design/icons";
 import { Services } from "@/types/services";
 
@@ -50,6 +51,24 @@ function ServiceCard({
         }
       `}
     >
+      {/* Photo header */}
+      {service.photoUrl ? (
+        <div className="relative w-full h-40 overflow-hidden">
+          <img
+            src={service.photoUrl}
+            alt={service.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        </div>
+      ) : (
+        <div className="w-full h-20 bg-slate-50 dark:bg-[#27272a] flex items-center justify-center">
+          <PictureOutlined className="text-2xl text-slate-300 dark:text-slate-600" />
+        </div>
+      )}
+
       {/* Popular Badge */}
       {isPopular && (
         <div className="absolute top-0 right-0 z-10 transition-opacity">

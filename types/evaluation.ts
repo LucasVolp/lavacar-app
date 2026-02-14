@@ -2,6 +2,7 @@ export interface Evaluation {
     id: string;
     rating: number;
     comment?: string;
+    photos?: string[];
     appointmentId: string;
     userId: string;
 
@@ -18,6 +19,7 @@ export interface EvaluationWithRelations extends Evaluation {
         id: string;
         firstName: string;
         lastName: string;
+        picture?: string;
     };
     appointment?: {
         id: string;
@@ -30,6 +32,7 @@ export interface EvaluationWithRelations extends Evaluation {
 export interface CreateEvaluationPayload {
     rating: number;
     comment?: string;
+    photos?: string[];
     appointmentId: string;
     userId: string;
 }
@@ -37,4 +40,5 @@ export interface CreateEvaluationPayload {
 export interface UpdateEvaluationPayload {
     rating?: number;
     comment?: string;
+    photos?: string[];
 }

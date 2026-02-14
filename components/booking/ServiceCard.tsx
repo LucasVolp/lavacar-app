@@ -1,7 +1,7 @@
 "use client";
 
 import { Services } from "@/types/services";
-import { ClockCircleOutlined, DollarOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { ClockCircleOutlined, DollarOutlined, CheckCircleFilled, PictureOutlined } from "@ant-design/icons";
 
 interface ServiceCardProps {
   service: Services;
@@ -35,7 +35,7 @@ export function ServiceCard({
     <div
       onClick={() => onSelect?.(service)}
       className={`
-        relative overflow-hidden group p-6 rounded-xl border transition-all duration-300 cursor-pointer h-full flex flex-col
+        relative overflow-hidden group p-0 rounded-xl border transition-all duration-300 cursor-pointer h-full flex flex-col
         ${
           selected
             ? "bg-slate-50 dark:bg-[#18181b] border-indigo-500 dark:border-slate-50 shadow-[0_0_20px_-5px_rgba(99,102,241,0.2)] dark:shadow-[0_0_20px_-5px_rgba(255,255,255,0.2)] scale-[1.02]"
@@ -43,14 +43,32 @@ export function ServiceCard({
         }
       `}
     >
+      {/* Photo header */}
+      {service.photoUrl ? (
+        <div className="relative w-full h-36 overflow-hidden">
+          <img
+            src={service.photoUrl}
+            alt={service.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+              (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+            }}
+          />
+          <div className="hidden w-full h-full bg-slate-100 dark:bg-[#27272a] flex items-center justify-center">
+            <PictureOutlined className="text-3xl text-slate-400" />
+          </div>
+        </div>
+      ) : null}
+
       {/* Selection Indicator */}
       {selected && (
-        <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-200">
+        <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-200 z-10">
           <CheckCircleFilled className="text-emerald-500 dark:text-emerald-400 text-xl shadow-lg rounded-full bg-white dark:bg-black/50" />
         </div>
       )}
 
-      <div className="flex flex-col gap-4 flex-1">
+      <div className="flex flex-col gap-4 flex-1 p-6">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 leading-tight tracking-tight pr-8 service-title transition-colors duration-300">
             {service.name}

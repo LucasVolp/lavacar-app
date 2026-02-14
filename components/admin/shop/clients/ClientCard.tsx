@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, Avatar, Typography, Tag, Button } from "antd";
+import { Card, Avatar, Typography, Button } from "antd";
 import {
   PhoneOutlined, 
   MailOutlined, 
@@ -13,7 +13,7 @@ import {
 } from "@ant-design/icons";
 import { ShopClient } from "@/types/shopClient";
 import { formatPhone } from "@/utils/formatters";
-import { CustomTooltip } from "@/components/ui";
+import { CustomTooltip, StatusBadge } from "@/components/ui";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
@@ -174,20 +174,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
               <CalendarOutlined />
               <span>Último: {dayjs(lastAppointment.scheduledAt).format("DD/MM/YYYY")}</span>
             </div>
-            <Tag 
-              className={`m-0 text-[10px] border-0 px-2 py-0.5 rounded-full ${
-                lastAppointment.status === "COMPLETED" 
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                  : lastAppointment.status === "CANCELED" 
-                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              }`}
-            >
-              {lastAppointment.status === "COMPLETED" ? "Concluído" :
-               lastAppointment.status === "CANCELED" ? "Cancelado" :
-               lastAppointment.status === "PENDING" ? "Pendente" :
-               lastAppointment.status}
-            </Tag>
+            <StatusBadge status={lastAppointment.status} className="text-[10px] px-2 py-0.5 rounded-full" />
           </div>
         </div>
       )}

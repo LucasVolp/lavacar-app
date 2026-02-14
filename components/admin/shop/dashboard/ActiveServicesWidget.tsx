@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
 import dayjs from "dayjs";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 interface ActiveServicesWidgetProps {
   appointments: Appointment[];
@@ -53,7 +54,7 @@ export const ActiveServicesWidget: React.FC<ActiveServicesWidgetProps> = ({
                         {apt.vehicle?.model || "Veículo"}
                       </h4>
                       <Tag className="m-0 mt-1 border-0 bg-white/60 dark:bg-zinc-800/50 text-zinc-500 font-mono text-xs px-1.5 rounded">
-                        {apt.vehicle?.plate}
+                        {formatVehiclePlate(apt.vehicle?.plate)}
                       </Tag>
                     </div>
                   </div>

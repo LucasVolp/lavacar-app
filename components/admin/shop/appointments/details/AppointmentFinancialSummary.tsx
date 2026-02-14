@@ -9,9 +9,24 @@ const { Title } = Typography;
 interface AppointmentFinancialSummaryProps {
   appointment: Appointment;
   onPrint: () => void;
+  extraSummary?: React.ReactNode;
 }
 
-export const AppointmentFinancialSummary: React.FC<AppointmentFinancialSummaryProps> = ({ appointment, onPrint }) => {
+const formatDuration = (minutes: number) => {
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hrs <= 0) return `${mins}min`;
+  if (mins === 0) return `${hrs}h`;
+
+  return `${hrs}:${String(mins).padStart(2, "0")}h`;
+};
+
+export const AppointmentFinancialSummary: React.FC<AppointmentFinancialSummaryProps> = ({
+  appointment,
+  onPrint,
+  extraSummary,
+}) => {
   return (
     <Card 
       className="shadow-md border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden h-full flex flex-col"
@@ -51,7 +66,7 @@ export const AppointmentFinancialSummary: React.FC<AppointmentFinancialSummaryPr
 
           <div className="flex justify-between items-center">
             <span className="text-slate-500 dark:text-zinc-400 font-medium">Duração Total</span>
-            <span className="font-bold text-slate-800 dark:text-zinc-100 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-md">{appointment.totalDuration} min</span>
+            <span className="font-bold text-slate-800 dark:text-zinc-100 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-md">{formatDuration(appointment.totalDuration)}</span>
           </div>
 
           <div className="bg-emerald-50 dark:bg-emerald-900/10 p-5 rounded-xl border border-emerald-100 dark:border-emerald-900/30 mt-4 text-center">
@@ -63,6 +78,12 @@ export const AppointmentFinancialSummary: React.FC<AppointmentFinancialSummaryPr
               <CheckCircleOutlined /> Pagamento pendente
             </div>
           </div>
+
+          {extraSummary ? (
+            <div className="pt-2">
+              {extraSummary}
+            </div>
+          ) : null}
         </div>
 
         <Button block size="large" icon={<PrinterOutlined />} onClick={onPrint} className="h-12 rounded-xl font-medium border-slate-300 dark:border-zinc-700 dark:text-zinc-200 mt-6 hover:bg-slate-50 dark:hover:bg-zinc-800">

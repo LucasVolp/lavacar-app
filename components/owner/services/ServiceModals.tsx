@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { Modal, Form, Input, InputNumber, Switch, Button, Select } from "antd";
-import { ToolOutlined, FolderOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Modal, Form, Input, InputNumber, Switch, Button, Select, Image } from "antd";
+import { ToolOutlined, FolderOutlined, LinkOutlined, PictureOutlined } from "@ant-design/icons";
 import { Services } from "@/types/services";
 import { ServiceGroup } from "@/types/serviceGroup";
 
@@ -11,6 +11,7 @@ const { TextArea } = Input;
 interface ServiceFormValues {
   name: string;
   description?: string;
+  photoUrl?: string;
   price: number;
   duration: number;
   isActive: boolean;
@@ -38,6 +39,31 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
   isSubmitting,
   form,
 }) => {
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingService?.photoUrl) {
+      setPhotoPreview(editingService.photoUrl);
+    } else {
+      setPhotoPreview(null);
+    }
+  }, [editingService, open]);
+
+  const handlePhotoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    form.setFieldValue("photoUrl", url);
+    if (url.trim()) {
+      try {
+        new URL(url);
+        setPhotoPreview(url);
+      } catch {
+        setPhotoPreview(null);
+      }
+    } else {
+      setPhotoPreview(null);
+    }
+  };
+
   return (
     <Modal
       title={
@@ -77,6 +103,45 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
             maxLength={500}
           />
         </Form.Item>
+
+        <Form.Item
+          name="photoUrl"
+          label={
+            <span className="flex items-center gap-1.5">
+              <PictureOutlined />
+              Foto do Serviço (URL)
+            </span>
+          }
+          rules={[
+            {
+              type: "url",
+              message: "Informe uma URL válida",
+            },
+          ]}
+        >
+          <Input
+            placeholder="https://exemplo.com/foto-servico.jpg"
+            size="large"
+            prefix={<LinkOutlined className="text-zinc-400" />}
+            onChange={handlePhotoUrlChange}
+            allowClear
+          />
+        </Form.Item>
+
+        {photoPreview && (
+          <div className="mb-4 flex justify-center">
+            <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm">
+              <Image
+                src={photoPreview}
+                alt="Preview"
+                width={200}
+                height={120}
+                className="object-cover"
+                fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjY2NjIiBmb250LXNpemU9IjEyIj5JbWFnZW0gaW52w6FsaWRhPC90ZXh0Pjwvc3ZnPg=="
+              />
+            </div>
+          </div>
+        )}
 
         <Form.Item
           name="groupId"

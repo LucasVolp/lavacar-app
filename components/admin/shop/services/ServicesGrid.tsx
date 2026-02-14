@@ -9,7 +9,8 @@ import {
   StopOutlined,
   CheckCircleOutlined,
   DollarOutlined,
-  PlusOutlined
+  PlusOutlined,
+  PictureOutlined
 } from "@ant-design/icons";
 import { Services } from "@/types/services";
 import { CustomTooltip } from "@/components/ui";
@@ -52,6 +53,24 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
           <Card
             hoverable
             className={`h-full flex flex-col ${service.isActive === false ? 'opacity-60 grayscale' : ''}`}
+            cover={
+              service.photoUrl ? (
+                <div className="relative h-36 overflow-hidden">
+                  <img
+                    src={service.photoUrl}
+                    alt={service.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-24 bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-center">
+                  <PictureOutlined className="text-2xl text-zinc-300 dark:text-zinc-600" />
+                </div>
+              )
+            }
             actions={[
               <CustomTooltip title="Editar" key="edit">
                 <EditOutlined onClick={() => onEdit(service)} />

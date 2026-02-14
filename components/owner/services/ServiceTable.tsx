@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Table, Popconfirm, Switch, Button, Tooltip, Empty } from "antd";
-import { EditOutlined, DeleteOutlined, ClockCircleOutlined, DollarOutlined } from "@ant-design/icons";
+import { Table, Popconfirm, Switch, Button, Tooltip, Empty, Avatar } from "antd";
+import { EditOutlined, DeleteOutlined, ClockCircleOutlined, DollarOutlined, PictureOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { Services } from "@/types/services";
 
@@ -29,13 +29,22 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({
       dataIndex: "name",
       key: "name",
       render: (name: string, record: Services) => (
-        <div>
-          <div className="font-medium text-slate-800">{name}</div>
-          {record.description && (
-            <div className="text-xs text-slate-500 mt-0.5 line-clamp-1">
-              {record.description}
-            </div>
-          )}
+        <div className="flex items-center gap-3">
+          <Avatar
+            shape="square"
+            size={36}
+            src={record.photoUrl || undefined}
+            icon={!record.photoUrl ? <PictureOutlined /> : undefined}
+            className="flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+          />
+          <div>
+            <div className="font-medium text-slate-800">{name}</div>
+            {record.description && (
+              <div className="text-xs text-slate-500 mt-0.5 line-clamp-1">
+                {record.description}
+              </div>
+            )}
+          </div>
         </div>
       ),
     },
