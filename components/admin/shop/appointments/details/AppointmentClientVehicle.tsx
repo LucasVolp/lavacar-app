@@ -13,6 +13,7 @@ import {
 import { Appointment } from "@/types/appointment";
 import { sanitizeText, sanitizePhone } from "@/lib/security";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
+import { getApiImageUrl } from "@/utils/image";
 
 interface AppointmentClientVehicleProps {
   appointment: Appointment;
@@ -133,7 +134,8 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
           <div className="flex items-start gap-4">
             <Avatar
               size={64}
-              icon={<UserOutlined />}
+              src={appointment.user?.picture ? getApiImageUrl(appointment.user.picture) : undefined}
+              icon={!appointment.user?.picture ? <UserOutlined /> : undefined}
               className="bg-gradient-to-br from-blue-500 to-indigo-600 flex-shrink-0"
             />
             <div className="flex-1 min-w-0">

@@ -43,8 +43,9 @@ import { useRouter } from "next/navigation";
 
 import { formatPhone } from "@/utils/formatters";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
+import { getApiImageUrl } from "@/utils/image";
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 interface ClientDetailDrawerProps {
@@ -236,42 +237,50 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
       className="client-detail-drawer"
       styles={{ body: { padding: 0 } }}
     >
-      <div className="bg-gradient-to-br from-cyan-600 to-blue-600 p-6 text-white">
+      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-6 transition-colors duration-300">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Avatar
-              size={72}
-              src={user.picture}
-              style={{ backgroundColor: !user.picture ? getAvatarColor(displayName) : undefined }}
-              className="ring-4 ring-white/30"
-            >
-              {!user.picture && <span className="text-2xl">{initials}</span>}
-            </Avatar>
+            <div className="relative">
+              <Avatar
+                size={72}
+                src={user.picture ? getApiImageUrl(user.picture) : undefined}
+                style={{ backgroundColor: !user.picture ? getAvatarColor(displayName) : undefined }}
+                className="!border-3 !border-indigo-100 dark:!border-indigo-900/50 shadow-lg"
+              >
+                {!user.picture && <span className="text-2xl">{initials}</span>}
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm" />
+            </div>
             <div>
               <div className="flex items-center gap-2">
-                <Title level={4} className="!text-white !mb-0">
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 m-0">
                   {displayName}
-                </Title>
+                </h3>
               </div>
               {client.customName && (
-                <Text className="text-cyan-200 text-xs block">
+                <Text className="!text-zinc-400 dark:!text-zinc-500 text-xs block">
                   Nome original: {originalName}
                 </Text>
               )}
-              {hasCustomData && (
-                <CustomTooltip title="Este cliente possui dados personalizados">
-                  <Tag className="mt-1 !bg-white/20 !text-white !border-0 backdrop-blur-sm">
-                    Personalizado
-                  </Tag>
-                </CustomTooltip>
-              )}
-              <Text className="text-cyan-100 block mt-1">
-                Cliente desde {dayjs(client.createdAt).format("DD/MM/YYYY")}
-              </Text>
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                {hasCustomData && (
+                  <CustomTooltip title="Este cliente possui dados personalizados">
+                    <Tag className="!bg-indigo-50 dark:!bg-indigo-900/20 !border-indigo-200 dark:!border-indigo-800 !text-indigo-700 dark:!text-indigo-300 !rounded-full !px-2.5 !text-xs">
+                      Personalizado
+                    </Tag>
+                  </CustomTooltip>
+                )}
+                <Tag
+                  icon={<CalendarOutlined />}
+                  className="!bg-indigo-50 dark:!bg-indigo-900/20 !border-indigo-200 dark:!border-indigo-800 !text-indigo-700 dark:!text-indigo-300 !rounded-full !px-2.5 !text-xs"
+                >
+                  Desde {dayjs(client.createdAt).format("DD/MM/YYYY")}
+                </Tag>
+              </div>
               {avgRating > 0 && (
-                <div className="flex items-center gap-1 mt-1">
+                <div className="flex items-center gap-1.5 mt-2">
                   <Rate disabled value={avgRating} allowHalf className="text-sm text-amber-400" />
-                  <Text className="text-white/80 text-sm">({avgRating.toFixed(1)})</Text>
+                  <Text className="!text-zinc-500 dark:!text-zinc-400 text-sm">({avgRating.toFixed(1)})</Text>
                 </div>
               )}
             </div>
@@ -280,41 +289,39 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
             type="text"
             icon={<EditOutlined className="text-lg" />}
             onClick={() => setIsEditing(true)}
-            className="!text-white hover:bg-white/20 flex items-center justify-center"
+            className="!text-zinc-500 dark:!text-zinc-400 hover:!text-indigo-600 dark:hover:!text-indigo-400 hover:!bg-indigo-50 dark:hover:!bg-indigo-900/20 flex items-center justify-center !rounded-lg"
           />
         </div>
 
-        <div className="mt-4">
-          <Button
-            type="primary"
-            size="large"
-            onClick={() => router.push(`/admin/shop/${shopId}/clients/${client.id}`)}
-            className="w-full !bg-white !text-indigo-700 !border-0 !font-semibold !rounded-xl !h-11 hover:!bg-indigo-50 !shadow-md transition-all"
-          >
-            Ver Perfil Completo & Histórico ↗
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="text-center bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <div className="text-2xl font-bold">{vehicleCount}</div>
-            <div className="text-cyan-100 text-xs">Veículos</div>
+        <div className="grid grid-cols-3 gap-3 mt-5">
+          <div className="text-center bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl p-3">
+            <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">{vehicleCount}</div>
+            <div className="text-indigo-500 dark:text-indigo-400 text-xs font-medium">Veículos</div>
           </div>
-          <div className="text-center bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <div className="text-2xl font-bold">{appointmentCount}</div>
-            <div className="text-cyan-100 text-xs">Visitas</div>
+          <div className="text-center bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl p-3">
+            <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">{appointmentCount}</div>
+            <div className="text-indigo-500 dark:text-indigo-400 text-xs font-medium">Visitas</div>
           </div>
-          <div className="text-center bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <div className="text-2xl font-bold">
+          <div className="text-center bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl p-3">
+            <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
                 notation: "compact",
               }).format(totalSpent)}
             </div>
-            <div className="text-cyan-100 text-xs">Total Gasto</div>
+            <div className="text-emerald-500 dark:text-emerald-400 text-xs font-medium">Total Gasto</div>
           </div>
         </div>
+
+        <Button
+          type="primary"
+          size="large"
+          onClick={() => router.push(`/admin/shop/${shopId}/clients/${client.id}`)}
+          className="w-full !bg-indigo-600 hover:!bg-indigo-700 !border-indigo-600 !font-semibold !rounded-xl !h-11 !shadow-sm transition-all mt-4"
+        >
+          Ver Perfil Completo & Histórico ↗
+        </Button>
       </div>
 
       <div className="p-6 dark:bg-zinc-900">
@@ -533,7 +540,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                 title={
                   <div className="flex items-center justify-between">
                     <span className="font-semibold dark:text-white">Veículos</span>
-                    <Tag className="!bg-cyan-100 dark:!bg-cyan-900/30 !text-cyan-700 dark:!text-cyan-400 !border-0">{vehicleCount}</Tag>
+                    <Tag className="!bg-indigo-100 dark:!bg-indigo-900/30 !text-indigo-700 dark:!text-indigo-400 !border-0">{vehicleCount}</Tag>
                   </div>
                 }
                 className="rounded-xl border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900"
@@ -668,7 +675,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
               <Button
                 icon={<EditOutlined />}
                 onClick={() => setIsEditing(true)}
-                className="border-zinc-300 dark:border-zinc-700 dark:text-zinc-300 hover:text-blue-500 hover:border-blue-500 dark:hover:text-blue-400 dark:hover:border-blue-400"
+                className="border-zinc-300 dark:border-zinc-700 dark:text-zinc-300 hover:!text-indigo-500 hover:!border-indigo-500 dark:hover:!text-indigo-400 dark:hover:!border-indigo-400"
               >
                 Editar Cliente
               </Button>

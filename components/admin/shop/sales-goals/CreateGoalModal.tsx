@@ -10,11 +10,8 @@ import {
 } from "antd";
 import { RiseOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
 import { SalesGoal, GoalPeriod, CreateSalesGoalPayload, UpdateSalesGoalPayload } from "@/types/salesGoal";
 import { UseMutationResult } from "@tanstack/react-query";
-
-dayjs.extend(isBetween);
 
 const { RangePicker } = DatePicker;
 
@@ -146,38 +143,6 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
         const dates = values.dates as [dayjs.Dayjs, dayjs.Dayjs];
         startDateStr = dates[0].startOf('day').toISOString();
         endDateStr = dates[1].endOf('day').toISOString();
-      }
-
-      // 3. Conflict Prevention (Client-side)
-      const newStart = dayjs(startDateStr);
-      const newEnd = dayjs(endDateStr);
-
-      const hasConflict = salesGoals.some(goal => {
-        // Skip current goal if editing
-        if (editingGoal && goal.id === editingGoal.id) return false;
-
-        // Skip COMPLETED goals from conflict check
-        // If a goal is already met, we allow creating a new one overlapping (or after) it
-        const currentSales = Number(goal.currentSales || 0);
-        const targetAmount = Number(goal.amount);
-        if (currentSales >= targetAmount) {
-             return false;
-        }
-
-        const existingStart = dayjs(goal.startDate);
-        const existingEnd = dayjs(goal.endDate);
-
-        // Check for overlap with INCOMPLETE goals
-        return (
-          newStart.isBetween(existingStart, existingEnd, null, '[]') ||
-          newEnd.isBetween(existingStart, existingEnd, null, '[]') ||
-          existingStart.isBetween(newStart, newEnd, null, '[]')
-        );
-      });
-
-      if (hasConflict) {
-        message.error("Já existe uma meta em andamento para este período. Complete-a antes de criar uma nova.");
-        return;
       }
 
       const payload = {

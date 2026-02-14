@@ -8,7 +8,6 @@ import {
   ClockCircleOutlined,
   StopOutlined,
   CheckCircleOutlined,
-  DollarOutlined,
   PlusOutlined,
   PictureOutlined
 } from "@ant-design/icons";
@@ -100,8 +99,8 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
             
             <div className="flex justify-between items-center mt-auto">
               <div className="flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-lg">
-                <DollarOutlined />
-                {parseFloat(service.price).toFixed(2)}
+                <span className="text-sm font-semibold">R$</span>
+                {parseFloat(service.price).toFixed(2).replace('.', ',')}
               </div>
               <div className="flex items-center gap-1 text-gray-500 dark:text-zinc-400">
                 <ClockCircleOutlined />

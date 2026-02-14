@@ -7,6 +7,7 @@ import { EvaluationWithRelations } from "@/types/evaluation";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { sanitizeText } from "@/lib/security";
+import { getApiImageUrl } from "@/utils/image";
 
 interface EvaluationListProps {
   evaluations: EvaluationWithRelations[];
@@ -55,7 +56,7 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({ evaluations, loa
       }}
       renderItem={(item) => (
         <List.Item
-          className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors px-6 py-6"
+          className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors !px-6 !py-5 border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
           actions={[
             <Popconfirm
               key="delete"
@@ -86,7 +87,7 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({ evaluations, loa
             <div className="flex gap-4 w-full group min-w-0">
                 <Avatar 
                     size={48} 
-                    src={picture || undefined}
+                    src={picture ? getApiImageUrl(picture) : undefined}
                     className="flex-shrink-0 text-zinc-700"
                     style={!picture ? { backgroundColor: avatarColor } : undefined}
                 >
@@ -131,7 +132,7 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({ evaluations, loa
                             {photos.map((photo, idx) => (
                               <Image
                                 key={idx}
-                                src={photo}
+                                src={getApiImageUrl(photo)}
                                 alt={`Foto ${idx + 1}`}
                                 width={56}
                                 height={56}

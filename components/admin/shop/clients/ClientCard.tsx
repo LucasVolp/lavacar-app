@@ -16,6 +16,8 @@ import { formatPhone } from "@/utils/formatters";
 import { CustomTooltip, StatusBadge } from "@/components/ui";
 import dayjs from "dayjs";
 
+import { getApiImageUrl } from "@/utils/image";
+
 const { Text } = Typography;
 
 interface ClientCardProps {
@@ -73,7 +75,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
 
   return (
     <Card
-      className="group cursor-pointer rounded-2xl border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 hover:border-cyan-300 dark:hover:border-cyan-700 hover:shadow-lg transition-all duration-300"
+      className="group cursor-pointer rounded-2xl border border-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-lg transition-all duration-300"
       styles={{ body: { padding: 0 } }}
       onClick={onClick}
     >
@@ -83,14 +85,14 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
           <div className="flex items-center gap-4">
             <Avatar 
               size={56} 
-              src={user.picture}
+              src={user.picture ? getApiImageUrl(user.picture) : undefined}
               style={{ backgroundColor: !user.picture ? getAvatarColor(fullName) : undefined }}
               className="ring-2 ring-zinc-100 dark:ring-zinc-800"
             >
               {!user.picture && initials}
             </Avatar>
             <div className="min-w-0 flex-1">
-              <Text strong className="text-lg block truncate dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+              <Text strong className="text-lg block truncate dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 {fullName}
               </Text>
               {email && (

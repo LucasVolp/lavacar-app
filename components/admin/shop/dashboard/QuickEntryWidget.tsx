@@ -270,7 +270,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
               onChange={handleInputChange}
               onSearch={handleSearch}
               enterButton={
-                <Button className="h-12 px-5 font-semibold rounded-r-lg">
+                <Button className="!h-12 px-5 font-semibold rounded-r-lg">
                   <span className="flex items-center gap-1">
                     <SearchOutlined />
                     Buscar
@@ -278,15 +278,13 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
                 </Button>
               }
               loading={vehicleQuery.isFetching || updateStatus.isPending}
-              className="quick-entry-search"
-              style={{ minHeight: 48 }}
+              className="[&_.ant-input-group-addon]:!p-0 [&_.ant-input-wrapper]:!h-12 [&_input]:!h-12"
               styles={{
                 input: {
                   fontFamily: "monospace",
                   fontSize: 18,
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
-                  minHeight: 48,
                 },
               }}
             />

@@ -6,7 +6,7 @@ import { ArrowLeftOutlined, UserOutlined, MailOutlined, PhoneOutlined, CalendarO
 import { getApiImageUrl } from "@/utils/image";
 import { formatPhone } from "@/utils/formatters";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface ClientDetailHeaderProps {
   fullName: string;
@@ -32,15 +32,12 @@ export const ClientDetailHeader: React.FC<ClientDetailHeaderProps> = ({
   const avatarUrl = getApiImageUrl(picture);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6 sm:p-8">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGwtb3BhY2l0eT0iLjA1IiBmaWxsPSIjZmZmIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
-
-      <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 transition-colors duration-300">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-5">
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={onBack}
-          className="!absolute top-0 right-0 sm:!relative sm:!mr-auto !bg-white/20 !border-white/30 !text-white hover:!bg-white/30 hover:!border-white/50 hover:!text-white !rounded-xl !h-9 !px-4 !font-medium !shadow-sm !backdrop-blur-sm"
+          className="!rounded-xl !h-9 !px-4 !font-medium self-start"
           size="small"
         >
           Voltar
@@ -49,38 +46,38 @@ export const ClientDetailHeader: React.FC<ClientDetailHeaderProps> = ({
         <div className="flex items-center gap-5 flex-1">
           <div className="relative">
             <Avatar
-              size={80}
+              size={72}
               src={avatarUrl || undefined}
               icon={!avatarUrl ? <UserOutlined /> : undefined}
-              className="!border-4 !border-white/30 shadow-xl"
-              style={{ backgroundColor: avatarUrl ? undefined : "rgba(255,255,255,0.2)" }}
+              className="!border-3 !border-indigo-100 dark:!border-indigo-900/50 shadow-lg"
+              style={{ backgroundColor: avatarUrl ? undefined : "#6366f1" }}
             />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white shadow-sm" />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm" />
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <Title level={3} className="!m-0 !text-white truncate" style={{ color: "white" }}>
+              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 m-0 truncate">
                 {fullName}
-              </Title>
+              </h2>
               {onEdit && (
                 <Button
                   icon={<EditOutlined />}
                   onClick={onEdit}
                   size="small"
-                  className="!bg-white/20 !border-white/30 !text-white hover:!bg-white/30 hover:!border-white/50 !rounded-lg shrink-0"
+                  className="!rounded-lg shrink-0"
                 />
               )}
             </div>
             <div className="flex flex-wrap items-center gap-3 mt-1.5">
               {phone && (
-                <Text className="!text-white/80 text-sm flex items-center gap-1.5">
-                  <PhoneOutlined /> {formatPhone(phone)}
+                <Text className="!text-zinc-500 dark:!text-zinc-400 text-sm flex items-center gap-1.5">
+                  <PhoneOutlined className="text-indigo-500" /> {formatPhone(phone)}
                 </Text>
               )}
               {email && (
-                <Text className="!text-white/80 text-sm flex items-center gap-1.5">
-                  <MailOutlined /> {email}
+                <Text className="!text-zinc-500 dark:!text-zinc-400 text-sm flex items-center gap-1.5">
+                  <MailOutlined className="text-indigo-500" /> {email}
                 </Text>
               )}
             </div>
@@ -89,12 +86,12 @@ export const ClientDetailHeader: React.FC<ClientDetailHeaderProps> = ({
               {memberSince && (
                 <Tag
                   icon={<CalendarOutlined />}
-                  className="!bg-white/15 !border-white/25 !text-white !rounded-full !px-3"
+                  className="!bg-indigo-50 dark:!bg-indigo-900/20 !border-indigo-200 dark:!border-indigo-800 !text-indigo-700 dark:!text-indigo-300 !rounded-full !px-3"
                 >
                   Cliente desde {memberSince}
                 </Tag>
               )}
-              <Tag className="!bg-white/15 !border-white/25 !text-white !rounded-full !px-3">
+              <Tag className="!bg-indigo-50 dark:!bg-indigo-900/20 !border-indigo-200 dark:!border-indigo-800 !text-indigo-700 dark:!text-indigo-300 !rounded-full !px-3">
                 {totalAppointments} atendimento{totalAppointments !== 1 ? "s" : ""}
               </Tag>
             </div>
