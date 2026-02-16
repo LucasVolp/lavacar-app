@@ -10,7 +10,7 @@ import {
 import { ManagementCard } from "./ManagementCard";
 import { Schedule } from "@/types/schedule";
 import { BlockedTime } from "@/types/blockedTime";
-import { format, isSameDay, isBefore, startOfDay, parseISO } from "date-fns";
+import { format, isSameDay, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface ManagementGridProps {
@@ -58,8 +58,12 @@ const getBlockedTimesSummary = (blockedTimes: BlockedTime[]): { count: number; s
   }
 
   const today = startOfDay(new Date());
+  const parseDateOnly = (dateValue: string) => {
+    const dateKey = dateValue.split("T")[0];
+    return new Date(`${dateKey}T12:00:00`);
+  };
   const futureBlocks = blockedTimes.filter(bt => {
-    const d = parseISO(bt.date);
+    const d = parseDateOnly(bt.date);
     return isSameDay(d, today) || !isBefore(d, today);
   });
 
@@ -68,10 +72,10 @@ const getBlockedTimesSummary = (blockedTimes: BlockedTime[]): { count: number; s
   }
 
   const nextBlock = futureBlocks.sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    parseDateOnly(a.date).getTime() - parseDateOnly(b.date).getTime()
   )[0];
 
-  const nextDate = parseISO(nextBlock.date);
+  const nextDate = parseDateOnly(nextBlock.date);
   const isToday = isSameDay(nextDate, today);
 
   return {

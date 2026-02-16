@@ -3,12 +3,11 @@
 import React from "react";
 import { DateTimePicker } from "@/components/booking";
 import { Schedule } from "@/types/schedule";
-import { Appointment } from "@/types/appointment";
 import { Shop } from "@/types/shop";
 
 interface DateTimeStepProps {
   schedules: Schedule[];
-  existingAppointments: Appointment[];
+  availableSlots: string[];
   shop: Shop | null;
   totalDuration: number;
   selectedDate: Date | null;
@@ -20,7 +19,7 @@ interface DateTimeStepProps {
 
 export function DateTimeStep({
   schedules,
-  existingAppointments,
+  availableSlots,
   shop,
   totalDuration,
   selectedDate,
@@ -42,7 +41,7 @@ export function DateTimeStep({
 
       <DateTimePicker
         shopSchedules={schedules}
-        existingAppointments={existingAppointments}
+        availableSlots={availableSlots}
         shop={shop}
         totalDuration={totalDuration}
         selectedDate={selectedDate}

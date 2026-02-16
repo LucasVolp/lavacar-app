@@ -11,7 +11,8 @@ import {
   SwapOutlined
 } from "@ant-design/icons";
 import { Appointment } from "@/types/appointment";
-import { sanitizeText, sanitizePhone } from "@/lib/security";
+import { sanitizeText } from "@/lib/security";
+import { maskPhone } from "@/lib/masks";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
 import { getApiImageUrl } from "@/utils/image";
 
@@ -93,7 +94,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
     appointment.user?.phone,
     shopClient?.customPhone
   );
-  const clientPhone = phoneData.value ? sanitizePhone(phoneData.value) : null;
+  const clientPhone = phoneData.value ? maskPhone(phoneData.value) : null;
 
   // Email with fallback to shopClient.customEmail
   const emailData = getContactWithFallback(

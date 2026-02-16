@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, Card, Row, Col, InputNumber, message } from "antd";
+import { Form, Input, Button, Card, Row, Col, InputNumber, Select, message } from "antd";
 import { SaveOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useCreateShop } from "@/hooks/shop/useCreateShop";
 import { CreateShopDto } from "@/types/shop";
 import { formatDocument, generateSlug } from "@/utils/formatters";
 import { validateDocument } from "@/utils/validators";
+import { brasilApiService, BrasilApiStateResponse } from "@/services/brasilApi";
+import { timeApiService } from "@/services/timeApi";
+import { maskCep } from "@/lib/masks";
 
 interface CreateShopFormProps {
   organizationId: string;
@@ -34,9 +37,15 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
 }) => {
   const router = useRouter();
   const [form] = Form.useForm<CreateShopDto>();
+  const selectedState = Form.useWatch("state", form);
   const createShop = useCreateShop();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [states, setStates] = useState<BrasilApiStateResponse[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [loadingByCep, setLoadingByCep] = useState(false);
+  const [loadingByCnpj, setLoadingByCnpj] = useState(false);
+  const [timezones, setTimezones] = useState<string[]>([]);
 
   const handleFinish = async (values: CreateShopDto) => {
     setIsSubmitting(true);
@@ -78,6 +87,122 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
     form.setFieldsValue({ document: formatted });
   };
 
+  useEffect(() => {
+    let active = true;
+
+    const loadInitialData = async () => {
+      try {
+        const [ufList, timezoneList, ipTimezone] = await Promise.all([
+          brasilApiService.listStates(),
+          timeApiService.listTimezones(),
+          timeApiService.detectTimezoneByIp().catch(() => null),
+        ]);
+
+        if (!active) return;
+        setStates(ufList);
+        setTimezones(timezoneList);
+        form.setFieldValue("timeZone", ipTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo");
+      } catch {
+        if (!active) return;
+        const fallbackTimezones = typeof Intl.supportedValuesOf === "function"
+          ? Intl.supportedValuesOf("timeZone")
+          : ["America/Sao_Paulo"];
+        setTimezones(fallbackTimezones);
+      }
+    };
+
+    loadInitialData();
+    return () => {
+      active = false;
+    };
+  }, [form]);
+
+  const handleStateChange = async (state: string) => {
+    form.setFieldValue("state", state);
+    form.setFieldValue("city", undefined);
+    try {
+      const cityList = await brasilApiService.listCitiesByState(state);
+      setCities(cityList);
+    } catch {
+      setCities([]);
+      message.warning("Não foi possível carregar as cidades deste estado.");
+    }
+  };
+
+  const handleZipCodeBlur = async () => {
+    const zipCode = String(form.getFieldValue("zipCode") || "");
+    const cepDigits = zipCode.replace(/\D/g, "");
+    if (cepDigits.length !== 8) {
+      return;
+    }
+
+    setLoadingByCep(true);
+    try {
+      const data = await brasilApiService.findAddressByCep(cepDigits);
+      form.setFieldsValue({
+        zipCode: maskCep(data.cep),
+        street: data.street || form.getFieldValue("street"),
+        neighborhood: data.neighborhood || form.getFieldValue("neighborhood"),
+        city: data.city || form.getFieldValue("city"),
+        state: data.state || form.getFieldValue("state"),
+      });
+
+      if (data.state) {
+        try {
+          const cityList = await brasilApiService.listCitiesByState(data.state);
+          setCities(cityList);
+        } catch {
+          setCities([]);
+          message.warning("CEP encontrado, mas não foi possível carregar cidades automaticamente.");
+        }
+      }
+    } catch {
+      message.warning("CEP não encontrado. Você pode preencher o endereço manualmente.");
+    } finally {
+      setLoadingByCep(false);
+    }
+  };
+
+  const handleDocumentBlur = async () => {
+    const document = String(form.getFieldValue("document") || "");
+    const digits = document.replace(/\D/g, "");
+    if (digits.length !== 14) {
+      return;
+    }
+
+    setLoadingByCnpj(true);
+    try {
+      const company = await brasilApiService.findCompanyByCnpj(digits);
+
+      const nextValues: Partial<CreateShopDto> = {};
+      if (!form.getFieldValue("name")) nextValues.name = company.nome_fantasia || company.razao_social || undefined;
+      if (!form.getFieldValue("zipCode")) nextValues.zipCode = company.cep || undefined;
+      if (!form.getFieldValue("street")) nextValues.street = company.logradouro || undefined;
+      if (!form.getFieldValue("number")) nextValues.number = company.numero || undefined;
+      if (!form.getFieldValue("neighborhood")) nextValues.neighborhood = company.bairro || undefined;
+      if (!form.getFieldValue("city")) nextValues.city = company.municipio || undefined;
+      if (!form.getFieldValue("state")) nextValues.state = company.uf || undefined;
+
+      form.setFieldsValue(nextValues);
+      if (company.uf) {
+        const cityList = await brasilApiService.listCitiesByState(company.uf);
+        setCities(cityList);
+      }
+
+      if ((company.nome_fantasia || company.razao_social) && !slugTouched) {
+        form.setFieldValue("slug", generateSlug(company.nome_fantasia || company.razao_social || ""));
+      }
+    } catch {
+      message.info("CNPJ não encontrado na BrasilAPI. Continue o preenchimento manualmente.");
+    } finally {
+      setLoadingByCnpj(false);
+    }
+  };
+
+  const handleZipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setFieldValue("zipCode", maskCep(e.target.value));
+  };
+
 
   return (
     <Form
@@ -89,6 +214,7 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
         bufferBetweenSlots: 0,
         maxAdvanceDays: 30,
         minAdvanceMinutes: 60,
+        timeZone: "America/Sao_Paulo",
       }}
       className="max-w-5xl mx-auto pb-24 space-y-8"
       requiredMark={false}
@@ -214,8 +340,12 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
                   className={INPUT_CLASS} 
                   maxLength={18}
                   onChange={handleDocumentChange}
+                  onBlur={handleDocumentBlur}
                 />
               </Form.Item>
+              {loadingByCnpj && (
+                <p className="text-xs text-zinc-500 -mt-4">Buscando dados do CNPJ...</p>
+              )}
             </Col>
 
             <Col span={24}>
@@ -253,8 +383,18 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
                 label={<FormLabel>CEP</FormLabel>}
                 rules={[{ required: true, message: "CEP é obrigatório" }]}
               >
-                <Input size="large" placeholder="00000-000" maxLength={9} className={INPUT_CLASS} />
+                <Input
+                  size="large"
+                  placeholder="00000-000"
+                  maxLength={9}
+                  className={INPUT_CLASS}
+                  onChange={handleZipCodeChange}
+                  onBlur={handleZipCodeBlur}
+                />
               </Form.Item>
+              {loadingByCep && (
+                <p className="text-xs text-zinc-500 -mt-4">Buscando CEP...</p>
+              )}
             </Col>
             <Col span={24} md={14}>
               <Form.Item
@@ -302,7 +442,14 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
                 label={<FormLabel>Cidade</FormLabel>}
                 rules={[{ required: true, message: "Cidade é obrigatória" }]}
               >
-                <Input size="large" placeholder="São Paulo" className={INPUT_CLASS} />
+                <Select
+                  showSearch
+                  placeholder="Selecione a cidade"
+                  optionFilterProp="label"
+                  disabled={!selectedState}
+                  options={cities.map((city) => ({ value: city, label: city }))}
+                  onChange={(city) => form.setFieldValue("city", city)}
+                />
               </Form.Item>
             </Col>
             <Col span={24} md={6}>
@@ -311,7 +458,16 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
                 label={<FormLabel>UF</FormLabel>}
                 rules={[{ required: true, message: "UF obrigatória" }]}
               >
-                <Input size="large" placeholder="SP" maxLength={2} className={`${INPUT_CLASS} uppercase`} />
+                <Select
+                  showSearch
+                  placeholder="UF"
+                  optionFilterProp="label"
+                  options={states.map((state) => ({
+                    value: state.sigla,
+                    label: `${state.sigla} - ${state.nome}`,
+                  }))}
+                  onChange={handleStateChange}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -365,6 +521,21 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
                extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Quantos dias à frente o cliente vê</span>}
              >
                <InputNumber size="large" min={1} max={365} className="w-full" />
+             </Form.Item>
+           </Col>
+           <Col span={24}>
+             <Form.Item
+               name="timeZone"
+               label={<FormLabel>Timezone da Loja</FormLabel>}
+               rules={[{ required: true, message: "Selecione o timezone" }]}
+               extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Usado para agenda, bloqueios e cálculos de disponibilidade</span>}
+             >
+               <Select
+                 showSearch
+                 placeholder="Selecione o timezone"
+                 optionFilterProp="label"
+                 options={timezones.map((tz) => ({ value: tz, label: tz }))}
+               />
              </Form.Item>
            </Col>
          </Row>

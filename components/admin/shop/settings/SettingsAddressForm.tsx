@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
-import { Form, Input, Button, Row, Col, Divider, type FormInstance } from "antd";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Button, Row, Col, Divider, Select, message, type FormInstance } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import { UpdateShopDto } from "@/types/shop";
 import { InfoBox } from "@/components/ui";
+import { brasilApiService, BrasilApiStateResponse } from "@/services/brasilApi";
+import { maskCep } from "@/lib/masks";
 
 interface SettingsAddressFormProps {
   form: FormInstance;
@@ -17,6 +19,69 @@ export const SettingsAddressForm: React.FC<SettingsAddressFormProps> = ({
   onFinish,
   saving,
 }) => {
+  const [states, setStates] = useState<BrasilApiStateResponse[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [loadingByCep, setLoadingByCep] = useState(false);
+  const selectedState = Form.useWatch("state", form);
+
+  useEffect(() => {
+    let active = true;
+    brasilApiService.listStates()
+      .then((data) => {
+        if (!active) return;
+        setStates(data);
+      })
+      .catch(() => {
+        if (!active) return;
+        setStates([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleStateChange = async (state: string) => {
+    form.setFieldValue("state", state);
+    form.setFieldValue("city", undefined);
+    try {
+      const cityList = await brasilApiService.listCitiesByState(state);
+      setCities(cityList);
+    } catch {
+      setCities([]);
+      message.warning("Não foi possível carregar as cidades.");
+    }
+  };
+
+  const handleZipCodeBlur = async () => {
+    const zipCode = String(form.getFieldValue("zipCode") || "");
+    const cepDigits = zipCode.replace(/\D/g, "");
+    if (cepDigits.length !== 8) {
+      return;
+    }
+
+    setLoadingByCep(true);
+    try {
+      const data = await brasilApiService.findAddressByCep(cepDigits);
+      form.setFieldsValue({
+        zipCode: maskCep(data.cep),
+        street: data.street || form.getFieldValue("street"),
+        neighborhood: data.neighborhood || form.getFieldValue("neighborhood"),
+        city: data.city || form.getFieldValue("city"),
+        state: data.state || form.getFieldValue("state"),
+      });
+
+      if (data.state) {
+        const cityList = await brasilApiService.listCitiesByState(data.state);
+        setCities(cityList);
+      }
+    } catch {
+      message.warning("CEP não encontrado. Você pode preencher manualmente.");
+    } finally {
+      setLoadingByCep(false);
+    }
+  };
+
   return (
     <Form
       form={form}
@@ -37,9 +102,15 @@ export const SettingsAddressForm: React.FC<SettingsAddressFormProps> = ({
             >
               <Input 
                 placeholder="00000-000"
+                maxLength={9}
+                onChange={(e) => form.setFieldValue("zipCode", maskCep(e.target.value))}
+                onBlur={handleZipCodeBlur}
                 className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
               />
             </Form.Item>
+            {loadingByCep && (
+              <p className="text-xs text-zinc-500 -mt-4">Buscando CEP...</p>
+            )}
           </Col>
           <Col xs={24} md={14}>
             <Form.Item
@@ -97,9 +168,12 @@ export const SettingsAddressForm: React.FC<SettingsAddressFormProps> = ({
               label={<span className="text-zinc-600 dark:text-zinc-400">Cidade</span>}
               rules={[{ required: true, message: "Informe a cidade" }]}
             >
-              <Input 
-                placeholder="Cidade"
-                className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
+              <Select
+                showSearch
+                placeholder="Selecione a cidade"
+                optionFilterProp="label"
+                disabled={!selectedState}
+                options={cities.map((city) => ({ value: city, label: city }))}
               />
             </Form.Item>
           </Col>
@@ -109,10 +183,15 @@ export const SettingsAddressForm: React.FC<SettingsAddressFormProps> = ({
               label={<span className="text-zinc-600 dark:text-zinc-400">UF</span>}
               rules={[{ required: true, message: "UF" }]}
             >
-              <Input 
-                placeholder="UF" 
-                maxLength={2}
-                className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
+              <Select
+                showSearch
+                placeholder="UF"
+                optionFilterProp="label"
+                options={states.map((state) => ({
+                  value: state.sigla,
+                  label: `${state.sigla} - ${state.nome}`,
+                }))}
+                onChange={handleStateChange}
               />
             </Form.Item>
           </Col>

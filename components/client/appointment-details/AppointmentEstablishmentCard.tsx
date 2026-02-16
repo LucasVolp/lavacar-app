@@ -4,6 +4,7 @@ import { Button, Card } from "antd";
 import { EnvironmentOutlined, ShopOutlined } from "@ant-design/icons";
 import type { Shop } from "@/types/shop";
 import { formatAddress } from "./formatters";
+import { maskPhone } from "@/lib/masks";
 
 interface AppointmentEstablishmentCardProps {
   shop?: Shop;
@@ -36,7 +37,7 @@ export function AppointmentEstablishmentCard({ shop }: AppointmentEstablishmentC
                 {address.line1 && <p className="m-0">{address.line1}</p>}
                 {address.line2 && <p className="m-0">{address.line2}</p>}
                 {address.line3 && <p className="m-0">{address.line3}</p>}
-                {shop.phone && <p className="m-0">Telefone: {shop.phone}</p>}
+                {shop.phone && <p className="m-0">Telefone: {maskPhone(shop.phone)}</p>}
                 {shop.email && <p className="m-0">E-mail: {shop.email}</p>}
               </div>
             </div>

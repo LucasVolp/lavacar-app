@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Button, Form, message } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import { useOrganization } from "@/hooks/useOrganizations";
+import { organizationService } from "@/services/organizations";
 import { SettingsHeader } from "@/components/organization/settings/SettingsHeader";
 import { OrganizationInfoForm } from "@/components/organization/settings/OrganizationInfoForm";
 import { DangerZone } from "@/components/organization/settings/DangerZone";
@@ -15,6 +16,7 @@ export default function OrganizationSettingsPage() {
   const { data: organization, isLoading } = useOrganization(organizationId);
   const [form] = Form.useForm();
   const [isSaving, setIsSaving] = React.useState(false);
+  const [currentLogo, setCurrentLogo] = React.useState<string | undefined>(undefined);
 
   React.useEffect(() => {
     if (organization) {
@@ -24,16 +26,24 @@ export default function OrganizationSettingsPage() {
         document: organization.document,
         isActive: organization.isActive ?? true,
       });
+      setCurrentLogo(organization.logoUrl);
     }
   }, [organization, form]);
 
-  const onFinish = async () => {
+  const onFinish = async (values: { name: string; document?: string }) => {
+    if (!organizationId) return;
     setIsSaving(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await organizationService.update(organizationId, {
+        name: values.name,
+        document: values.document || null,
+      });
       message.success("Configurações salvas com sucesso!");
-    }, 1000);
+    } catch {
+      message.error("Erro ao salvar configurações da organização");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {
@@ -52,7 +62,11 @@ export default function OrganizationSettingsPage() {
         requiredMark={false}
         className="space-y-8"
       >
-        <OrganizationInfoForm logoUrl={organization?.logoUrl} />
+        <OrganizationInfoForm
+          organizationId={organizationId}
+          logoUrl={currentLogo}
+          onLogoUpdated={setCurrentLogo}
+        />
 
         <DangerZone />
 

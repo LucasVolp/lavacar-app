@@ -2,7 +2,7 @@
 
 import { CreateSchedulePayload } from "@/types/schedule";
 import { format, parse } from "date-fns";
-import { message, Spin } from "antd";
+import { message, Spin, Select, Button } from "antd";
 import {
   WEEKDAYS,
   Weekday,
@@ -15,15 +15,21 @@ import {
 import { useCreateSchedule, useShopSchedules, useUpdateSchedule } from "@/hooks";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useEffect, useState } from "react";
+import { useUpdateShop } from "@/hooks/useShops";
+import { timeApiService } from "@/services/timeApi";
 
 /**
  * Horários de Funcionamento do Shop - Configuração completa
  */
 export default function SchedulesPage() {
-  const { shopId } = useShopAdmin();
+  const { shopId, shop } = useShopAdmin();
   const { data: schedules = [], isLoading } = useShopSchedules(shopId);
   const createSchedule = useCreateSchedule();
   const updateSchedule = useUpdateSchedule();
+  const updateShop = useUpdateShop();
+  const [timezones, setTimezones] = useState<string[]>([]);
+  const [selectedTimezone, setSelectedTimezone] = useState<string>("");
+  const [savingTimezone, setSavingTimezone] = useState(false);
 
   const [formData, setFormData] = useState<Record<Weekday, ScheduleFormData>>(() => {
     const initial: Record<string, ScheduleFormData> = {};
@@ -43,6 +49,35 @@ export default function SchedulesPage() {
 
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadTimezones = async () => {
+      try {
+        const [zones, ipZone] = await Promise.all([
+          timeApiService.listTimezones(),
+          timeApiService.detectTimezoneByIp().catch(() => null),
+        ]);
+
+        if (!active) return;
+        setTimezones(zones);
+        setSelectedTimezone(shop?.timeZone || ipZone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo");
+      } catch {
+        const fallbackZones = typeof Intl.supportedValuesOf === "function"
+          ? Intl.supportedValuesOf("timeZone")
+          : ["America/Sao_Paulo"];
+        if (!active) return;
+        setTimezones(fallbackZones);
+        setSelectedTimezone(shop?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo");
+      }
+    };
+
+    loadTimezones();
+    return () => {
+      active = false;
+    };
+  }, [shop?.timeZone]);
 
   // Carregar dados existentes
   useEffect(() => {
@@ -133,6 +168,22 @@ export default function SchedulesPage() {
     }
   };
 
+  const handleSaveTimezone = async () => {
+    if (!selectedTimezone) return;
+    setSavingTimezone(true);
+    try {
+      await updateShop.mutateAsync({
+        id: shopId,
+        payload: { timeZone: selectedTimezone },
+      });
+      message.success("Timezone atualizado com sucesso!");
+    } catch {
+      message.error("Erro ao atualizar timezone.");
+    } finally {
+      setSavingTimezone(false);
+    }
+  };
+
   // Resumo dos horários
   const openDays = WEEKDAYS.filter((day) => formData[day.key].isOpen);
   const closedDays = WEEKDAYS.filter((day) => !formData[day.key].isOpen);
@@ -154,6 +205,25 @@ export default function SchedulesPage() {
       />
 
       <SchedulesSummary openDays={openDays} closedDays={closedDays} />
+
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-300">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+          Fuso Horário da Loja
+        </h3>
+        <div className="grid md:grid-cols-[1fr_auto] gap-3">
+          <Select
+            showSearch
+            placeholder="Selecione o fuso horário"
+            value={selectedTimezone || undefined}
+            onChange={setSelectedTimezone}
+            options={timezones.map((tz) => ({ value: tz, label: tz }))}
+            optionFilterProp="label"
+          />
+          <Button type="primary" onClick={handleSaveTimezone} loading={savingTimezone}>
+            Salvar
+          </Button>
+        </div>
+      </div>
 
       {/* Configuração por dia */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-300">

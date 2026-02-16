@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { scheduleService } from "@/services/schedule";
 import { CreateSchedulePayload, UpdateSchedulePayload } from "@/types/schedule";
+import { handleQueryForbidden } from "./handleQueryForbidden";
 
 // Query Keys
 export const scheduleKeys = {
@@ -17,7 +18,14 @@ export const scheduleKeys = {
 export function useSchedules(enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.lists(),
-    queryFn: () => scheduleService.findAll(),
+    queryFn: async () => {
+      try {
+        return await scheduleService.findAll();
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled,
     staleTime: 10 * 60 * 1000, // 10 minutos
   });
@@ -29,7 +37,23 @@ export function useSchedules(enabled = true) {
 export function useShopSchedules(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.byShop(shopId || ""),
-    queryFn: () => scheduleService.findByShop(shopId!),
+    queryFn: async () => {
+      try {
+        return await scheduleService.findByShop(shopId!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
+    enabled: enabled && !!shopId,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function usePublicShopSchedules(shopId: string | null, enabled = true) {
+  return useQuery({
+    queryKey: [...scheduleKeys.byShop(shopId || ""), "public"],
+    queryFn: () => scheduleService.findPublicByShop(shopId!),
     enabled: enabled && !!shopId,
     staleTime: 10 * 60 * 1000,
   });
@@ -41,7 +65,14 @@ export function useShopSchedules(shopId: string | null, enabled = true) {
 export function useSchedule(id: string | null, enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.detail(id || ""),
-    queryFn: () => scheduleService.findOne(id!),
+    queryFn: async () => {
+      try {
+        return await scheduleService.findOne(id!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!id,
   });
 }

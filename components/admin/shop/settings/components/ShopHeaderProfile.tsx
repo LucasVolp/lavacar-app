@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button, Input, Form, message, Avatar, Upload, Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Input, Form, message, Avatar, Upload, Typography, Select, Tabs, InputNumber, Checkbox } from "antd";
 import type { UploadProps } from "antd";
 import Image from "next/image";
 import {
@@ -11,14 +11,20 @@ import {
   ShopOutlined,
   PhoneOutlined,
   MailOutlined,
+  GlobalOutlined,
+  TikTokFilled,
   FileTextOutlined,
   EnvironmentOutlined,
-  PlusOutlined,
-  LoadingOutlined
+  InstagramOutlined,
+  YoutubeOutlined,
+  WhatsAppOutlined,
 } from "@ant-design/icons";
-import { Shop, UpdateShopDto, SHOP_STATUS_MAP } from "@/types/shop";
-import { maskCpfCnpj, maskPhone } from "@/lib/masks";
+import { Shop, ShopSocialLinks, UpdateShopDto, SHOP_STATUS_MAP } from "@/types/shop";
+import { maskCpfCnpj, maskPhone, maskCep } from "@/lib/masks";
 import { sanitizeText } from "@/lib/security";
+import { brasilApiService, BrasilApiStateResponse } from "@/services/brasilApi";
+import { timeApiService } from "@/services/timeApi";
+import { shopService } from "@/services/shop";
 
 const { Title, Text } = Typography;
 
@@ -31,7 +37,7 @@ interface ShopHeaderProfileProps {
 /**
  * Format display masks for view mode
  */
-const formatDocument = (doc?: string): string => {
+const formatDocument = (doc?: string | null): string => {
   if (!doc) return "—";
   return maskCpfCnpj(doc);
 };
@@ -39,6 +45,49 @@ const formatDocument = (doc?: string): string => {
 const formatPhone = (phone?: string): string => {
   if (!phone) return "—";
   return maskPhone(phone);
+};
+
+const toNullableText = (value: unknown): string | null | undefined => {
+  if (value === undefined) return undefined;
+  const text = String(value).trim();
+  return text.length > 0 ? text : null;
+};
+
+const normalizeSocialLink = (platform: "instagram" | "youtube" | "tiktok" | "whatsapp", rawValue: unknown): string | null | undefined => {
+  if (rawValue === undefined) return undefined;
+  const value = String(rawValue).trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+
+  if (platform === "instagram") {
+    return `https://instagram.com/${value.replace(/^@/, "")}`;
+  }
+
+  if (platform === "youtube") {
+    return value.startsWith("@")
+      ? `https://youtube.com/${value}`
+      : `https://youtube.com/${value.replace(/^\/+/, "")}`;
+  }
+
+  if (platform === "tiktok") {
+    return `https://www.tiktok.com/@${value.replace(/^@/, "")}`;
+  }
+
+  const digits = value.replace(/\D/g, "");
+  return digits ? `https://wa.me/${digits}` : null;
+};
+
+const parseSocialLinks = (socialLinks: Shop["socialLinks"]): ShopSocialLinks => {
+  if (!socialLinks) return {};
+  if (typeof socialLinks === "string") {
+    try {
+      const parsed = JSON.parse(socialLinks) as ShopSocialLinks;
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return socialLinks;
 };
 
 /**
@@ -64,38 +113,64 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value }) => (
   </div>
 );
 
-/**
- * Image upload button component
- */
-const UploadButton: React.FC<{ loading?: boolean; label: string }> = ({ loading, label }) => (
-  <div className="flex flex-col items-center justify-center p-4 text-zinc-400 dark:text-zinc-500">
-    {loading ? <LoadingOutlined className="text-2xl" /> : <PlusOutlined className="text-2xl" />}
-    <span className="mt-2 text-xs font-medium">{label}</span>
-  </div>
-);
-
-/**
- * Convert file to base64 for preview (mock upload)
- */
-const getBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-  });
-
 export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
   shop,
   onSave,
   isSaving = false
 }) => {
+  const socialLinks = parseSocialLinks(shop.socialLinks);
+  const instagramUrl = normalizeSocialLink("instagram", socialLinks.instagram) || "";
+  const youtubeUrl = normalizeSocialLink("youtube", socialLinks.youtube) || "";
+  const tiktokUrl = normalizeSocialLink("tiktok", socialLinks.tiktok) || "";
+  const whatsappUrl = normalizeSocialLink("whatsapp", socialLinks.whatsapp) || "";
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
+  const selectedState = Form.useWatch("state", form);
   const [logoLoading, setLogoLoading] = useState(false);
   const [bannerLoading, setBannerLoading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string>(shop.logoUrl || "");
   const [bannerPreview, setBannerPreview] = useState<string>(shop.bannerUrl || "");
+  const [states, setStates] = useState<BrasilApiStateResponse[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [timezones, setTimezones] = useState<string[]>([]);
+  const [loadingByCep, setLoadingByCep] = useState(false);
+  const [useShopPhoneOnWhatsApp, setUseShopPhoneOnWhatsApp] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const loadAuxData = async () => {
+      const [ufRes, tzRes, ipRes] = await Promise.allSettled([
+        brasilApiService.listStates(),
+        timeApiService.listTimezones(),
+        timeApiService.detectTimezoneByIp(),
+      ]);
+
+      if (!active) return;
+
+      if (ufRes.status === "fulfilled") {
+        setStates(ufRes.value);
+      } else {
+        setStates([]);
+      }
+
+      if (tzRes.status === "fulfilled") {
+        setTimezones(tzRes.value);
+      } else {
+        setTimezones(typeof Intl.supportedValuesOf === "function"
+          ? Intl.supportedValuesOf("timeZone")
+          : ["America/Sao_Paulo"]);
+      }
+
+      if (!shop.timeZone && ipRes.status === "fulfilled" && ipRes.value) {
+        form.setFieldValue("timeZone", ipRes.value);
+      }
+    };
+
+    loadAuxData();
+    return () => {
+      active = false;
+    };
+  }, [form, shop.timeZone]);
 
   const handleStartEdit = () => {
     form.setFieldsValue({
@@ -103,9 +178,31 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
       phone: shop.phone ? maskPhone(shop.phone) : "",
       email: shop.email || "",
       document: shop.document ? maskCpfCnpj(shop.document) : "",
+      zipCode: shop.zipCode ? maskCep(shop.zipCode) : "",
+      street: shop.street || "",
+      number: shop.number || "",
+      complement: shop.complement || "",
+      neighborhood: shop.neighborhood || "",
+      city: shop.city || "",
+      state: shop.state || "",
+      timeZone: shop.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo",
+      slotInterval: shop.slotInterval,
+      bufferBetweenSlots: shop.bufferBetweenSlots,
+      maxAdvanceDays: shop.maxAdvanceDays,
+      minAdvanceMinutes: shop.minAdvanceMinutes,
+      socialInstagram: socialLinks.instagram || "",
+      socialYoutube: socialLinks.youtube || "",
+      socialTiktok: socialLinks.tiktok || "",
+      socialWhatsapp: socialLinks.whatsapp || "",
     });
+    if (shop.state) {
+      brasilApiService.listCitiesByState(shop.state)
+        .then(setCities)
+        .catch(() => setCities([]));
+    }
     setLogoPreview(shop.logoUrl || "");
     setBannerPreview(shop.bannerUrl || "");
+    setUseShopPhoneOnWhatsApp(false);
     setIsEditing(true);
   };
 
@@ -113,20 +210,42 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     form.resetFields();
     setLogoPreview(shop.logoUrl || "");
     setBannerPreview(shop.bannerUrl || "");
+    setUseShopPhoneOnWhatsApp(false);
     setIsEditing(false);
   };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+      const socialWhatsappRaw = useShopPhoneOnWhatsApp ? values.phone : values.socialWhatsapp;
+      const socialLinksPayload: ShopSocialLinks = {
+        instagram: normalizeSocialLink("instagram", values.socialInstagram),
+        youtube: normalizeSocialLink("youtube", values.socialYoutube),
+        tiktok: normalizeSocialLink("tiktok", values.socialTiktok),
+        whatsapp: normalizeSocialLink("whatsapp", socialWhatsappRaw),
+      };
+
       // Remove masks before saving
       const payload: UpdateShopDto = {
         name: values.name,
         phone: values.phone?.replace(/\D/g, ""),
-        email: values.email || undefined,
-        document: values.document?.replace(/\D/g, "") || undefined,
-        logoUrl: logoPreview || undefined,
-        bannerUrl: bannerPreview || undefined,
+        email: toNullableText(values.email),
+        document: toNullableText(values.document)?.replace(/\D/g, "") ?? null,
+        zipCode: values.zipCode?.replace(/\D/g, "") || undefined,
+        street: values.street || undefined,
+        number: values.number || undefined,
+        complement: toNullableText(values.complement),
+        neighborhood: values.neighborhood || undefined,
+        city: values.city || undefined,
+        state: values.state?.toUpperCase() || undefined,
+        timeZone: toNullableText(values.timeZone),
+        slotInterval: values.slotInterval ?? undefined,
+        bufferBetweenSlots: values.bufferBetweenSlots ?? undefined,
+        maxAdvanceDays: values.maxAdvanceDays ?? undefined,
+        minAdvanceMinutes: values.minAdvanceMinutes ?? undefined,
+        logoUrl: toNullableText(logoPreview),
+        bannerUrl: toNullableText(bannerPreview),
+        socialLinks: JSON.stringify(socialLinksPayload),
       };
       await onSave(payload);
       message.success("Perfil atualizado com sucesso!");
@@ -146,36 +265,57 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     form.setFieldValue("document", maskCpfCnpj(e.target.value));
   };
 
-  // Validate image dimensions
-  const validateImageDimensions = (
-    file: File,
-    maxWidth: number,
-    maxHeight: number,
-    label: string
-  ): Promise<boolean> => {
-    return new Promise((resolve) => {
-      // Create a temporary object URL to load the image
-      const objectUrl = URL.createObjectURL(file);
-      const img = new window.Image();
-      
-      img.onload = () => {
-        URL.revokeObjectURL(objectUrl);
-        if (img.width > maxWidth || img.height > maxHeight) {
-          message.error(`${label}: dimensões máximas ${maxWidth}x${maxHeight}px`);
-          resolve(false);
-        } else {
-          resolve(true);
+  const handleZipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setFieldValue("zipCode", maskCep(e.target.value));
+  };
+
+  const handleStateChange = async (state?: string) => {
+    form.setFieldValue("state", state);
+    form.setFieldValue("city", undefined);
+    if (!state) {
+      setCities([]);
+      return;
+    }
+    try {
+      const cityList = await brasilApiService.listCitiesByState(state);
+      setCities(cityList);
+    } catch {
+      setCities([]);
+      message.warning("Não foi possível carregar as cidades.");
+    }
+  };
+
+  const handleZipCodeBlur = async () => {
+    const zipCode = String(form.getFieldValue("zipCode") || "");
+    const cepDigits = zipCode.replace(/\D/g, "");
+    if (cepDigits.length !== 8) {
+      return;
+    }
+
+    setLoadingByCep(true);
+    try {
+      const data = await brasilApiService.findAddressByCep(cepDigits);
+      form.setFieldsValue({
+        zipCode: maskCep(data.cep),
+        street: data.street || form.getFieldValue("street"),
+        neighborhood: data.neighborhood || form.getFieldValue("neighborhood"),
+        city: data.city || form.getFieldValue("city"),
+        state: data.state || form.getFieldValue("state"),
+      });
+
+      if (data.state) {
+        try {
+          const cityList = await brasilApiService.listCitiesByState(data.state);
+          setCities(cityList);
+        } catch {
+          setCities([]);
         }
-      };
-      
-      img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        message.error(`${label}: erro ao carregar imagem`);
-        resolve(false);
-      };
-      
-      img.src = objectUrl;
-    });
+      }
+    } catch {
+      message.warning("CEP não encontrado. Você pode preencher o endereço manualmente.");
+    } finally {
+      setLoadingByCep(false);
+    }
   };
 
   // Handle logo upload
@@ -183,26 +323,18 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     const { file, onSuccess, onError } = options;
     const fileObj = file as File;
 
-    // Validate file size (max 5MB)
-    if (fileObj.size > 5 * 1024 * 1024) {
-      message.error("Logo: tamanho máximo 5MB");
+    if (fileObj.size > 12 * 1024 * 1024) {
+      message.error("Logo: tamanho máximo 12MB");
       onError?.(new Error("File too large"));
-      return;
-    }
-
-    // Validate dimensions
-    const isValid = await validateImageDimensions(fileObj, 500, 500, "Logo");
-    if (!isValid) {
-      onError?.(new Error("Invalid dimensions"));
       return;
     }
 
     setLogoLoading(true);
     try {
-      const base64 = await getBase64(fileObj);
-      setLogoPreview(base64);
+      const result = await shopService.uploadLogo(shop.id, fileObj);
+      setLogoPreview(result.url);
       onSuccess?.("ok");
-      message.success("Logo carregado");
+      message.success("Logo enviada com sucesso");
     } catch {
       onError?.(new Error("Upload failed"));
       message.error("Erro ao carregar logo");
@@ -216,26 +348,18 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     const { file, onSuccess, onError } = options;
     const fileObj = file as File;
 
-    // Validate file size (max 5MB)
-    if (fileObj.size > 5 * 1024 * 1024) {
-      message.error("Banner: tamanho máximo 5MB");
+    if (fileObj.size > 12 * 1024 * 1024) {
+      message.error("Banner: tamanho máximo 12MB");
       onError?.(new Error("File too large"));
-      return;
-    }
-
-    // Validate dimensions
-    const isValid = await validateImageDimensions(fileObj, 1920, 600, "Banner");
-    if (!isValid) {
-      onError?.(new Error("Invalid dimensions"));
       return;
     }
 
     setBannerLoading(true);
     try {
-      const base64 = await getBase64(fileObj);
-      setBannerPreview(base64);
+      const result = await shopService.uploadBanner(shop.id, fileObj);
+      setBannerPreview(result.url);
       onSuccess?.("ok");
-      message.success("Banner carregado");
+      message.success("Banner enviado com sucesso");
     } catch {
       onError?.(new Error("Upload failed"));
       message.error("Erro ao carregar banner");
@@ -271,6 +395,22 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
 
+        {isEditing && (
+          <Upload
+            accept="image/*"
+            showUploadList={false}
+            customRequest={handleBannerUpload}
+            className="absolute inset-0 z-10 cursor-pointer group"
+          >
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
+              <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-medium inline-flex items-center gap-2">
+                <EditOutlined />
+                {bannerLoading ? "Enviando..." : "Editar banner"}
+              </span>
+            </div>
+          </Upload>
+        )}
+
         {/* Status Badge */}
         <div className="absolute top-4 right-4">
           <span
@@ -294,12 +434,33 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
       <div className="relative px-6 pb-6">
         {/* Logo Avatar */}
         <div className="flex items-end gap-4 -mt-10 mb-6">
-          <Avatar
-            size={80}
-            src={isEditing ? logoPreview : shop.logoUrl}
-            icon={!(isEditing ? logoPreview : shop.logoUrl) && <ShopOutlined />}
-            className="border-4 border-white dark:border-zinc-900 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg"
-          />
+          {isEditing ? (
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              customRequest={handleLogoUpload}
+              className="relative group cursor-pointer"
+            >
+              <Avatar
+                size={80}
+                src={logoPreview}
+                icon={!logoPreview && <ShopOutlined />}
+                className="border-4 border-white dark:border-zinc-900 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg"
+              />
+              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  {logoLoading ? "..." : <EditOutlined />}
+                </span>
+              </div>
+            </Upload>
+          ) : (
+            <Avatar
+              size={80}
+              src={shop.logoUrl}
+              icon={!shop.logoUrl && <ShopOutlined />}
+              className="border-4 border-white dark:border-zinc-900 bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg"
+            />
+          )}
           <div className="flex-1 min-w-0 pb-1">
             <Title
               level={2}
@@ -342,6 +503,11 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
               label="CPF/CNPJ"
               value={formatDocument(shop.document)}
             />
+            <InfoItem
+              icon={<GlobalOutlined />}
+              label="Fuso Horário"
+              value={shop.timeZone || "America/Sao_Paulo"}
+            />
             <div className="sm:col-span-2 lg:col-span-3">
               <InfoItem
                 icon={<EnvironmentOutlined />}
@@ -349,158 +515,374 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
                 value={fullAddress || "Endereço não cadastrado"}
               />
             </div>
+            {(instagramUrl || youtubeUrl || tiktokUrl || whatsappUrl) && (
+              <div className="sm:col-span-2 lg:col-span-3">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Redes Sociais</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {instagramUrl && (
+                    <a
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group/social no-underline inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 !text-white shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30 hover:scale-105 active:scale-95 transition-all duration-300"
+                    >
+                      <InstagramOutlined className="text-base !text-inherit group-hover/social:rotate-12 transition-transform duration-300" />
+                      <span className="text-sm font-medium">Instagram</span>
+                    </a>
+                  )}
+                  {youtubeUrl && (
+                    <a
+                      href={youtubeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group/social no-underline inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-red-600 to-red-500 !text-white shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/30 hover:scale-105 active:scale-95 transition-all duration-300"
+                    >
+                      <YoutubeOutlined className="text-base !text-inherit group-hover/social:rotate-12 transition-transform duration-300" />
+                      <span className="text-sm font-medium">YouTube</span>
+                    </a>
+                  )}
+                  {tiktokUrl && (
+                    <a
+                      href={tiktokUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group/social no-underline inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-white dark:to-zinc-200 !text-white dark:!text-black shadow-md shadow-zinc-900/20 dark:shadow-white/15 hover:shadow-lg hover:shadow-zinc-900/30 dark:hover:shadow-white/25 hover:scale-105 active:scale-95 transition-all duration-300"
+                    >
+                      <TikTokFilled className="text-base !text-inherit group-hover/social:rotate-12 transition-transform duration-300" />
+                      <span className="text-sm font-medium">TikTok</span>
+                    </a>
+                  )}
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group/social no-underline inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl !bg-[#25D366] dark:!bg-[#25D366] !text-white shadow-md shadow-[#25D366]/20 hover:shadow-lg hover:shadow-[#25D366]/40 hover:scale-105 active:scale-95 transition-all duration-300"
+                    >
+                      <WhatsAppOutlined className="text-base !text-white group-hover/social:rotate-12 transition-transform duration-300" />
+                      <span className="text-sm font-medium">WhatsApp</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Edit Mode */}
         {isEditing && (
           <Form form={form} layout="vertical" className="animate-fade-in">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Form.Item
-                name="name"
-                label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Nome da Loja</span>}
-                rules={[{ required: true, message: "Informe o nome" }]}
-                className="!mb-3"
-              >
-                <Input
-                  prefix={<ShopOutlined className="text-zinc-400" />}
-                  placeholder="Nome do estabelecimento"
-                  className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
-                />
-              </Form.Item>
+            <Tabs
+              defaultActiveKey="basic"
+              items={[
+                {
+                  key: "basic",
+                  label: "Dados Básicos",
+                  children: (
+                    <div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <Form.Item
+                          name="name"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Nome da Loja</span>}
+                          rules={[{ required: true, message: "Informe o nome" }]}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<ShopOutlined className="text-zinc-400" />}
+                            placeholder="Nome do estabelecimento"
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
 
-              <Form.Item
-                name="phone"
-                label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Telefone</span>}
-                rules={[{ required: true, message: "Informe o telefone" }]}
-                className="!mb-3"
-              >
-                <Input
-                  prefix={<PhoneOutlined className="text-zinc-400" />}
-                  placeholder="(99) 99999-9999"
-                  onChange={handlePhoneChange}
-                  maxLength={15}
-                  className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
-                />
-              </Form.Item>
+                        <Form.Item
+                          name="phone"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Telefone</span>}
+                          rules={[{ required: true, message: "Informe o telefone" }]}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<PhoneOutlined className="text-zinc-400" />}
+                            placeholder="(99) 99999-9999"
+                            onChange={handlePhoneChange}
+                            maxLength={15}
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
 
-              <Form.Item
-                name="email"
-                label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">E-mail</span>}
-                rules={[{ type: "email", message: "E-mail inválido" }]}
-                className="!mb-3"
-              >
-                <Input
-                  prefix={<MailOutlined className="text-zinc-400" />}
-                  placeholder="contato@loja.com"
-                  className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
-                />
-              </Form.Item>
+                        <Form.Item
+                          name="email"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">E-mail</span>}
+                          rules={[{ type: "email", message: "E-mail inválido" }]}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<MailOutlined className="text-zinc-400" />}
+                            placeholder="contato@loja.com"
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
 
-              <Form.Item
-                name="document"
-                label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">CPF/CNPJ</span>}
-                className="!mb-3"
-              >
-                <Input
-                  prefix={<FileTextOutlined className="text-zinc-400" />}
-                  placeholder="000.000.000-00"
-                  onChange={handleDocumentChange}
-                  maxLength={18}
-                  className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
-                />
-              </Form.Item>
-            </div>
+                        <Form.Item
+                          name="document"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">CPF/CNPJ</span>}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<FileTextOutlined className="text-zinc-400" />}
+                            placeholder="000.000.000-00"
+                            onChange={handleDocumentChange}
+                            maxLength={18}
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
 
-            {/* Image Upload Section */}
-            <div className="mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800">
-              <Text className="text-zinc-600 dark:text-zinc-400 text-sm font-medium block mb-4">
-                Imagens da Loja
-              </Text>
-              <div className="grid sm:grid-cols-2 gap-6">
-                {/* Logo Upload */}
-                <div>
-                  <Text className="text-zinc-500 dark:text-zinc-400 text-xs block mb-2">
-                    Logo (máx. 500x500px, 5MB)
-                  </Text>
-                  <Upload.Dragger
-                    name="logo"
-                    accept="image/*"
-                    showUploadList={false}
-                    customRequest={handleLogoUpload}
-                    className={`
-                      !bg-zinc-50 dark:!bg-zinc-800/50
-                      !border-zinc-200 dark:!border-zinc-700
-                      !rounded-xl
-                      hover:!border-indigo-400 dark:hover:!border-indigo-500
-                      transition-colors
-                      [&_.ant-upload-drag-icon]:!mb-2
-                    `}
-                  >
-                    {logoPreview ? (
-                      <div className="p-2 relative w-20 h-20 mx-auto">
-                        <Image
-                          src={logoPreview}
-                          alt="Logo preview"
-                          fill
-                          className="object-cover rounded-xl"
-                          unoptimized
-                        />
+                        <Form.Item
+                          name="socialInstagram"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Instagram</span>}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<InstagramOutlined className="text-zinc-400" />}
+                            placeholder="@seuperfil ou link"
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
+
+                        <Form.Item
+                          name="socialYoutube"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">YouTube</span>}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<YoutubeOutlined className="text-zinc-400" />}
+                            placeholder="@canal ou link"
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
+
+                        <Form.Item
+                          name="socialTiktok"
+                          label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">TikTok</span>}
+                          className="!mb-3"
+                        >
+                          <Input
+                            prefix={<TikTokFilled className="text-zinc-400" />}
+                            placeholder="@perfil ou link"
+                            allowClear
+                            className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                          />
+                        </Form.Item>
+
+                        <div className="!mb-3">
+                          <Form.Item
+                            name="socialWhatsapp"
+                            label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">WhatsApp</span>}
+                            className="!mb-2"
+                          >
+                            <Input
+                              prefix={<WhatsAppOutlined className="text-zinc-400" />}
+                              placeholder="(DDD) número ou link wa.me"
+                              allowClear
+                              disabled={useShopPhoneOnWhatsApp}
+                              className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                            />
+                          </Form.Item>
+                          <Checkbox
+                            checked={useShopPhoneOnWhatsApp}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setUseShopPhoneOnWhatsApp(checked);
+                              if (checked) {
+                                form.setFieldValue("socialWhatsapp", form.getFieldValue("phone") || shop.phone || "");
+                              }
+                            }}
+                          >
+                            Usar mesmo telefone cadastrado
+                          </Checkbox>
+                        </div>
                       </div>
-                    ) : (
-                      <UploadButton loading={logoLoading} label="Upload Logo" />
-                    )}
-                    {logoPreview && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                          Clique ou arraste para substituir
-                        </p>
-                    )}
-                  </Upload.Dragger>
-                </div>
 
-                {/* Banner Upload */}
-                <div>
-                  <Text className="text-zinc-500 dark:text-zinc-400 text-xs block mb-2">
-                    Banner (máx. 1920x600px, 5MB)
-                  </Text>
-                  <Upload.Dragger
-                    name="banner"
-                    accept="image/*"
-                    showUploadList={false}
-                    customRequest={handleBannerUpload}
-                    className={`
-                      !bg-zinc-50 dark:!bg-zinc-800/50
-                      !border-zinc-200 dark:!border-zinc-700
-                      !rounded-xl
-                      hover:!border-indigo-400 dark:hover:!border-indigo-500
-                      transition-colors
-                      [&_.ant-upload-drag-icon]:!mb-2
-                    `}
-                  >
-                    {bannerPreview ? (
-                      <div className="p-2 relative w-full h-16 mx-auto">
-                        <Image
-                          src={bannerPreview}
-                          alt="Banner preview"
-                          fill
-                          className="object-cover rounded-lg"
-                          unoptimized
+                    </div>
+                  ),
+                },
+                {
+                  key: "address",
+                  label: "Endereço e Fuso",
+                  children: (
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Form.Item
+                        name="timeZone"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Fuso Horário</span>}
+                        className="!mb-3 sm:col-span-2"
+                        rules={[{ required: true, message: "Selecione o fuso horário" }]}
+                      >
+                        <Select
+                          showSearch
+                          placeholder="Selecione o timezone"
+                          optionFilterProp="label"
+                          allowClear
+                          options={timezones.map((tz) => ({ value: tz, label: tz }))}
                         />
-                      </div>
-                    ) : (
-                      <UploadButton loading={bannerLoading} label="Upload Banner" />
-                    )}
-                     {bannerPreview && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                          Clique ou arraste para substituir
-                        </p>
-                    )}
-                  </Upload.Dragger>
-                </div>
-              </div>
-            </div>
+                      </Form.Item>
 
-            <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <Form.Item
+                        name="zipCode"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">CEP</span>}
+                        className="!mb-3"
+                        rules={[{ required: true, message: "Informe o CEP" }]}
+                        help={loadingByCep ? "Buscando CEP..." : undefined}
+                      >
+                        <Input
+                          placeholder="00000-000"
+                          onChange={handleZipCodeChange}
+                          onBlur={handleZipCodeBlur}
+                          maxLength={9}
+                          allowClear
+                          className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="street"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Rua</span>}
+                        className="!mb-3"
+                        rules={[{ required: true, message: "Informe a rua" }]}
+                      >
+                        <Input
+                          placeholder="Nome da rua"
+                          allowClear
+                          className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="number"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Número</span>}
+                        className="!mb-3"
+                        rules={[{ required: true, message: "Informe o número" }]}
+                      >
+                        <Input
+                          placeholder="123"
+                          allowClear
+                          className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="complement"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Complemento</span>}
+                        className="!mb-3"
+                      >
+                        <Input
+                          placeholder="Sala, bloco, etc."
+                          allowClear
+                          className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="neighborhood"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Bairro</span>}
+                        className="!mb-3"
+                        rules={[{ required: true, message: "Informe o bairro" }]}
+                      >
+                        <Input
+                          placeholder="Bairro"
+                          allowClear
+                          className="!rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100"
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="state"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">UF</span>}
+                        className="!mb-3"
+                        rules={[{ required: true, message: "Informe a UF" }]}
+                      >
+                        <Select
+                          showSearch
+                          placeholder="UF"
+                          optionFilterProp="label"
+                          allowClear
+                          options={states.map((state) => ({
+                            value: state.sigla,
+                            label: `${state.sigla} - ${state.nome}`,
+                          }))}
+                          onChange={handleStateChange}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="city"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Cidade</span>}
+                        className="!mb-3"
+                        rules={[{ required: true, message: "Informe a cidade" }]}
+                      >
+                        <Select
+                          showSearch
+                          placeholder="Selecione a cidade"
+                          optionFilterProp="label"
+                          allowClear
+                          disabled={!selectedState}
+                          options={cities.map((city) => ({ value: city, label: city }))}
+                        />
+                      </Form.Item>
+                    </div>
+                  ),
+                },
+                {
+                  key: "advanced",
+                  label: "Avançado",
+                  children: (
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Form.Item
+                        name="slotInterval"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Intervalo entre Slots</span>}
+                        rules={[{ required: true, message: "Informe o intervalo" }]}
+                        className="!mb-3"
+                      >
+                        <InputNumber min={5} max={120} step={5} addonAfter="min" className="!w-full" />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="bufferBetweenSlots"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Buffer entre Agendamentos</span>}
+                        rules={[{ required: true, message: "Informe o buffer" }]}
+                        className="!mb-3"
+                      >
+                        <InputNumber min={0} max={60} step={5} addonAfter="min" className="!w-full" />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="maxAdvanceDays"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Máximo de Dias</span>}
+                        rules={[{ required: true, message: "Informe o máximo" }]}
+                        className="!mb-3"
+                      >
+                        <InputNumber min={1} max={365} addonAfter="dias" className="!w-full" />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="minAdvanceMinutes"
+                        label={<span className="text-zinc-600 dark:text-zinc-400 text-sm">Antecedência Mínima</span>}
+                        rules={[{ required: true, message: "Informe a antecedência" }]}
+                        className="!mb-3"
+                      >
+                        <InputNumber min={0} max={1440} step={15} addonAfter="min" className="!w-full" />
+                      </Form.Item>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+
+            <div className="flex justify-end gap-4 pt-4 mt-2 border-t border-zinc-100 dark:border-zinc-800">
               <Button onClick={handleCancel}>
                 Cancelar
               </Button>

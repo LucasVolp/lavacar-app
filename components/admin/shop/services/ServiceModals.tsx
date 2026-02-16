@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Modal, Form, Input, InputNumber, Switch, Button, Select, Image } from "antd";
-import { ToolOutlined, FolderOutlined, LinkOutlined, PictureOutlined } from "@ant-design/icons";
+import React from "react";
+import { Modal, Form, Input, InputNumber, Switch, Button, Select, Image, Upload, message } from "antd";
+import { ToolOutlined, FolderOutlined, UploadOutlined } from "@ant-design/icons";
 import { Services } from "@/types/services";
 import { ServiceGroup } from "@/types/serviceGroup";
+import { serviceService } from "@/services/service";
 
 const { TextArea } = Input;
 
@@ -39,29 +40,32 @@ export const ServiceFormModal: React.FC<ServiceModalProps> = ({
   isSubmitting,
   form,
 }) => {
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (editingService?.photoUrl) {
-      setPhotoPreview(editingService.photoUrl);
-    } else {
-      setPhotoPreview(null);
+  const watchedPhotoUrl = Form.useWatch("photoUrl", form);
+  const photoPreview = React.useMemo(() => {
+    const candidate = (watchedPhotoUrl ?? editingService?.photoUrl ?? "").trim();
+    if (!candidate) return null;
+    try {
+      new URL(candidate);
+      return candidate;
+    } catch {
+      return null;
     }
-  }, [editingService, open]);
+  }, [watchedPhotoUrl, editingService?.photoUrl]);
 
-  const handlePhotoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    form.setFieldValue("photoUrl", url);
-    if (url.trim()) {
-      try {
-        new URL(url);
-        setPhotoPreview(url);
-      } catch {
-        setPhotoPreview(null);
-      }
-    } else {
-      setPhotoPreview(null);
+  const handlePhotoUpload = async (file: File) => {
+    if (!editingService?.id) {
+      message.info("Salve o serviço primeiro para habilitar upload de capa.");
+      return false;
     }
+
+    try {
+      const { url } = await serviceService.uploadPhoto(editingService.id, file);
+      form.setFieldValue("photoUrl", url);
+      message.success("Capa enviada com sucesso");
+    } catch {
+      message.error("Erro ao enviar capa do serviço");
+    }
+    return false;
   };
 
   return (
@@ -104,29 +108,24 @@ export const ServiceFormModal: React.FC<ServiceModalProps> = ({
           />
         </Form.Item>
 
-        <Form.Item
-          name="photoUrl"
-          label={
-            <span className="flex items-center gap-1.5">
-              <PictureOutlined />
-              Foto do Serviço (URL)
-            </span>
-          }
-          rules={[
-            {
-              type: "url",
-              message: "Informe uma URL válida",
-            },
-          ]}
-        >
-          <Input
-            placeholder="https://exemplo.com/foto-servico.jpg"
-            size="large"
-            prefix={<LinkOutlined className="text-zinc-400" />}
-            onChange={handlePhotoUrlChange}
-            allowClear
-          />
+        <Form.Item name="photoUrl" hidden>
+          <Input />
         </Form.Item>
+
+        <div className="mb-4">
+          <Upload
+            accept="image/*"
+            showUploadList={false}
+            beforeUpload={handlePhotoUpload}
+          >
+            <Button icon={<UploadOutlined />}>
+              Selecionar Capa do Serviço
+            </Button>
+          </Upload>
+          <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+            Envie uma imagem para a capa. Formatos aceitos: JPG, PNG, WEBP.
+          </p>
+        </div>
 
         {photoPreview && (
           <div className="mb-4 flex justify-center">

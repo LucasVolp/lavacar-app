@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { appointmentService, CreateAppointmentRequest, AppointmentFilters } from "@/services/appointment";
 import { Appointment } from "@/types/appointment";
+import { handleQueryForbidden } from "./handleQueryForbidden";
 
 export const appointmentKeys = {
   all: ["appointments"] as const,
@@ -10,6 +11,8 @@ export const appointmentKeys = {
   byUser: (userId: string, filters?: object) => [...appointmentKeys.lists(), { userId, ...filters }] as const,
   byShopAndDate: (shopId: string, date: string) =>
     [...appointmentKeys.lists(), { shopId, date }] as const,
+  publicAvailability: (shopId: string, date: string, serviceIds: string[]) =>
+    [...appointmentKeys.lists(), "public-availability", { shopId, date, serviceIds: serviceIds.join(",") }] as const,
   details: () => [...appointmentKeys.all, "detail"] as const,
   detail: (id: string) => [...appointmentKeys.details(), id] as const,
 };
@@ -17,7 +20,14 @@ export const appointmentKeys = {
 export function useAppointments(filters: AppointmentFilters = {}, enabled = true, options?: { refetchInterval?: number }) {
   return useQuery({
     queryKey: appointmentKeys.list(filters),
-    queryFn: () => appointmentService.findAll(filters),
+    queryFn: async () => {
+      try {
+        return await appointmentService.findAll(filters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
@@ -29,7 +39,14 @@ export function useShopAppointments(shopId: string | null, filters: Omit<Appoint
   const queryFilters = { ...filters, shopId: shopId! };
   return useQuery({
     queryKey: appointmentKeys.byShop(shopId || "", filters),
-    queryFn: () => appointmentService.findAll(queryFilters),
+    queryFn: async () => {
+      try {
+        return await appointmentService.findAll(queryFilters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!shopId,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
@@ -41,7 +58,14 @@ export function useUserAppointments(userId: string | null, filters: Omit<Appoint
   const queryFilters = { ...filters, userId: userId! };
   return useQuery({
     queryKey: appointmentKeys.byUser(userId || "", filters),
-    queryFn: () => appointmentService.findAll(queryFilters),
+    queryFn: async () => {
+      try {
+        return await appointmentService.findAll(queryFilters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!userId,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
@@ -56,13 +80,48 @@ export function useShopAppointmentsByDate(
 ) {
   return useQuery({
     queryKey: appointmentKeys.byShopAndDate(shopId || "", date || ""),
-    queryFn: () =>
-      appointmentService.findAll({
-        shopId: shopId!,
-        startDate: date!,
-        endDate: date!,
-      }),
+    queryFn: async () => {
+      try {
+        return await appointmentService.findAll({
+          shopId: shopId!,
+          startDate: date!,
+          endDate: date!,
+        });
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!shopId && !!date,
+    staleTime: 0,
+    refetchOnMount: 'always',
+  });
+}
+
+export function usePublicShopAppointmentsByDate(
+  shopId: string | null,
+  date: string | null,
+  enabled = true
+) {
+  return useQuery({
+    queryKey: [...appointmentKeys.byShopAndDate(shopId || "", date || ""), "public"],
+    queryFn: () => appointmentService.findPublicByShopAndDate(shopId!, date!),
+    enabled: enabled && !!shopId && !!date,
+    staleTime: 0,
+    refetchOnMount: 'always',
+  });
+}
+
+export function usePublicAvailability(
+  shopId: string | null,
+  date: string | null,
+  serviceIds: string[],
+  enabled = true
+) {
+  return useQuery({
+    queryKey: appointmentKeys.publicAvailability(shopId || "", date || "", serviceIds),
+    queryFn: () => appointmentService.findPublicAvailability(shopId!, date!, serviceIds),
+    enabled: enabled && !!shopId && !!date && serviceIds.length > 0,
     staleTime: 0,
     refetchOnMount: 'always',
   });
@@ -71,7 +130,14 @@ export function useShopAppointmentsByDate(
 export function useAppointment(id: string | null, enabled = true) {
   return useQuery({
     queryKey: appointmentKeys.detail(id || ""),
-    queryFn: () => appointmentService.findOne(id!),
+    queryFn: async () => {
+      try {
+        return await appointmentService.findOne(id!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!id,
   });
 }
@@ -109,12 +175,10 @@ export function useCancelAppointment() {
     mutationFn: ({
       id,
       reason,
-      userId,
     }: {
       id: string;
       reason?: string;
-      userId?: string;
-    }) => appointmentService.cancel(id, reason, userId),
+    }) => appointmentService.cancel(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },

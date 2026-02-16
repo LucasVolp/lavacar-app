@@ -55,6 +55,24 @@ export const scheduleService = {
     }
   },
 
+  findPublicByShop: async (shopId: string) => {
+    try {
+      const response: AxiosResponse<Schedule[]> = await axiosInstance.get(`${base}/public`, {
+        params: { shopId }
+      });
+      return response.data || [];
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao listar horários públicos do shop ${shopId} (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error(`Erro desconhecido ao listar horários públicos do shop ${shopId}:`, error);
+      }
+      throw error;
+    }
+  },
+
   findOne: async (id: string) => {
     try {
       const response: AxiosResponse<Schedule> = await axiosInstance.get(`${base}/${id}`);

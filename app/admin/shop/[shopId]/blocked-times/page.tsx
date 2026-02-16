@@ -11,7 +11,7 @@ import {
 } from "@/hooks/useBlockedTimes";
 import { BlockedTime, CreateBlockedTimePayload } from "@/types/blockedTime";
 import dayjs, { type Dayjs } from "dayjs";
-import { startOfDay, isAfter, isSameDay, isBefore, parseISO } from "date-fns";
+import { startOfDay, isAfter, isSameDay, isBefore } from "date-fns";
 import {
   BlockedTimeHeader,
   BlockedTimeStats,
@@ -23,6 +23,11 @@ import {
  * Bloqueios de Horário do Shop - CRUD Completo
  */
 export default function BlockedTimesPage() {
+  const parseDateOnly = (dateValue: string) => {
+    const dateKey = dateValue.split("T")[0];
+    return new Date(`${dateKey}T12:00:00`);
+  };
+
   const { shopId } = useShopAdmin();
   const { data: blockedTimes = [], isLoading } = useBlockedTimesByShop(shopId);
   const createBlockedTime = useCreateBlockedTime();
@@ -40,16 +45,16 @@ export default function BlockedTimesPage() {
   const stats = {
     total: blockedTimes.length,
     future: blockedTimes.filter(b => {
-      const d = parseISO(b.date);
+      const d = parseDateOnly(b.date);
       return isAfter(d, today) || isSameDay(d, today);
     }).length,
-    past: blockedTimes.filter(b => isBefore(parseISO(b.date), today)).length,
+    past: blockedTimes.filter(b => isBefore(parseDateOnly(b.date), today)).length,
     fullDay: blockedTimes.filter(b => b.type === "FULL_DAY").length,
   };
 
   // Ordenar por data (futuros primeiro)
   const sortedBlockedTimes = [...blockedTimes].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+    parseDateOnly(b.date).getTime() - parseDateOnly(a.date).getTime()
   );
 
   const handleOpenModal = (blockedTime?: BlockedTime) => {
@@ -58,7 +63,7 @@ export default function BlockedTimesPage() {
       // Ant Design Form fields expect dayjs objects for DatePicker/TimePicker
       form.setFieldsValue({
         type: blockedTime.type,
-        date: dayjs(blockedTime.date),
+        date: dayjs(blockedTime.date.split("T")[0], "YYYY-MM-DD"),
         startTime: blockedTime.startTime ? dayjs(blockedTime.startTime, "HH:mm") : null,
         endTime: blockedTime.endTime ? dayjs(blockedTime.endTime, "HH:mm") : null,
         reason: blockedTime.reason,

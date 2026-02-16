@@ -3,8 +3,8 @@ export interface Evaluation {
     rating: number;
     comment?: string;
     photos?: string[];
-    appointmentId: string;
-    userId: string;
+    appointmentId?: string;
+    userId?: string;
 
     createdAt: string;
     updatedAt: string;

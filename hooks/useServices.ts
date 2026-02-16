@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { serviceService, ServiceFilters } from "@/services/service";
 import { CreateServicePayload, UpdateServicePayload } from "@/types/services";
+import { handleQueryForbidden } from "./handleQueryForbidden";
 
 export const serviceKeys = {
   all: ["services"] as const,
@@ -14,7 +15,14 @@ export const serviceKeys = {
 export function useServices(filters: ServiceFilters = {}, enabled = true) {
   return useQuery({
     queryKey: serviceKeys.list(filters),
-    queryFn: () => serviceService.findAll(filters),
+    queryFn: async () => {
+      try {
+        return await serviceService.findAll(filters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled,
     staleTime: 5 * 60 * 1000,
     placeholderData: keepPreviousData,
@@ -25,7 +33,25 @@ export function useServicesByShop(shopId: string | null, filters: Omit<ServiceFi
   const queryFilters = { ...filters, shopId: shopId! };
   return useQuery({
     queryKey: serviceKeys.byShop(shopId || "", filters),
-    queryFn: () => serviceService.findAll(queryFilters),
+    queryFn: async () => {
+      try {
+        return await serviceService.findAll(queryFilters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
+    enabled: enabled && !!shopId,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function usePublicServicesByShop(shopId: string | null, filters: Omit<ServiceFilters, 'shopId'> = {}, enabled = true) {
+  const queryFilters = { ...filters, shopId: shopId! };
+  return useQuery({
+    queryKey: [...serviceKeys.byShop(shopId || "", filters), "public"],
+    queryFn: () => serviceService.findPublic(queryFilters),
     enabled: enabled && !!shopId,
     staleTime: 5 * 60 * 1000,
     placeholderData: keepPreviousData,
@@ -35,7 +61,14 @@ export function useServicesByShop(shopId: string | null, filters: Omit<ServiceFi
 export function useService(id: string | null, enabled = true) {
   return useQuery({
     queryKey: serviceKeys.detail(id || ""),
-    queryFn: () => serviceService.findOne(id!),
+    queryFn: async () => {
+      try {
+        return await serviceService.findOne(id!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!id,
   });
 }

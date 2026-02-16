@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Empty } from "antd";
 import { LeftOutlined, RightOutlined, ClockCircleOutlined, CalendarOutlined } from "@ant-design/icons";
 import { Schedule } from "@/types/schedule";
-import { Appointment } from "@/types/appointment";
 import { Shop } from "@/types/shop";
 import {
   nowInTimezone,
   formatMonthYear,
   formatDayMonth,
-  addMinutes,
+  createDateInTimezone,
+  timeToMinutes,
+  minutesToTime,
   addMonths,
   subMonths,
   startOfMonth,
@@ -21,8 +22,6 @@ import {
   isSameDay,
   startOfDay,
   addDays,
-  timeToMinutes,
-  setTimeOnDate,
   WEEKDAY_MAP,
   DEFAULT_TIMEZONE,
 } from "@/utils/dateUtils";
@@ -35,7 +34,7 @@ interface TimeSlot {
 
 interface DateTimePickerProps {
   shopSchedules: Schedule[];
-  existingAppointments: Appointment[];
+  availableSlots: string[];
   shop: Shop | null;
   totalDuration: number;
   selectedDate: Date | null;
@@ -47,7 +46,7 @@ interface DateTimePickerProps {
 
 export function DateTimePicker({
   shopSchedules,
-  existingAppointments,
+  availableSlots,
   shop,
   totalDuration,
   selectedDate,
@@ -56,7 +55,13 @@ export function DateTimePicker({
   onTimeChange,
   loading = false,
 }: DateTimePickerProps) {
-  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(nowInTimezone()));
+  const shopTimeZone = shop?.timeZone || DEFAULT_TIMEZONE;
+  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(nowInTimezone(shopTimeZone)));
+
+  // Recalcula o mês base quando o timezone da loja muda.
+  useEffect(() => {
+    setCurrentMonth(startOfMonth(nowInTimezone(shopTimeZone)));
+  }, [shopTimeZone]);
 
   // Verifica se um dia está aberto baseado nos schedules
   const isDayOpen = (date: Date) => {
@@ -67,7 +72,7 @@ export function DateTimePicker({
 
   // Verifica se a data está disponível para agendamento
   const isDateAvailable = (date: Date) => {
-    const today = startOfDay(nowInTimezone());
+    const today = startOfDay(nowInTimezone(shopTimeZone));
     const maxDate = addDays(today, shop?.maxAdvanceDays || 30);
 
     // Não pode agendar no passado
@@ -84,84 +89,31 @@ export function DateTimePicker({
 
   // Gera os slots de horário para a data selecionada
   const timeSlots = useMemo(() => {
-    if (!selectedDate || !shop) return [];
+    if (!selectedDate || !shop || totalDuration <= 0) return [];
 
     const weekday = WEEKDAY_MAP[getDay(selectedDate)];
     const schedule = shopSchedules.find((s) => s.weekday === weekday);
-
-    if (!schedule || schedule.isOpen !== "ACTIVE") return [];
-
-    const slots: TimeSlot[] = [];
-    const minAdvanceMinutes = shop.minAdvanceMinutes || 60;
-
-    // Parse horários do schedule (são strings "HH:mm")
-    const startMinutes = timeToMinutes(schedule.startTime);
-    const endMinutes = timeToMinutes(schedule.endTime);
-
-    // Horário de intervalo (almoço)
-    let breakStartMinutes: number | null = null;
-    let breakEndMinutes: number | null = null;
-
-    if (schedule.breakStartTime && schedule.breakEndTime) {
-      breakStartMinutes = timeToMinutes(schedule.breakStartTime);
-      breakEndMinutes = timeToMinutes(schedule.breakEndTime);
+    if (!schedule || schedule.isOpen !== "ACTIVE") {
+      return [];
     }
 
+    const allSlots: TimeSlot[] = [];
     const slotInterval = shop.slotInterval || 30;
+    const startMinutes = timeToMinutes(schedule.startTime);
+    const endMinutes = timeToMinutes(schedule.endTime);
+    const availableSlotSet = new Set(availableSlots);
 
-    for (let currentMinutes = startMinutes; currentMinutes < endMinutes; currentMinutes += slotInterval) {
-      const slotEndMinutes = currentMinutes + totalDuration;
-      const hours = Math.floor(currentMinutes / 60);
-      const mins = currentMinutes % 60;
-      const time = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-
-      // Verifica se está no horário de intervalo
-      const isInBreak =
-        breakStartMinutes !== null &&
-        breakEndMinutes !== null &&
-        ((currentMinutes >= breakStartMinutes && currentMinutes < breakEndMinutes) ||
-          (slotEndMinutes > breakStartMinutes && slotEndMinutes <= breakEndMinutes) ||
-          (currentMinutes < breakStartMinutes && slotEndMinutes > breakEndMinutes));
-
-      // Verifica se ultrapassa o horário de fechamento
-      const exceedsEndTime = slotEndMinutes > endMinutes;
-
-      // Verifica antecedência mínima (comparação em minutos para evitar problemas de timezone)
-      const slotDateTime = setTimeOnDate(selectedDate, time);
-      const nowUtc = new Date();
-      nowUtc.setSeconds(0, 0); // Ignora segundos para evitar bloqueio por frações de tempo
-      const minAllowedTime = addMinutes(nowUtc, minAdvanceMinutes);
-      const tooSoon = slotDateTime.getTime() < minAllowedTime.getTime();
-
-      // Verifica conflito com agendamentos existentes (todos em UTC)
-      const hasConflict = existingAppointments.some((apt) => {
-        // Considera apenas agendamentos não cancelados
-        if (apt.status === "CANCELED" || apt.status === "NO_SHOW") return false;
-
-        const aptStart = new Date(apt.scheduledAt);
-        const aptEnd = new Date(apt.endTime);
-        const slotStart = slotDateTime;
-        const slotEnd = addMinutes(slotDateTime, totalDuration);
-
-        // Verifica sobreposição
-        return (
-          (slotStart >= aptStart && slotStart < aptEnd) ||
-          (slotEnd > aptStart && slotEnd <= aptEnd) ||
-          (slotStart < aptStart && slotEnd > aptEnd)
-        );
-      });
-
-      const isAvailable = !isInBreak && !exceedsEndTime && !tooSoon && !hasConflict;
-
-      slots.push({
+    for (let current = startMinutes; current < endMinutes; current += slotInterval) {
+      const time = minutesToTime(current);
+      allSlots.push({
         time,
-        available: isAvailable,
+        available: availableSlotSet.has(time),
         label: time,
       });
     }
 
-    return slots;
-  }, [selectedDate, shop, shopSchedules, totalDuration, existingAppointments]);
+    return allSlots;
+  }, [availableSlots, selectedDate, shop, shopSchedules, totalDuration]);
 
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
@@ -176,7 +128,7 @@ export function DateTimePicker({
   const getDateFromDay = (day: number): Date => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
-    return new Date(year, month, day);
+    return createDateInTimezone(year, month, day, 12, 0, shopTimeZone);
   };
 
   if (loading) {
@@ -197,13 +149,13 @@ export function DateTimePicker({
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 transition-colors duration-300 capitalize">
             <CalendarOutlined />
-            {formatMonthYear(currentMonth)}
+            {formatMonthYear(currentMonth, shopTimeZone)}
           </h3>
           <div className="flex gap-2">
             <button
               onClick={prevMonth}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-              disabled={isBefore(currentMonth, startOfMonth(nowInTimezone()))}
+              disabled={isBefore(currentMonth, startOfMonth(nowInTimezone(shopTimeZone)))}
             >
               <LeftOutlined />
             </button>
@@ -262,7 +214,7 @@ export function DateTimePicker({
       </div>
 
       {/* Time Slots Section */}
-      <div className="bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 flex flex-col min-h-[400px] transition-colors duration-300 shadow-sm">
+      <div className="space-y-4 bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 flex flex-col min-h-[400px] transition-colors duration-300 shadow-sm">
         <div className="mb-6">
           <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 mb-1 transition-colors duration-300">
             <ClockCircleOutlined />
@@ -270,12 +222,12 @@ export function DateTimePicker({
           </h3>
           <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300">
             {selectedDate
-              ? `Disponibilidade para ${formatDayMonth(selectedDate)}`
+              ? `Disponibilidade para ${formatDayMonth(selectedDate, shopTimeZone)}`
               : "Selecione uma data para ver os horários"}
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-600 mt-1 flex items-center gap-1">
              <ClockCircleOutlined className="text-[10px]" />
-             Fuso horário: {(DEFAULT_TIMEZONE as string) === 'America/Sao_Paulo' ? 'Horário de Brasília' : DEFAULT_TIMEZONE}
+             Fuso horário: {shopTimeZone === 'America/Sao_Paulo' ? 'Horário de Brasília' : shopTimeZone}
           </p>
         </div>
 

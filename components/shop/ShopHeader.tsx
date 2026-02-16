@@ -38,7 +38,7 @@ export function ShopHeader() {
     {
         key: "settings",
         icon: <SettingOutlined />,
-        label: <Link href="/client">Configurações</Link>,
+        label: <Link href="/client/profile">Configurações</Link>,
     },
     {
       type: "divider",
@@ -66,6 +66,7 @@ export function ShopHeader() {
             <Avatar 
                 size="small" 
                 className="bg-indigo-500"
+                src={user?.picture || undefined}
                 icon={<UserOutlined />}
             >
                 {user?.firstName?.[0]?.toUpperCase()}

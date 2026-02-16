@@ -1,18 +1,18 @@
 "use client";
 
 import { use, useState, useEffect, useMemo } from "react";
-import { message } from "antd";
+import { Alert, message } from "antd";
 import { useRouter } from "next/navigation";
-import { format, parseISO } from "date-fns";
-import { setTimeOnDate, addMinutes } from "@/utils/dateUtils";
+import { parseISO } from "date-fns";
+import { setTimeOnDate, addMinutes, formatDateInTimezone, DEFAULT_TIMEZONE } from "@/utils/dateUtils";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useShop } from "@/contexts/ShopContext";
 import { useShopBySlug } from "@/hooks/useShops";
-import { useServicesByShop } from "@/hooks/useServices";
+import { usePublicServicesByShop } from "@/hooks/useServices";
 import { useUserVehicles } from "@/hooks/useVehicles";
-import { useShopSchedules } from "@/hooks/useSchedules";
-import { useShopAppointmentsByDate, useCreateAppointment } from "@/hooks/useAppointments";
+import { usePublicShopSchedules } from "@/hooks/useSchedules";
+import { usePublicAvailability, useCreateAppointment } from "@/hooks/useAppointments";
 import {
   AddVehicleModal,
   BookingHeader,
@@ -20,7 +20,6 @@ import {
   BookingReviewCard,
 } from "@/components/booking";
 import { Services } from "@/types/services";
-import { Appointment } from "@/types/appointment";
 import { VehicleStep } from "@/components/shop/booking/VehicleStep";
 import { GuestVehicleData } from "@/components/shop/booking/GuestVehicleForm";
 import { ServicesStep } from "@/components/shop/booking/ServicesStep";
@@ -28,6 +27,7 @@ import { DateTimeStep } from "@/components/shop/booking/DateTimeStep";
 import { BookingSuccess } from "@/components/shop/booking/BookingSuccess";
 import { LoginModal } from "@/components/shop/booking/LoginModal";
 import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { timeApiService } from "@/services/timeApi";
 
 interface BookingPageProps {
   params: Promise<{ slug: string }>;
@@ -62,10 +62,11 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
+  const [userTimezone, setUserTimezone] = useState<string>("");
 
   // Queries
   const { data: shop, isLoading: shopLoading, error: shopError } = useShopBySlug(slug);
-  const { data: servicesData, isLoading: servicesLoading } = useServicesByShop(
+  const { data: servicesData, isLoading: servicesLoading } = usePublicServicesByShop(
     shop?.id || null,
     { isActive: true },
     !!shop
@@ -73,17 +74,20 @@ export default function BookingPage({ params }: BookingPageProps) {
   const services: Services[] = servicesData?.data ?? [];
   const { data: vehicles = [], isLoading: vehiclesLoading, refetch: refetchVehicles } =
     useUserVehicles(user?.id || null, !!user);
-  const { data: schedules = [], isLoading: schedulesLoading } = useShopSchedules(
+  const { data: schedules = [], isLoading: schedulesLoading } = usePublicShopSchedules(
     shop?.id || null,
     !!shop
   );
-  const { data: existingAppointmentsData, isLoading: appointmentsLoading } =
-    useShopAppointmentsByDate(
-      shop?.id || null,
-      selectedDate ? format(selectedDate, "yyyy-MM-dd") : null,
-      !!shop && !!selectedDate
-    );
-  const existingAppointments: Appointment[] = existingAppointmentsData?.data ?? [];
+  const selectedServiceIds = useMemo(() => selectedServices.map((service) => service.id), [selectedServices]);
+
+  const { data: availabilityData, isLoading: availabilityLoading } = usePublicAvailability(
+    shop?.id || null,
+    selectedDate ? formatDateInTimezone(selectedDate, "yyyy-MM-dd", shop?.timeZone || DEFAULT_TIMEZONE) : null,
+    selectedServiceIds,
+    !!shop && !!selectedDate && selectedServiceIds.length > 0
+  );
+
+  const availableSlots = availabilityData?.availableSlots ?? [];
 
   const createAppointment = useCreateAppointment();
 
@@ -93,6 +97,24 @@ export default function BookingPage({ params }: BookingPageProps) {
       setShopBySlug(slug);
     }
   }, [slug, setShopBySlug]);
+
+  useEffect(() => {
+    let active = true;
+
+    timeApiService.detectTimezoneByIp()
+      .then((tz) => {
+        if (!active) return;
+        setUserTimezone(tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+      })
+      .catch(() => {
+        if (!active) return;
+        setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Restore draft from sessionStorage
   useEffect(() => {
@@ -232,7 +254,7 @@ export default function BookingPage({ params }: BookingPageProps) {
       return;
     }
 
-    const scheduledAt = setTimeOnDate(selectedDate, selectedTime);
+    const scheduledAt = setTimeOnDate(selectedDate, selectedTime, shop.timeZone || DEFAULT_TIMEZONE);
     const endTime = addMinutes(scheduledAt, totalDuration);
 
     try {
@@ -360,6 +382,16 @@ export default function BookingPage({ params }: BookingPageProps) {
         userName={user?.firstName}
       />
 
+      {userTimezone && shop.timeZone && userTimezone !== shop.timeZone && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <Alert
+            type="info"
+            showIcon
+            message={`Seu fuso horário (${userTimezone}) é diferente do fuso da loja (${shop.timeZone}). Os horários exibidos seguem o fuso da loja.`}
+          />
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Steps */}
@@ -403,14 +435,14 @@ export default function BookingPage({ params }: BookingPageProps) {
               {currentStep === 2 && (
                 <DateTimeStep
                   schedules={schedules}
-                  existingAppointments={existingAppointments}
+                  availableSlots={availableSlots}
                   shop={shop}
                   totalDuration={totalDuration}
                   selectedDate={selectedDate}
                   selectedTime={selectedTime}
                   onDateChange={handleDateChange}
                   onTimeChange={setSelectedTime}
-                  isLoading={schedulesLoading || appointmentsLoading}
+                  isLoading={schedulesLoading || availabilityLoading}
                 />
               )}
 

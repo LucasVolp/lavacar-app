@@ -10,7 +10,7 @@ import {
   CalendarOutlined
 } from "@ant-design/icons";
 import { BlockedTime } from "@/types/blockedTime";
-import { format, isBefore, isSameDay, startOfDay, parseISO } from "date-fns";
+import { format, isBefore, isSameDay, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CustomTooltip, CustomPopconfirm } from "@/components/ui";
 
@@ -82,6 +82,10 @@ export const BlockedTimeList: React.FC<BlockedTimeListProps> = ({
   onAdd,
 }) => {
   const today = startOfDay(new Date());
+  const parseDateOnly = (dateValue: string) => {
+    const dateKey = dateValue.split("T")[0];
+    return new Date(`${dateKey}T12:00:00`);
+  };
 
   const columns = [
     {
@@ -90,7 +94,7 @@ export const BlockedTimeList: React.FC<BlockedTimeListProps> = ({
       key: "date",
       width: 140,
       render: (dateStr: string) => {
-        const d = parseISO(dateStr);
+        const d = parseDateOnly(dateStr);
         const isPast = isBefore(d, today) && !isSameDay(d, today);
         return (
           <div className={isPast ? "opacity-50" : ""}>
@@ -106,7 +110,7 @@ export const BlockedTimeList: React.FC<BlockedTimeListProps> = ({
           </div>
         );
       },
-      sorter: (a: BlockedTime, b: BlockedTime) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      sorter: (a: BlockedTime, b: BlockedTime) => parseDateOnly(a.date).getTime() - parseDateOnly(b.date).getTime(),
     },
     {
       title: <span className="text-zinc-600 dark:text-zinc-400">Tipo</span>,
@@ -165,7 +169,7 @@ export const BlockedTimeList: React.FC<BlockedTimeListProps> = ({
       key: "status",
       width: 100,
       render: (_: unknown, record: BlockedTime) => {
-        const d = parseISO(record.date);
+        const d = parseDateOnly(record.date);
         if (isSameDay(d, today)) {
           return <StatusBadge type="today" />;
         }
@@ -258,7 +262,7 @@ export const BlockedTimeList: React.FC<BlockedTimeListProps> = ({
             ),
           }}
           rowClassName={(record) => {
-            const d = parseISO(record.date);
+            const d = parseDateOnly(record.date);
             const isPast = isBefore(d, today) && !isSameDay(d, today);
             return isPast ? "opacity-50" : "";
           }}

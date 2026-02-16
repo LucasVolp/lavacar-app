@@ -18,6 +18,7 @@ import { useGetChecklist } from "@/hooks/useChecklist";
 import { ChecklistModal } from "@/components/modals/ChecklistModal";
 import { StatusBadge } from "@/components/ui";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
+import { maskPhone } from "@/lib/masks";
 
 const { Text } = Typography;
 
@@ -192,7 +193,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                         </Text>
                         {appointment.user?.phone && (
                           <Text type="secondary" className="text-xs flex items-center gap-1">
-                            <PhoneOutlined /> {appointment.user.phone}
+                            <PhoneOutlined /> {maskPhone(appointment.user.phone)}
                           </Text>
                         )}
                       </div>

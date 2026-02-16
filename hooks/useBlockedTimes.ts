@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { blockedTimeService } from "@/services/blockedTime";
 import { BlockedTime, CreateBlockedTimePayload, UpdateBlockedTimePayload } from "@/types/blockedTime";
+import { handleQueryForbidden } from "./handleQueryForbidden";
 
 // Query Keys
 export const blockedTimeKeys = {
@@ -18,7 +19,13 @@ export function useBlockedTimes(enabled = true) {
   return useQuery({
     queryKey: blockedTimeKeys.lists(),
     queryFn: async () => {
-      const response = await blockedTimeService.findAll();
+      let response;
+      try {
+        response = await blockedTimeService.findAll();
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       // Unwrapping data safely
       const raw = response as unknown;
       const items = Array.isArray(raw) 
@@ -38,7 +45,13 @@ export function useBlockedTimesByShop(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: blockedTimeKeys.byShop(shopId || ""),
     queryFn: async () => {
-      const response = await blockedTimeService.findAll();
+      let response;
+      try {
+        response = await blockedTimeService.findAll();
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       // Unwrapping data safely before filtering
       const raw = response as unknown;
       const items = Array.isArray(raw) 
@@ -58,7 +71,13 @@ export function useBlockedTimeById(id: string | null, enabled = true) {
   return useQuery({
     queryKey: blockedTimeKeys.detail(id || ""),
     queryFn: async () => {
-      const response = await blockedTimeService.findOne(id!);
+      let response;
+      try {
+        response = await blockedTimeService.findOne(id!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       // Handle potential wrapper for single item
       const raw = response as unknown;
       return (raw as { data: BlockedTime }).data || (raw as BlockedTime);

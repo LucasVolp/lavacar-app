@@ -7,13 +7,13 @@ import { OrganizationMember } from "@/types/organization";
 import { useUpdateOrganizationMember, useDeleteOrganizationMember } from "@/hooks/useOrganizations";
 import { CustomTooltip, CustomPopconfirm } from "@/components/ui";
 
-export interface ExtendedMember extends OrganizationMember {
+export type ExtendedMember = Omit<OrganizationMember, "user"> & {
   user?: {
     name: string;
     email: string;
     avatarUrl?: string;
   };
-}
+};
 
 interface MembersListProps {
   members: ExtendedMember[];

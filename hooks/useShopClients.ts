@@ -5,6 +5,7 @@ import {
   UpdateShopClientPayload,
   ShopClientFilters,
 } from "@/types/shopClient";
+import { handleQueryForbidden } from "./handleQueryForbidden";
 
 export const shopClientKeys = {
   all: ["shopClients"] as const,
@@ -20,7 +21,14 @@ export const shopClientKeys = {
 export function useShopClients(filters?: ShopClientFilters, enabled = true) {
   return useQuery({
     queryKey: shopClientKeys.list(filters || {}),
-    queryFn: () => shopClientService.findAll(filters),
+    queryFn: async () => {
+      try {
+        return await shopClientService.findAll(filters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled,
     placeholderData: keepPreviousData,
   });
@@ -33,7 +41,14 @@ export function useShopClientsByShop(
 ) {
   return useQuery({
     queryKey: shopClientKeys.byShop(shopId || "", filters),
-    queryFn: () => shopClientService.findByShopId(shopId!, filters),
+    queryFn: async () => {
+      try {
+        return await shopClientService.findByShopId(shopId!, filters);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!shopId,
     placeholderData: keepPreviousData,
   });
@@ -42,7 +57,14 @@ export function useShopClientsByShop(
 export function useShopClientsCount(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: shopClientKeys.count(shopId || ""),
-    queryFn: () => shopClientService.countByShopId(shopId!),
+    queryFn: async () => {
+      try {
+        return await shopClientService.countByShopId(shopId!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!shopId,
   });
 }
@@ -50,7 +72,14 @@ export function useShopClientsCount(shopId: string | null, enabled = true) {
 export function useShopClient(id: string | null, enabled = true) {
   return useQuery({
     queryKey: shopClientKeys.detail(id || ""),
-    queryFn: () => shopClientService.findOne(id!),
+    queryFn: async () => {
+      try {
+        return await shopClientService.findOne(id!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
+    },
     enabled: enabled && !!id,
   });
 }

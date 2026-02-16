@@ -87,6 +87,18 @@ export const usersService = {
     }
   },
 
+  uploadAvatar: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response: AxiosResponse<{ url: string }> = await axiosInstance.post(`${base}/${id}/upload/avatar`, formData);
+    return response.data;
+  },
+
+  deleteAvatar: async (id: string) => {
+    const response: AxiosResponse<{ success: boolean }> = await axiosInstance.delete(`${base}/${id}/upload/avatar`);
+    return response.data;
+  },
+
   remove: async (id: string) => {
     try {
       const response = await axiosInstance.delete(`${base}/${id}`);

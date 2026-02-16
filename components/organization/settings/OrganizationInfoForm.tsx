@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Form, Input, Upload, Button } from "antd";
+import { Form, Input, Upload, Button, message } from "antd";
 import {
   BankOutlined,
   GlobalOutlined,
@@ -9,14 +9,32 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
+import type { UploadProps } from "antd";
+import { organizationService } from "@/services/organizations";
 
 interface OrganizationInfoFormProps {
+  organizationId: string;
   logoUrl?: string;
+  onLogoUpdated?: (url: string) => void;
 }
 
 export const OrganizationInfoForm: React.FC<OrganizationInfoFormProps> = ({
+  organizationId,
   logoUrl,
+  onLogoUpdated,
 }) => {
+  const handleLogoUpload: UploadProps["customRequest"] = async ({ file, onSuccess, onError }) => {
+    try {
+      const result = await organizationService.uploadLogo(organizationId, file as File);
+      onLogoUpdated?.(result.url);
+      message.success("Logo atualizada com sucesso");
+      onSuccess?.("ok");
+    } catch (error) {
+      message.error("Erro ao enviar logo");
+      onError?.(error as Error);
+    }
+  };
+
   return (
     <>
       {/* Basic Info Section */}
@@ -89,7 +107,11 @@ export const OrganizationInfoForm: React.FC<OrganizationInfoFormProps> = ({
               Faça upload de uma imagem (JPG, PNG) para ser usada como ícone da
               sua organização. Recomendado: 512x512px.
             </p>
-            <Upload>
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              customRequest={handleLogoUpload}
+            >
               <Button
                 icon={<UploadOutlined />}
                 className="bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-500 dark:hover:border-zinc-600"

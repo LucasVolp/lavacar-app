@@ -144,6 +144,18 @@ export const organizationService = {
     }
   },
 
+  uploadLogo: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response: AxiosResponse<{ url: string }> = await axiosInstance.post(`${base}/${id}/upload/logo`, formData);
+    return response.data;
+  },
+
+  deleteLogo: async (id: string) => {
+    const response: AxiosResponse<{ success: boolean }> = await axiosInstance.delete(`${base}/${id}/upload/logo`);
+    return response.data;
+  },
+
   delete: async (id: string) => {
     try {
       const response = await axiosInstance.delete(`${base}/${id}`);

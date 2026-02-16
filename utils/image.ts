@@ -1,7 +1,6 @@
 /**
  * Resolves an image path from the API to a full URL.
- * Checklist photos and other uploads are stored as relative paths (e.g. `/uploads/checklists/photo.jpg`)
- * and served by the backend via ServeStaticModule.
+ * Storage pode retornar URL absoluta (R2/CDN) ou path relativo legado.
  */
 export function getApiImageUrl(path: string | undefined | null): string {
   if (!path) return "";

@@ -8,6 +8,7 @@ import {
   CompassFilled,
 } from "@ant-design/icons";
 import { Shop } from "@/types/shop";
+import { maskPhone } from "@/lib/masks";
 
 interface Schedule {
   id: string;
@@ -44,6 +45,21 @@ const weekdayOrder = [
 ];
 
 export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
+  const fullAddress = [
+    shop.street,
+    shop.number,
+    shop.neighborhood,
+    shop.city,
+    shop.state,
+    shop.zipCode,
+    "Brasil",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const mapsEmbedUrl = `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`;
+  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+
   const sortedSchedules = [...schedules].sort(
     (a, b) => weekdayOrder.indexOf(a.weekday) - weekdayOrder.indexOf(b.weekday)
   );
@@ -114,7 +130,7 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
                     Telefone
                   </h4>
                   <p className="text-slate-600 dark:text-slate-400 text-sm transition-colors duration-300">
-                    {shop.phone}
+                    {maskPhone(shop.phone)}
                   </p>
                 </div>
               </div>
@@ -135,6 +151,32 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
                   </div>
                 </div>
               )}
+
+              {/* Maps */}
+              <div className="pt-2">
+                <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-[#27272a] shadow-sm bg-white dark:bg-[#101012]">
+                  <div className="px-4 py-3 border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
+                      Como Chegar
+                    </h4>
+                    <a
+                      href={mapsExternalUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                    >
+                      Abrir no Google Maps
+                    </a>
+                  </div>
+                  <iframe
+                    title={`Mapa da loja ${shop.name}`}
+                    src={mapsEmbedUrl}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="w-full h-56 border-0"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

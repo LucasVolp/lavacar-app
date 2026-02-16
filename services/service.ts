@@ -55,6 +55,30 @@ export const serviceService = {
     }
   },
 
+  findPublic: async (filters?: ServiceFilters): Promise<PaginatedResult<Services>> => {
+    try {
+      const params = new URLSearchParams();
+      if (filters) {
+        Object.entries(filters).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
+      const response: AxiosResponse<PaginatedResult<Services>> = await axiosInstance.get(`${base}/public`, { params });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao listar serviços públicos (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao listar serviços públicos:', error);
+      }
+      throw error;
+    }
+  },
+
   findOne: async (id: string) => {
     try {
       const response: AxiosResponse<Services> = await axiosInstance.get(`${base}/${id}`);
@@ -85,6 +109,18 @@ export const serviceService = {
       }
       throw error;
     }
+  },
+
+  uploadPhoto: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response: AxiosResponse<{ url: string }> = await axiosInstance.post(`${base}/${id}/upload/photo`, formData);
+    return response.data;
+  },
+
+  deletePhoto: async (id: string) => {
+    const response: AxiosResponse<{ success: boolean }> = await axiosInstance.delete(`${base}/${id}/upload/photo`);
+    return response.data;
   },
 
   remove: async (id: string) => {

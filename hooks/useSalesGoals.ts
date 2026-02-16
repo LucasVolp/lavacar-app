@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { salesGoalService } from "@/services/salesGoal";
 import { CreateSalesGoalPayload, UpdateSalesGoalPayload, SalesGoal } from "@/types/salesGoal";
+import { handleQueryForbidden } from "./handleQueryForbidden";
 
 // Query Keys
 export const salesGoalKeys = {
@@ -19,7 +20,13 @@ export function useSalesGoals(enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.lists(),
     queryFn: async () => {
-      const response = await salesGoalService.findAll();
+      let response;
+      try {
+        response = await salesGoalService.findAll();
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       const raw = response as unknown;
       return Array.isArray(raw) 
         ? (raw as SalesGoal[]) 
@@ -36,7 +43,13 @@ export function useShopSalesGoals(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.byShop(shopId || ""),
     queryFn: async () => {
-      const response = await salesGoalService.findByShopId(shopId!);
+      let response;
+      try {
+        response = await salesGoalService.findByShopId(shopId!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       const raw = response as unknown;
       return Array.isArray(raw) 
         ? (raw as SalesGoal[]) 
@@ -53,7 +66,13 @@ export function useOrganizationSalesGoals(organizationId: string | null, enabled
   return useQuery({
     queryKey: salesGoalKeys.byOrganization(organizationId || ""),
     queryFn: async () => {
-      const response = await salesGoalService.findByOrganizationId(organizationId!);
+      let response;
+      try {
+        response = await salesGoalService.findByOrganizationId(organizationId!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       const raw = response as unknown;
       return Array.isArray(raw) 
         ? (raw as SalesGoal[]) 
@@ -70,7 +89,13 @@ export function useSalesGoal(id: string | null, enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.detail(id || ""),
     queryFn: async () => {
-      const response = await salesGoalService.findOne(id!);
+      let response;
+      try {
+        response = await salesGoalService.findOne(id!);
+      } catch (error) {
+        handleQueryForbidden(error);
+        throw error;
+      }
       const raw = response as unknown;
       return (raw as { data: SalesGoal }).data || (raw as SalesGoal);
     },

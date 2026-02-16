@@ -1,23 +1,39 @@
 "use client";
 
 import React from "react";
-import { Avatar, Button, Card, Tag, Upload } from "antd";
+import { Avatar, Button, Card, Tag, Upload, message } from "antd";
 import {
   CalendarOutlined,
   CameraOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import type { PublicUser } from "@/types/user";
+import type { UploadProps } from "antd";
+import { usersService } from "@/services/users";
 
 interface ClientProfileIdentityCardProps {
   user: PublicUser;
   memberSince: string;
+  onAvatarUpdated?: () => Promise<void> | void;
 }
 
 export const ClientProfileIdentityCard: React.FC<ClientProfileIdentityCardProps> = ({
   user,
   memberSince,
+  onAvatarUpdated,
 }) => {
+  const handleAvatarUpload: UploadProps["customRequest"] = async ({ file, onSuccess, onError }) => {
+    try {
+      await usersService.uploadAvatar(user.id, file as File);
+      await onAvatarUpdated?.();
+      message.success("Avatar atualizado com sucesso");
+      onSuccess?.("ok");
+    } catch {
+      message.error("Erro ao atualizar avatar");
+      onError?.(new Error("Upload failed"));
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card
@@ -33,7 +49,7 @@ export const ClientProfileIdentityCard: React.FC<ClientProfileIdentityCardProps>
               icon={<UserOutlined />}
               className="border-4 border-white dark:border-zinc-900 bg-indigo-100 dark:bg-indigo-900 text-indigo-500 shadow-md"
             />
-            <Upload showUploadList={false} disabled>
+            <Upload showUploadList={false} customRequest={handleAvatarUpload} accept="image/*">
               <Button
                 type="primary"
                 shape="circle"

@@ -9,8 +9,6 @@ import {
   MailOutlined,
   GlobalOutlined,
   FileTextOutlined,
-  PictureOutlined,
-  CameraOutlined
 } from "@ant-design/icons";
 import { SHOP_STATUS_MAP, UpdateShopDto } from "@/types/shop";
 import { maskCpfCnpj, maskPhone, isValidCpfCnpj } from "@/lib/masks";
@@ -99,43 +97,12 @@ export const SettingsInfoForm: React.FC<SettingsInfoFormProps> = ({
       </div>
 
       <div className="mb-6">
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
           Identidade Visual
         </h3>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} md={12}>
-            <Form.Item
-              name="logoUrl"
-              label={<span className="text-zinc-600 dark:text-zinc-400">URL do Logo</span>}
-              rules={[
-                { type: "url", message: "Informe uma URL válida" }
-              ]}
-              extra={<span className="text-xs text-zinc-500">URL da imagem do logo (formato quadrado recomendado)</span>}
-            >
-              <Input
-                prefix={<PictureOutlined className="text-zinc-400" />}
-                placeholder="https://exemplo.com/logo.png"
-                className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={12}>
-            <Form.Item
-              name="bannerUrl"
-              label={<span className="text-zinc-600 dark:text-zinc-400">URL do Banner</span>}
-              rules={[
-                { type: "url", message: "Informe uma URL válida" }
-              ]}
-              extra={<span className="text-xs text-zinc-500">URL da imagem do banner (1200x400px recomendado)</span>}
-            >
-              <Input
-                prefix={<CameraOutlined className="text-zinc-400" />}
-                placeholder="https://exemplo.com/banner.png"
-                className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-500"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Logo e banner são enviados por upload na seção de perfil do estabelecimento.
+        </p>
       </div>
 
       <div className="mb-6">

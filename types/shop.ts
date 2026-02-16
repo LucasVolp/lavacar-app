@@ -2,26 +2,35 @@
 
 export type ShopStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
+export interface ShopSocialLinks {
+  instagram?: string | null;
+  youtube?: string | null;
+  tiktok?: string | null;
+  whatsapp?: string | null;
+}
+
 export interface Shop {
   id: string;
   name: string;
   slug: string;
-  description?: string;
-  document?: string;
+  description?: string | null;
+  document?: string | null;
   phone: string;
-  email?: string;
+  email?: string | null;
   status: ShopStatus;
-  logoUrl?: string;
-  bannerUrl?: string;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
 
   // Endereço
   zipCode: string;
   street: string;
   number: string;
-  complement?: string;
+  complement?: string | null;
   neighborhood: string;
   city: string;
   state: string;
+  timeZone?: string | null;
+  socialLinks?: ShopSocialLinks | string | null;
 
   // Configurações
   slotInterval: number;
@@ -40,19 +49,21 @@ export interface Shop {
 export interface CreateShopDto {
   name: string;
   slug: string;
-  description?: string;
-  document?: string;
+  description?: string | null;
+  document?: string | null;
   phone: string;
-  email?: string;
-  logoUrl?: string;
-  bannerUrl?: string;
+  email?: string | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
   zipCode: string;
   street: string;
   number: string;
-  complement?: string;
+  complement?: string | null;
   neighborhood: string;
   city: string;
   state: string;
+  timeZone?: string | null;
+  socialLinks?: ShopSocialLinks | string | null;
   slotInterval?: number;
   bufferBetweenSlots?: number;
   maxAdvanceDays?: number;

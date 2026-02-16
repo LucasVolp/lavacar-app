@@ -3,9 +3,9 @@
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useShopBySlug } from "@/hooks/useShops";
-import { useServicesByShop } from "@/hooks/useServices";
-import { useShopSchedules } from "@/hooks/useSchedules";
-import { useCuratedReviews, useEvaluationSummary } from "@/hooks/useEvaluations";
+import { usePublicServicesByShop } from "@/hooks/useServices";
+import { usePublicShopSchedules } from "@/hooks/useSchedules";
+import { usePublicCuratedReviews, usePublicEvaluationSummary } from "@/hooks/useEvaluations";
 import { useShop } from "@/contexts/ShopContext";
 import {
   HeroSection,
@@ -15,12 +15,39 @@ import {
   CTASection,
   ShopFooter,
 } from "@/components/shop";
-import { CarFilled } from "@ant-design/icons";
+import { CarFilled, WhatsAppOutlined } from "@ant-design/icons";
 import { Services } from "@/types/services";
+import { ShopSocialLinks } from "@/types/shop";
 
 interface ShopPageProps {
   params: Promise<{ slug: string }>;
 }
+
+const ensureSocialUrl = (platform: "instagram" | "youtube" | "tiktok" | "whatsapp", raw?: string | null): string | null => {
+  if (!raw) return null;
+  const value = raw.trim();
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+
+  if (platform === "instagram") return `https://instagram.com/${value.replace(/^@/, "")}`;
+  if (platform === "youtube") return value.startsWith("@") ? `https://youtube.com/${value}` : `https://youtube.com/${value.replace(/^\/+/, "")}`;
+  if (platform === "tiktok") return `https://www.tiktok.com/@${value.replace(/^@/, "")}`;
+  const digits = value.replace(/\D/g, "");
+  return digits ? `https://wa.me/${digits}` : null;
+};
+
+const parseSocialLinks = (socialLinks: unknown): ShopSocialLinks => {
+  if (!socialLinks) return {};
+  if (typeof socialLinks === "string") {
+    try {
+      const parsed = JSON.parse(socialLinks) as ShopSocialLinks;
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return socialLinks as ShopSocialLinks;
+};
 
 export default function ShopPage({ params }: ShopPageProps) {
   const { slug } = use(params);
@@ -33,7 +60,7 @@ export default function ShopPage({ params }: ShopPageProps) {
     error: shopError,
   } = useShopBySlug(slug);
 
-  const { data: servicesData, isLoading: servicesLoading } = useServicesByShop(
+  const { data: servicesData, isLoading: servicesLoading } = usePublicServicesByShop(
     shop?.id || null,
     { isActive: true },
     !!shop
@@ -41,7 +68,7 @@ export default function ShopPage({ params }: ShopPageProps) {
 
   const services: Services[] = servicesData?.data ?? [];
 
-  const { data: schedules = [], isLoading: schedulesLoading } = useShopSchedules(
+  const { data: schedules = [], isLoading: schedulesLoading } = usePublicShopSchedules(
     shop?.id || null,
     !!shop
   );
@@ -49,9 +76,9 @@ export default function ShopPage({ params }: ShopPageProps) {
   const { 
     data: curatedReviews = [], 
     isLoading: reviewsLoading,
-  } = useCuratedReviews(shop?.id || null, 5, !!shop);
+  } = usePublicCuratedReviews(shop?.id || null, 5, !!shop);
 
-  const { data: evaluationSummary } = useEvaluationSummary(shop?.id || null, !!shop);
+  const { data: evaluationSummary } = usePublicEvaluationSummary(shop?.id || null, !!shop);
 
   useEffect(() => {
     if (slug) {
@@ -66,6 +93,11 @@ export default function ShopPage({ params }: ShopPageProps) {
   const activeServices = services.filter((s) => s.isActive !== false);
   const averageRating = evaluationSummary?.averageRating || 0;
   const totalReviews = evaluationSummary?.totalEvaluations || 0;
+  const socialLinks = parseSocialLinks(shop?.socialLinks);
+  const instagramUrl = ensureSocialUrl("instagram", socialLinks.instagram);
+  const youtubeUrl = ensureSocialUrl("youtube", socialLinks.youtube);
+  const tiktokUrl = ensureSocialUrl("tiktok", socialLinks.tiktok);
+  const whatsappUrl = ensureSocialUrl("whatsapp", socialLinks.whatsapp || shop?.phone || null);
 
   // Loading state
   if (shopLoading) {
@@ -113,6 +145,10 @@ export default function ShopPage({ params }: ShopPageProps) {
         totalReviews={totalReviews}
         totalServices={activeServices.length}
         onBooking={handleBooking}
+        instagramUrl={instagramUrl}
+        youtubeUrl={youtubeUrl}
+        tiktokUrl={tiktokUrl}
+        whatsappUrl={whatsappUrl}
       />
 
       {/* Services Section */}
@@ -145,6 +181,18 @@ export default function ShopPage({ params }: ShopPageProps) {
 
       {/* Footer */}
       <ShopFooter shopName={shop.name} />
+
+      {whatsappUrl && (
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="fixed right-6 bottom-6 z-50 inline-flex items-center justify-center w-16 h-16 rounded-full !bg-[#25D366] dark:!bg-[#25D366] !text-white shadow-2xl shadow-[#25D366]/40 ring-4 ring-white/80 dark:ring-zinc-900/80 animate-pulse hover:animate-none hover:scale-110 active:scale-95 transition-transform"
+          aria-label="Conversar no WhatsApp"
+        >
+          <WhatsAppOutlined className="text-3xl !text-white" />
+        </a>
+      )}
     </div>
   );
 }

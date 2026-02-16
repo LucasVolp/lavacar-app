@@ -22,6 +22,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import { Shop, SHOP_STATUS_MAP } from "@/types/shop";
+import { maskPhone } from "@/lib/masks";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -94,7 +95,7 @@ export default function ShopDetailModal({
             <div className="flex items-center gap-3">
               <PhoneOutlined className="text-base-content/40" />
               <Text copyable={{ tooltips: ["Copiar", "Copiado!"] }}>
-                {shop.phone}
+                {maskPhone(shop.phone)}
               </Text>
             </div>
             {shop.email && (

@@ -85,6 +85,34 @@ export const shopService = {
     }
   },
 
+  uploadLogo: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response: AxiosResponse<{ url: string }> = await axiosInstance.post(`${base}/${id}/upload/logo`, formData);
+    return response.data;
+  },
+
+  uploadBanner: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response: AxiosResponse<{ url: string }> = await axiosInstance.post(`${base}/${id}/upload/banner`, formData);
+    return response.data;
+  },
+
+  uploadGallery: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response: AxiosResponse<{ url: string; gallery: string[] }> = await axiosInstance.post(`${base}/${id}/upload/gallery`, formData);
+    return response.data;
+  },
+
+  deleteGalleryImage: async (id: string, url: string) => {
+    const response: AxiosResponse<{ success: boolean; gallery: string[] }> = await axiosInstance.delete(`${base}/${id}/upload/gallery`, {
+      params: { url },
+    });
+    return response.data;
+  },
+
   remove: async (id: string) => {
     try {
       const response = await axiosInstance.delete(`${base}/${id}`);

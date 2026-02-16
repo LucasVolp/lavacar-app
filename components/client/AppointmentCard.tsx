@@ -28,6 +28,7 @@ interface AppointmentCardProps {
   services: { name: string; price: string }[];
   vehicleInfo: string;
   scheduledAt: string;
+  endTime?: string;
   totalPrice: string;
   totalDuration: number;
   status: string;

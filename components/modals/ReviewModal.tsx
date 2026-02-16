@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Modal, Rate, Input, message, Button, Image } from "antd";
+import { Modal, Rate, Input, message, Button, Image, Upload } from "antd";
 import { StarFilled, PlusOutlined, DeleteOutlined, PictureOutlined } from "@ant-design/icons";
+import type { UploadProps } from "antd";
+import { evaluationService } from "@/services/evaluation";
 
 interface ReviewModalProps {
   open: boolean;
@@ -34,7 +36,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
-  const [newPhotoUrl, setNewPhotoUrl] = useState("");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const handleOk = () => {
     if (rating === 0) {
@@ -56,27 +58,32 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     setRating(0);
     setComment("");
     setPhotoUrls([]);
-    setNewPhotoUrl("");
   };
 
-  const handleAddPhoto = () => {
-    const trimmed = newPhotoUrl.trim();
-    if (!trimmed) return;
-
-    try {
-      new URL(trimmed);
-    } catch {
-      message.warning("Informe uma URL válida.");
-      return;
-    }
-
+  const handlePhotoUpload: UploadProps["beforeUpload"] = async (file) => {
     if (photoUrls.length >= MAX_PHOTOS) {
       message.warning(`Máximo de ${MAX_PHOTOS} fotos permitidas.`);
-      return;
+      return false;
     }
 
-    setPhotoUrls((prev) => [...prev, trimmed]);
-    setNewPhotoUrl("");
+    const isImage = String(file.type || "").startsWith("image/");
+    if (!isImage) {
+      message.warning("Apenas imagens são permitidas.");
+      return false;
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+      const { urls } = await evaluationService.uploadPhotos([file as File], appointmentId);
+      if (urls?.length) {
+        setPhotoUrls((prev) => [...prev, ...urls]);
+      }
+    } catch {
+      message.error("Erro ao enviar imagem.");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+    return false;
   };
 
   const handleRemovePhoto = (index: number) => {
@@ -177,22 +184,15 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           )}
 
           {photoUrls.length < MAX_PHOTOS && (
-            <div className="flex gap-2">
-              <Input
-                value={newPhotoUrl}
-                onChange={(e) => setNewPhotoUrl(e.target.value)}
-                placeholder="Cole a URL da imagem..."
-                onPressEnter={handleAddPhoto}
-                className="rounded-lg"
-              />
-              <Button
-                icon={<PlusOutlined />}
-                onClick={handleAddPhoto}
-                disabled={!newPhotoUrl.trim()}
-              >
-                Adicionar
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              beforeUpload={handlePhotoUpload}
+            >
+              <Button icon={<PlusOutlined />}>
+                {isUploadingPhoto ? "Enviando..." : "Adicionar Foto"}
               </Button>
-            </div>
+            </Upload>
           )}
         </div>
       </div>

@@ -14,6 +14,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import { Shop, SHOP_STATUS_MAP } from "@/types/shop";
+import { maskPhone } from "@/lib/masks";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -113,7 +114,7 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
       )}
 
       {/* Info items */}
-      <Space direction="vertical" size="small" className="w-full mb-4 flex-grow">
+      <Space orientation="vertical" size="small" className="w-full mb-4 flex-grow">
         {/* Location */}
         <div className="flex items-center gap-2 text-sm">
           <EnvironmentOutlined className="text-primary flex-shrink-0" />
@@ -134,7 +135,7 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         {/* Phone */}
         <div className="flex items-center gap-2 text-sm">
           <PhoneOutlined className="text-success flex-shrink-0" />
-          <Text className="text-base-content">{shop.phone}</Text>
+          <Text className="text-base-content">{maskPhone(shop.phone)}</Text>
         </div>
 
         {/* Email */}

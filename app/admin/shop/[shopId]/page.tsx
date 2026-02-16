@@ -258,7 +258,10 @@ export default function ShopDashboardPage() {
       title: "Bloqueios",
       icon: <StopOutlined className="text-xl" />,
       color: "#f59e0b",
-      value: blockedTimes.filter((b) => isAfter(parseISO(b.date), today))
+      value: blockedTimes.filter((b) => {
+        const dateKey = b.date.split("T")[0];
+        return isAfter(new Date(`${dateKey}T12:00:00`), today);
+      })
         .length,
       label: "futuros",
       path: `/admin/shop/${shopId}/blocked-times`,

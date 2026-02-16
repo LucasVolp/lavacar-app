@@ -33,6 +33,13 @@ export interface AppointmentFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface PublicAvailabilityResponse {
+  date: string;
+  totalDuration: number;
+  slotInterval: number;
+  availableSlots: string[];
+}
+
 export const appointmentService = {
   create: async (payload: CreateAppointmentRequest) => {
     try {
@@ -78,6 +85,50 @@ export const appointmentService = {
     }
   },
 
+  findPublicByShopAndDate: async (shopId: string, date: string): Promise<Appointment[]> => {
+    try {
+      const response: AxiosResponse<Appointment[]> = await axiosInstance.get(`${base}/public/by-date`, {
+        params: { shopId, date },
+      });
+      return response.data || [];
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar agendamentos públicos (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao buscar agendamentos públicos:', error);
+      }
+      throw error;
+    }
+  },
+
+  findPublicAvailability: async (
+    shopId: string,
+    date: string,
+    serviceIds: string[],
+  ): Promise<PublicAvailabilityResponse> => {
+    try {
+      const response: AxiosResponse<PublicAvailabilityResponse> = await axiosInstance.get(`${base}/public/availability`, {
+        params: {
+          shopId,
+          date,
+          serviceIds: serviceIds.join(","),
+        },
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar disponibilidade pública (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao buscar disponibilidade pública:', error);
+      }
+      throw error;
+    }
+  },
+
   findOne: async (id: string) => {
     try {
       const response: AxiosResponse<Appointment> = await axiosInstance.get(`${base}/${id}`);
@@ -110,9 +161,9 @@ export const appointmentService = {
     }
   },
 
-  cancel: async (id: string, reason?: string, userId?: string) => {
+  cancel: async (id: string, reason?: string) => {
     try {
-      const response = await axiosInstance.delete(`${base}/${id}`, { data: { reason, userId } });
+      const response = await axiosInstance.delete(`${base}/${id}`, { data: { reason } });
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

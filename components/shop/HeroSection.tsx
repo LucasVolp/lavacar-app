@@ -8,6 +8,10 @@ import {
   CheckCircleFilled,
   CarFilled,
   SafetyCertificateFilled,
+  InstagramOutlined,
+  YoutubeOutlined,
+  WhatsAppOutlined,
+  TikTokFilled,
 } from "@ant-design/icons";
 import { Shop } from "@/types/shop";
 
@@ -17,6 +21,10 @@ interface HeroSectionProps {
   totalReviews: number;
   totalServices: number;
   onBooking: () => void;
+  instagramUrl?: string | null;
+  youtubeUrl?: string | null;
+  tiktokUrl?: string | null;
+  whatsappUrl?: string | null;
 }
 
 export function HeroSection({
@@ -25,6 +33,10 @@ export function HeroSection({
   totalReviews,
   totalServices,
   onBooking,
+  instagramUrl,
+  youtubeUrl,
+  tiktokUrl,
+  whatsappUrl,
 }: HeroSectionProps) {
   
   const isOpen = shop.status === "ACTIVE";
@@ -106,6 +118,55 @@ export function HeroSection({
               </a>
              )}
           </div>
+
+          {(instagramUrl || youtubeUrl || tiktokUrl || whatsappUrl) && (
+            <div className="mt-8 flex items-center gap-3 flex-wrap">
+              {instagramUrl && (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group/social no-underline inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 !text-white shadow-lg shadow-pink-500/25 hover:shadow-xl hover:shadow-pink-500/40 hover:scale-110 active:scale-95 transition-all duration-300"
+                  aria-label="Instagram"
+                >
+                  <InstagramOutlined className="text-xl !text-inherit group-hover/social:rotate-12 transition-transform duration-300" />
+                </a>
+              )}
+              {youtubeUrl && (
+                <a
+                  href={youtubeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group/social no-underline inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-red-600 to-red-500 !text-white shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/40 hover:scale-110 active:scale-95 transition-all duration-300"
+                  aria-label="YouTube"
+                >
+                  <YoutubeOutlined className="text-xl !text-inherit group-hover/social:rotate-12 transition-transform duration-300" />
+                </a>
+              )}
+              {tiktokUrl && (
+                <a
+                  href={tiktokUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group/social no-underline inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-white dark:to-slate-200 !text-white dark:!text-black shadow-lg shadow-slate-900/25 dark:shadow-white/20 hover:shadow-xl hover:shadow-slate-900/40 dark:hover:shadow-white/30 hover:scale-110 active:scale-95 transition-all duration-300"
+                  aria-label="TikTok"
+                >
+                  <TikTokFilled className="text-xl !text-inherit group-hover/social:rotate-12 transition-transform duration-300" />
+                </a>
+              )}
+              {whatsappUrl && (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group/social no-underline inline-flex items-center justify-center w-12 h-12 rounded-2xl !bg-[#25D366] dark:!bg-[#25D366] !text-white shadow-lg shadow-[#25D366]/30 hover:shadow-xl hover:shadow-[#25D366]/50 hover:scale-110 active:scale-95 transition-all duration-300"
+                  aria-label="WhatsApp"
+                >
+                  <WhatsAppOutlined className="text-xl !text-white group-hover/social:rotate-12 transition-transform duration-300" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Side - Stats Card (Desktop Only) */}

@@ -59,7 +59,6 @@ export default function AppointmentDetailPage() {
       await cancelAppointment.mutateAsync({
         id: appointmentId,
         reason: cancelReason,
-        userId: user?.id,
       });
       message.success("Agendamento cancelado");
       setCancelModalOpen(false);

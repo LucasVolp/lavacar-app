@@ -48,6 +48,14 @@ export function maskPhone(value: string): string {
 }
 
 /**
+ * Formats a string as Brazilian CEP (00000-000)
+ */
+export function maskCep(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  return digits.replace(/(\d{5})(\d)/, "$1-$2");
+}
+
+/**
  * Removes all non-digit characters from a string
  */
 export function unmask(value: string): string {

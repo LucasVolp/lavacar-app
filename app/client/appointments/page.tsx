@@ -123,7 +123,6 @@ export default function ClientAppointmentsPage() {
       await cancelAppointment.mutateAsync({
         id: cancelingId,
         reason: cancelReason,
-        userId: user?.id,
       });
       message.success("Agendamento cancelado");
       setCancelModalOpen(false);
