@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import { Spin, Button, Form, message, Typography, Pagination } from "antd";
 import { ToolOutlined, PlusOutlined, FolderOutlined } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+  serviceKeys,
   useServicesByShop,
   useCreateService,
   useUpdateService,
@@ -16,7 +18,8 @@ import {
   useUpdateServiceGroup,
   useDeleteServiceGroup,
 } from "@/hooks/useServiceGroups";
-import { Services, CreateServicePayload, UpdateServicePayload } from "@/types/services";
+import { serviceVariantService } from "@/services/serviceVariant";
+import { Services, CreateServicePayload, UpdateServicePayload, ServiceVariant } from "@/types/services";
 import { ServiceGroup, CreateServiceGroupPayload, UpdateServiceGroupPayload } from "@/types/serviceGroup";
 import { useDebouncedValue } from "@/hooks";
 
@@ -26,12 +29,14 @@ import { ServicesFilters } from "@/components/admin/shop/services/ServicesFilter
 import { ServicesGrid } from "@/components/admin/shop/services/ServicesGrid";
 import { ServicesTable } from "@/components/admin/shop/services/ServicesTable";
 import { ServiceGroupsList } from "@/components/admin/shop/services/ServiceGroupsList";
-import { ServiceFormModal, GroupFormModal } from "@/components/admin/shop/services/ServiceModals";
+import { ServiceFormModal, GroupFormModal, ServiceFormValues } from "@/components/admin/shop/services/ServiceModals";
+import { ServiceVariantFormValue } from "@/components/admin/shop/services/ServiceVariantsEditor";
 
 const { Text } = Typography;
 
 export default function ServicesPage() {
   const { shopId } = useShopAdmin();
+  const queryClient = useQueryClient();
 
   const [searchText, setSearchText] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("grid");
@@ -39,6 +44,7 @@ export default function ServicesPage() {
   const [activeTab, setActiveTab] = useState<"services" | "groups">("services");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(12);
+  const [isSyncingVariants, setIsSyncingVariants] = useState(false);
 
   const debouncedSearch = useDebouncedValue(searchText, 300);
 
@@ -68,7 +74,7 @@ export default function ServicesPage() {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<ServiceGroup | null>(null);
 
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<ServiceFormValues>();
   const [groupForm] = Form.useForm();
 
   const stats = {
@@ -77,8 +83,69 @@ export default function ServicesPage() {
     inactive: services.filter((s) => s.isActive === false).length,
     avgPrice:
       services.length > 0
-        ? services.reduce((acc, s) => acc + parseFloat(s.price), 0) / services.length
+        ? services.reduce((acc, s) => acc + parseFloat(s.price || "0"), 0) / services.length
         : 0,
+    budgetOnly: services.filter((s) => s.isBudgetOnly).length,
+    withVariants: services.filter((s) => s.hasVariants).length,
+  };
+
+  const normalizeVariants = (variants?: ServiceVariantFormValue[]): ServiceVariantFormValue[] => {
+    const clean = (variants || [])
+      .filter((v): v is ServiceVariantFormValue => Boolean(v?.size) && Number(v?.duration) > 0 && Number(v?.price) >= 0)
+      .map((v) => ({
+        size: v.size,
+        duration: Number(v.duration),
+        price: Number(v.price),
+      }));
+
+    const uniqueBySize = new Map(clean.map((v) => [v.size, v]));
+    return Array.from(uniqueBySize.values());
+  };
+
+  const syncVariants = async (
+    serviceId: string,
+    existing: ServiceVariant[],
+    incoming: ServiceVariantFormValue[],
+  ) => {
+    const existingBySize = new Map(existing.map((variant) => [variant.size, variant]));
+    const incomingBySize = new Map(incoming.map((variant) => [variant.size, variant]));
+
+    const operations: Promise<unknown>[] = [];
+
+    for (const variant of incoming) {
+      const current = existingBySize.get(variant.size);
+      if (!current) {
+        operations.push(
+          serviceVariantService.create({
+            serviceId,
+            size: variant.size,
+            price: variant.price,
+            duration: variant.duration,
+          }),
+        );
+        continue;
+      }
+
+      if (Number(current.price) !== variant.price || current.duration !== variant.duration) {
+        operations.push(
+          serviceVariantService.update(current.id, {
+            price: variant.price,
+            duration: variant.duration,
+            size: variant.size,
+          }),
+        );
+      }
+    }
+
+    for (const current of existing) {
+      if (!incomingBySize.has(current.size)) {
+        operations.push(serviceVariantService.remove(current.id));
+      }
+    }
+
+    if (operations.length > 0) {
+      await Promise.all(operations);
+    }
   };
 
   const handleToggleActive = async (service: Services) => {
@@ -104,12 +171,27 @@ export default function ServicesPage() {
         duration: service.duration,
         isActive: service.isActive !== false,
         groupId: service.groupId || undefined,
+        hasVariants: Boolean(service.hasVariants),
+        isBudgetOnly: Boolean(service.isBudgetOnly),
+        variants: (service.variants || []).map((variant) => ({
+          size: variant.size,
+          price: Number(variant.price),
+          duration: variant.duration,
+        })),
       });
     } else {
       setEditingService(null);
       form.resetFields();
-      form.setFieldsValue({ isActive: true });
+      form.setFieldsValue({
+        isActive: true,
+        isBudgetOnly: false,
+        hasVariants: false,
+        duration: 30,
+        price: 0,
+        variants: [],
+      });
     }
+
     setIsModalOpen(true);
   };
 
@@ -119,28 +201,69 @@ export default function ServicesPage() {
     form.resetFields();
   };
 
-  const handleSubmit = async (values: {
-    name: string;
-    description?: string;
-    photoUrl?: string;
-    price: number;
-    duration: number;
-    isActive: boolean;
-    groupId?: string;
-  }) => {
+  const handleSubmit = async (values: ServiceFormValues) => {
+    const variants = normalizeVariants(values.variants);
+
+    if (values.hasVariants && variants.length === 0) {
+      message.warning("Adicione ao menos uma variação por porte.");
+      return;
+    }
+
+    const minVariantPrice = variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : 0;
+    const minVariantDuration = variants.length > 0 ? Math.min(...variants.map((v) => v.duration)) : values.duration;
+
+    const basePayload: Omit<CreateServicePayload, "shopId"> = {
+      name: values.name,
+      description: values.description || undefined,
+      photoUrl: values.photoUrl || undefined,
+      groupId: values.groupId || undefined,
+      isActive: values.isActive,
+      isBudgetOnly: values.isBudgetOnly,
+      hasVariants: values.hasVariants,
+      price: values.isBudgetOnly ? 0 : values.hasVariants ? minVariantPrice : values.price,
+      duration: values.hasVariants ? minVariantDuration : values.duration,
+    };
+
     try {
+      setIsSyncingVariants(true);
+
       if (editingService) {
-        const payload: UpdateServicePayload = { ...values, groupId: values.groupId || undefined, photoUrl: values.photoUrl || undefined };
-        await updateService.mutateAsync({ id: editingService.id, payload });
+        const payload: UpdateServicePayload = { ...basePayload };
+        const updated = await updateService.mutateAsync({ id: editingService.id, payload });
+
+        if (values.hasVariants) {
+          await syncVariants(updated.id, editingService.variants || [], variants);
+        } else if ((editingService.variants || []).length > 0) {
+          await Promise.all((editingService.variants || []).map((variant) => serviceVariantService.remove(variant.id)));
+        }
+
         message.success("Serviço atualizado com sucesso!");
       } else {
-        const payload: CreateServicePayload = { ...values, shopId, groupId: values.groupId || undefined, photoUrl: values.photoUrl || undefined };
-        await createService.mutateAsync(payload);
+        const payload: CreateServicePayload = { ...basePayload, shopId };
+        const created = await createService.mutateAsync(payload);
+
+        if (values.hasVariants && variants.length > 0) {
+          await Promise.all(
+            variants.map((variant) =>
+              serviceVariantService.create({
+                serviceId: created.id,
+                size: variant.size,
+                price: variant.price,
+                duration: variant.duration,
+              }),
+            ),
+          );
+        }
+
         message.success("Serviço criado com sucesso!");
       }
+
+      await queryClient.invalidateQueries({ queryKey: serviceKeys.all });
       handleCloseModal();
     } catch {
-      message.error("Erro ao salvar serviço.");
+      message.error("Erro ao salvar serviço. Verifique os dados e tente novamente.");
+    } finally {
+      setIsSyncingVariants(false);
     }
   };
 
@@ -225,7 +348,15 @@ export default function ServicesPage() {
   const handleAddServiceToGroup = (groupId: string) => {
     setEditingService(null);
     form.resetFields();
-    form.setFieldsValue({ isActive: true, groupId });
+    form.setFieldsValue({
+      isActive: true,
+      isBudgetOnly: false,
+      hasVariants: false,
+      groupId,
+      price: 0,
+      duration: 30,
+      variants: [],
+    });
     setIsModalOpen(true);
   };
 
@@ -241,7 +372,6 @@ export default function ServicesPage() {
     <div className="space-y-8 animate-fade-in">
       <ServicesHeader />
 
-      {/* Custom Tabs */}
       <div className="flex flex-col gap-6">
         <div className="border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex gap-8">
@@ -249,23 +379,25 @@ export default function ServicesPage() {
               onClick={() => setActiveTab("services")}
               className={`pb-4 px-2 text-sm font-medium transition-all relative ${
                 activeTab === "services"
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-indigo-600 dark:text-indigo-400"
                   : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
               }`}
             >
               <div className="flex items-center gap-2">
                 <ToolOutlined />
                 Serviços
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  activeTab === "services" 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
-                    : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                }`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${
+                    activeTab === "services"
+                      ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+                      : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                  }`}
+                >
                   {stats.total}
                 </span>
               </div>
               {activeTab === "services" && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-full" />
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full" />
               )}
             </button>
 
@@ -273,29 +405,30 @@ export default function ServicesPage() {
               onClick={() => setActiveTab("groups")}
               className={`pb-4 px-2 text-sm font-medium transition-all relative ${
                 activeTab === "groups"
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-indigo-600 dark:text-indigo-400"
                   : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
               }`}
             >
               <div className="flex items-center gap-2">
                 <FolderOutlined />
                 Grupos
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  activeTab === "groups" 
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
-                    : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                }`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${
+                    activeTab === "groups"
+                      ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+                      : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                  }`}
+                >
                   {serviceGroups.length}
                 </span>
               </div>
               {activeTab === "groups" && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-full" />
+                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full" />
               )}
             </button>
           </div>
         </div>
 
-        {/* Tab Content */}
         <div className="transition-all duration-300">
           {activeTab === "services" ? (
             <div className="space-y-6">
@@ -349,11 +482,9 @@ export default function ServicesPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="flex justify-between items-center bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-xl border border-blue-100 dark:border-blue-800/30">
+              <div className="flex justify-between items-center bg-indigo-50/50 dark:bg-indigo-900/10 p-6 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
                 <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
-                    Gerenciamento de Grupos
-                  </h3>
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Gerenciamento de Grupos</h3>
                   <Text className="text-zinc-500 dark:text-zinc-400 block">
                     Organize seus serviços em grupos para facilitar a navegação e o agendamento.
                   </Text>
@@ -363,7 +494,7 @@ export default function ServicesPage() {
                   icon={<PlusOutlined />}
                   size="large"
                   onClick={() => handleOpenGroupModal()}
-                  className="shadow-lg shadow-blue-500/20"
+                  className="shadow-lg shadow-indigo-500/20"
                 >
                   Novo Grupo
                 </Button>
@@ -393,7 +524,7 @@ export default function ServicesPage() {
         editingService={editingService}
         serviceGroups={serviceGroups}
         isLoadingGroups={isLoadingGroups}
-        isSubmitting={createService.isPending || updateService.isPending}
+        isSubmitting={createService.isPending || updateService.isPending || isSyncingVariants}
         form={form}
       />
 

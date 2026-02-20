@@ -1,5 +1,7 @@
 export * from "./useServices";
+export * from "./useServiceVariants";
 export * from "./useVehicles";
+export * from "./useFipe";
 export * from "./useAppointments";
 export * from "./useSchedules";
 export * from "./useShops";

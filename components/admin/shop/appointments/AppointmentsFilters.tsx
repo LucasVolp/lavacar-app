@@ -1,9 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, Segmented, DatePicker, Select, Input, Button, Space } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import { Dayjs } from "dayjs";
+import { Card, Segmented, DatePicker, Select, Button, Space } from "antd";import { Dayjs } from "dayjs";
 
 const { RangePicker } = DatePicker;
 
@@ -27,8 +25,6 @@ export const AppointmentsFilters: React.FC<AppointmentsFiltersProps> = ({
   setDateRange,
   statusFilter,
   setStatusFilter,
-  searchText,
-  setSearchText,
   statusConfig,
   onClearFilters,
 }) => {
@@ -72,18 +68,9 @@ export const AppointmentsFilters: React.FC<AppointmentsFiltersProps> = ({
                   ),
                 }))}
               />
-
-              <Input
-                placeholder="Buscar por serviço..."
-                prefix={<SearchOutlined className="text-gray-400" />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                allowClear
-                className="max-w-[200px]"
-              />
             </div>
 
-            {(dateRange || statusFilter || searchText) && (
+            {(dateRange || statusFilter) && (
               <Button type="link" onClick={onClearFilters}>
                 Limpar filtros
               </Button>

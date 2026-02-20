@@ -3,18 +3,24 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Card, Descriptions, Spin, Result, Tag, message } from "antd";
-import { ArrowLeftOutlined, CarOutlined, DeleteOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, CarOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { useVehicle, useDeleteVehicle } from "@/hooks/useVehicles";
 import { CustomPopconfirm } from "@/components/ui";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
+import { AddVehicleModal } from "@/components/booking/AddVehicleModal";
+import {
+  VEHICLE_TYPE_LABEL,
+  VEHICLE_SIZE_LABEL,
+} from "@/components/client/vehicles";
 
 export default function VehicleDetailPage() {
   const params = useParams();
   const router = useRouter();
   const vehicleId = params.id as string;
 
-  const { data: vehicle, isLoading, error } = useVehicle(vehicleId);
+  const { data: vehicle, isLoading, error, refetch } = useVehicle(vehicleId);
   const deleteVehicle = useDeleteVehicle();
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
   const handleDelete = async () => {
     try {
@@ -54,8 +60,8 @@ export default function VehicleDetailPage() {
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 animate-fade-in">
       <div className="flex items-center gap-4 mb-8">
-        <Button 
-          icon={<ArrowLeftOutlined />} 
+        <Button
+          icon={<ArrowLeftOutlined />}
           onClick={() => router.back()}
           className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300"
         >
@@ -76,9 +82,9 @@ export default function VehicleDetailPage() {
           </div>
 
           <div className="flex-1 w-full">
-            <Descriptions 
-                column={1} 
-                bordered 
+            <Descriptions
+                column={1}
+                bordered
                 className="bg-white dark:bg-transparent"
                 labelStyle={{ width: '140px', fontWeight: 500 }}
             >
@@ -91,17 +97,18 @@ export default function VehicleDetailPage() {
               <Descriptions.Item label="Modelo">{vehicle.model}</Descriptions.Item>
               <Descriptions.Item label="Cor">{vehicle.color || "-"}</Descriptions.Item>
               <Descriptions.Item label="Ano">{vehicle.year || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Categoria">
-                {String(vehicle.type) === "CAR" ? "Carro" : 
-                 String(vehicle.type) === "MOTORCYCLE" ? "Moto" : 
-                 String(vehicle.type) === "TRUCK" ? "Caminhão" : 
-                 String(vehicle.type) === "SUV" ? "SUV" :
-                 String(vehicle.type) === "VAN" ? "Van" :
-                 "Outro"}
+              <Descriptions.Item label="Tipo">
+                {VEHICLE_TYPE_LABEL[vehicle.type] || vehicle.type}
+              </Descriptions.Item>
+              <Descriptions.Item label="Porte">
+                {vehicle.size ? (VEHICLE_SIZE_LABEL[vehicle.size] || vehicle.size) : "-"}
               </Descriptions.Item>
             </Descriptions>
 
             <div className="flex gap-3 mt-6 justify-end">
+               <Button size="large" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)}>
+                 Editar
+               </Button>
                <CustomPopconfirm
                   title="Remover veículo"
                   description="Tem certeza que deseja remover este veículo? Agendamentos futuros podem ser afetados."
@@ -114,14 +121,20 @@ export default function VehicleDetailPage() {
                     Remover
                   </Button>
                </CustomPopconfirm>
-               {/* Edit functionality could be added here in the future */}
-               {/* <Button type="primary" size="large" icon={<EditOutlined />}>
-                 Editar
-               </Button> */}
             </div>
           </div>
         </div>
       </Card>
+
+      <AddVehicleModal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        vehicle={vehicle}
+        onSuccess={() => {
+          refetch();
+          setIsEditModalOpen(false);
+        }}
+      />
     </div>
   );
 }

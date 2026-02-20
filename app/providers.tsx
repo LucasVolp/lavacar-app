@@ -145,7 +145,9 @@ export default function ThemeAwareConfigProvider({
           },
           Button: {
             primaryColor: "#ffffff",
-            primaryShadow: "0 2px 0 rgba(0, 0, 0, 0.045)",
+            primaryShadow: "none",
+            defaultShadow: "none",
+            dangerShadow: "none",
             colorPrimary: colors.primary,
             defaultBorderColor: isDarkMode ? colors.dark.border : colors.light.border,
             defaultColor: isDarkMode ? colors.dark.textBase : colors.light.textBase,

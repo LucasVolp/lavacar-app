@@ -2,15 +2,18 @@
 
 import React from "react";
 import { Table, Space, Button, Typography, Card, Avatar } from "antd";
-import { 
-  EditOutlined, 
-  DeleteOutlined, 
-  StopOutlined, 
+import {
+  EditOutlined,
+  DeleteOutlined,
+  StopOutlined,
   CheckCircleOutlined,
   PictureOutlined,
 } from "@ant-design/icons";
 import { Services } from "@/types/services";
 import { CustomTooltip } from "@/components/ui";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ServicePricingSummary } from "./ServicePricingSummary";
+import { DEFAULT_SERVICE_IMAGE } from "@/lib/assets";
 
 const { Text } = Typography;
 
@@ -31,84 +34,81 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
   onToggleActive,
   updatingServiceId,
 }) => {
+  const [failedImages, setFailedImages] = React.useState<Record<string, boolean>>({});
+
   const columns = [
     {
-      title: "Nome",
+      title: "Serviço",
       dataIndex: "name",
       key: "name",
-      render: (text: string, record: Services) => (
-        <div className="flex items-center gap-3">
+      render: (text: string, record: Services) => {
+        const fallbackKey = `default:${record.id}`;
+        const src = record.photoUrl || DEFAULT_SERVICE_IMAGE || undefined;
+        const imageFailed = failedImages[record.id] || (!record.photoUrl && failedImages[fallbackKey]);
+
+        return (
+        <div className="flex items-center gap-3 min-w-[250px]">
           <Avatar
             shape="square"
-            size={40}
-            src={record.photoUrl || undefined}
-            icon={!record.photoUrl ? <PictureOutlined /> : undefined}
+            size={46}
+            src={!imageFailed ? src : undefined}
+            icon={<PictureOutlined />}
+            onError={() => {
+              setFailedImages((prev) => ({
+                ...prev,
+                [record.photoUrl ? record.id : fallbackKey]: true,
+              }));
+              return false;
+            }}
             className="flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
           />
-          <div>
-            <Text strong className="dark:text-zinc-100">{text}</Text>
+          <div className="space-y-1">
+            <Text strong className="dark:text-zinc-100">
+              {text}
+            </Text>
             {record.description && (
               <Text type="secondary" className="block text-xs line-clamp-1 dark:text-zinc-400">
                 {record.description}
               </Text>
             )}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <StatusBadge status={record.isActive === false ? "INACTIVE" : "ACTIVE"} />
+              {record.isBudgetOnly && <StatusBadge status="BUDGET_ONLY" />}
+              {record.hasVariants && <StatusBadge status="HAS_VARIANTS" />}
+            </div>
           </div>
         </div>
-      ),
+        );
+      },
     },
     {
       title: "Preço",
-      dataIndex: "price",
       key: "price",
-      render: (price: string) => (
-        <Text strong className="text-green-600 dark:text-green-400">
-          R$ {parseFloat(price).toFixed(2)}
-        </Text>
-      ),
-      sorter: (a: Services, b: Services) => parseFloat(a.price) - parseFloat(b.price),
+      render: (_: unknown, record: Services) => <ServicePricingSummary service={record} compact />,
     },
     {
       title: "Duração",
-      dataIndex: "duration",
       key: "duration",
-      render: (duration: number) => `${duration} min`,
-      sorter: (a: Services, b: Services) => a.duration - b.duration,
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      render: (isActive: boolean) => (
-        <span
-          className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-            isActive !== false
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30"
-              : "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
-          }`}
-        >
-          {isActive !== false ? "Ativo" : "Inativo"}
-        </span>
-      ),
-      filters: [
-        { text: "Ativo", value: true },
-        { text: "Inativo", value: false },
-      ],
-      onFilter: (value: boolean | React.Key, record: Services) => {
-        const isActive = record.isActive !== false;
-        return isActive === value;
+      render: (_: unknown, record: Services) => {
+        if (record.hasVariants && record.variants?.length) {
+          const durations = record.variants.map((v) => v.duration);
+          return `${Math.min(...durations)} - ${Math.max(...durations)} min`;
+        }
+        return `${record.duration} min`;
       },
     },
     {
       title: "Ações",
       key: "actions",
+      width: 140,
       render: (_: unknown, record: Services) => (
         <Space>
           <CustomTooltip title="Editar">
-            <Button 
-              type="text" 
-              icon={<EditOutlined />} 
-              onClick={() => onEdit(record)} 
-              className="text-blue-500"
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => onEdit(record)}
+              className="text-indigo-500"
             />
           </CustomTooltip>
           <CustomTooltip title={record.isActive === false ? "Ativar" : "Desativar"}>
@@ -117,16 +117,11 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
               icon={record.isActive === false ? <CheckCircleOutlined /> : <StopOutlined />}
               onClick={() => onToggleActive(record)}
               loading={updatingServiceId === record.id}
-              className={record.isActive === false ? "text-green-500" : "text-orange-500"}
+              className={record.isActive === false ? "text-emerald-500" : "text-amber-500"}
             />
           </CustomTooltip>
           <CustomTooltip title="Excluir">
-            <Button 
-              type="text" 
-              danger 
-              icon={<DeleteOutlined />} 
-              onClick={() => onDelete(record.id)} 
-            />
+            <Button type="text" danger icon={<DeleteOutlined />} onClick={() => onDelete(record.id)} />
           </CustomTooltip>
         </Space>
       ),
@@ -134,14 +129,8 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
   ];
 
   return (
-    <Card className="shadow-sm">
-      <Table
-        dataSource={services}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        pagination={{ pageSize: 10 }}
-      />
+    <Card className="shadow-sm border-zinc-200 dark:border-zinc-800">
+      <Table dataSource={services} columns={columns} rowKey="id" loading={loading} pagination={{ pageSize: 10 }} />
     </Card>
   );
 };

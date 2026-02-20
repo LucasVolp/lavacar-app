@@ -5,3 +5,6 @@ export * from "./ServicesGrid";
 export * from "./ServicesHeader";
 export * from "./ServicesStats";
 export * from "./ServicesTable";
+export * from "./ServiceMetaBadges";
+export * from "./ServicePricingSummary";
+export * from "./ServiceVariantsEditor";

@@ -36,7 +36,7 @@ export default function OrganizationSettingsPage() {
     try {
       await organizationService.update(organizationId, {
         name: values.name,
-        document: values.document || null,
+        document: values.document?.trim() || undefined,
       });
       message.success("Configurações salvas com sucesso!");
     } catch {

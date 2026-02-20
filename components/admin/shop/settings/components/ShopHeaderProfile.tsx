@@ -138,35 +138,17 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
 
   useEffect(() => {
     let active = true;
-    const loadAuxData = async () => {
-      const [ufRes, tzRes, ipRes] = await Promise.allSettled([
-        brasilApiService.listStates(),
-        timeApiService.listTimezones(),
-        timeApiService.detectTimezoneByIp(),
-      ]);
 
-      if (!active) return;
+    setTimezones(timeApiService.listTimezones());
 
-      if (ufRes.status === "fulfilled") {
-        setStates(ufRes.value);
-      } else {
-        setStates([]);
-      }
+    if (!shop.timeZone) {
+      form.setFieldValue("timeZone", timeApiService.detectTimezone());
+    }
 
-      if (tzRes.status === "fulfilled") {
-        setTimezones(tzRes.value);
-      } else {
-        setTimezones(typeof Intl.supportedValuesOf === "function"
-          ? Intl.supportedValuesOf("timeZone")
-          : ["America/Sao_Paulo"]);
-      }
+    brasilApiService.listStates()
+      .then((data) => { if (active) setStates(data); })
+      .catch(() => { if (active) setStates([]); });
 
-      if (!shop.timeZone && ipRes.status === "fulfilled" && ipRes.value) {
-        form.setFieldValue("timeZone", ipRes.value);
-      }
-    };
-
-    loadAuxData();
     return () => {
       active = false;
     };

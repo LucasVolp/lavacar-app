@@ -2,18 +2,35 @@
 
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { useOrganizationDashboardMetrics } from "@/hooks/useOrganizations";
+import { message } from "antd";
+import { useOrganizationDashboardMetrics, useOrganization } from "@/hooks/useOrganizations";
+import { useAuth } from "@/contexts";
+import { useDeleteShop } from "@/hooks/shop/useDeleteShop";
 import { ShopsHeader } from "@/components/organization/shops/ShopsHeader";
 import { ShopsGrid } from "@/components/organization/shops/ShopsGrid";
 
 export default function OrganizationShopsPage() {
   const params = useParams();
   const organizationId = params?.organizationId as string;
+  const { user } = useAuth();
 
   const { data: dashboardMetrics, isLoading } = useOrganizationDashboardMetrics(organizationId, {
     period: "30d",
   });
+  const { data: organization } = useOrganization(organizationId);
+  const deleteShop = useDeleteShop();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const canDelete = !!(user && organization && user.id === organization.ownerId);
+
+  const handleDeleteShop = async (shopId: string) => {
+    try {
+      await deleteShop.mutateAsync(shopId);
+      message.success("Estabelecimento excluído com sucesso.");
+    } catch {
+      message.error("Erro ao excluir estabelecimento. Tente novamente.");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -49,6 +66,8 @@ export default function OrganizationShopsPage() {
         shops={filteredShops}
         searchTerm={searchTerm}
         createHref={`/organization/${organizationId}/shops/new`}
+        canDelete={canDelete}
+        onDelete={handleDeleteShop}
       />
     </div>
   );

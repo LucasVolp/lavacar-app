@@ -1,59 +1,115 @@
 "use client";
 
 import React from "react";
-import { Row, Col, Statistic } from "antd";
+import { Row, Col } from "antd";
+import {
+  AppstoreOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  DollarOutlined,
+  FileTextOutlined,
+  BranchesOutlined,
+} from "@ant-design/icons";
+import { formatCurrency } from "./serviceUi";
 
 interface ServicesStatsProps {
   total: number;
   active: number;
   inactive: number;
   avgPrice: number;
+  budgetOnly: number;
+  withVariants: number;
 }
 
-export const ServicesStats: React.FC<ServicesStatsProps> = ({ total, active, inactive, avgPrice }) => {
+interface StatCardProps {
+  icon: React.ReactNode;
+  iconBg: string;
+  title: string;
+  value: string | number;
+  valueColor?: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+  icon,
+  iconBg,
+  title,
+  value,
+  valueColor = "text-zinc-900 dark:text-zinc-100",
+}) => (
+  <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow duration-200">
+    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${iconBg} mb-3`}>
+      {icon}
+    </div>
+    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1">
+      {title}
+    </p>
+    <p className={`text-2xl font-bold m-0 ${valueColor}`}>{value}</p>
+  </div>
+);
+
+export const ServicesStats: React.FC<ServicesStatsProps> = ({
+  total,
+  active,
+  inactive,
+  avgPrice,
+  budgetOnly,
+  withVariants,
+}) => {
   return (
     <Row gutter={[16, 16]}>
-      <Col xs={12} sm={6}>
-        <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 text-center border border-zinc-100 dark:border-zinc-700 transition-colors">
-          <Statistic 
-            title={<span className="text-zinc-500 dark:text-zinc-400 text-xs font-medium uppercase tracking-wide">Total</span>}
-            value={total} 
-            valueStyle={{ fontWeight: 600 }}
-            className="[&_.ant-statistic-content-value]:text-blue-600 dark:[&_.ant-statistic-content-value]:text-blue-400"
-          />
-        </div>
+      <Col xs={12} sm={8} lg={4}>
+        <StatCard
+          icon={<AppstoreOutlined className="text-lg text-blue-600 dark:text-blue-400" />}
+          iconBg="bg-blue-100 dark:bg-blue-900/30"
+          title="Total"
+          value={total}
+          valueColor="text-blue-600 dark:text-blue-400"
+        />
       </Col>
-      <Col xs={12} sm={6}>
-        <div className="bg-green-50/50 dark:bg-green-900/10 rounded-lg p-4 text-center border border-green-100 dark:border-green-900/20 transition-colors">
-          <Statistic 
-            title={<span className="text-green-600/70 dark:text-green-400/70 text-xs font-medium uppercase tracking-wide">Ativos</span>}
-            value={active} 
-            valueStyle={{ fontWeight: 600 }}
-            className="[&_.ant-statistic-content-value]:text-green-600 dark:[&_.ant-statistic-content-value]:text-green-400"
-          />
-        </div>
+      <Col xs={12} sm={8} lg={4}>
+        <StatCard
+          icon={<CheckCircleOutlined className="text-lg text-emerald-600 dark:text-emerald-400" />}
+          iconBg="bg-emerald-100 dark:bg-emerald-900/30"
+          title="Ativos"
+          value={active}
+          valueColor="text-emerald-600 dark:text-emerald-400"
+        />
       </Col>
-      <Col xs={12} sm={6}>
-        <div className="bg-orange-50/50 dark:bg-orange-900/10 rounded-lg p-4 text-center border border-orange-100 dark:border-orange-900/20 transition-colors">
-          <Statistic 
-            title={<span className="text-orange-600/70 dark:text-orange-400/70 text-xs font-medium uppercase tracking-wide">Inativos</span>}
-            value={inactive} 
-            valueStyle={{ fontWeight: 600 }}
-            className="[&_.ant-statistic-content-value]:text-orange-500 dark:[&_.ant-statistic-content-value]:text-orange-400"
-          />
-        </div>
+      <Col xs={12} sm={8} lg={4}>
+        <StatCard
+          icon={<CloseCircleOutlined className="text-lg text-amber-600 dark:text-amber-400" />}
+          iconBg="bg-amber-100 dark:bg-amber-900/30"
+          title="Inativos"
+          value={inactive}
+          valueColor="text-amber-600 dark:text-amber-400"
+        />
       </Col>
-      <Col xs={12} sm={6}>
-        <div className="bg-purple-50/50 dark:bg-purple-900/10 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-900/20 transition-colors">
-          <Statistic 
-            title={<span className="text-purple-600/70 dark:text-purple-400/70 text-xs font-medium uppercase tracking-wide">Preço Médio</span>}
-            value={avgPrice} 
-            precision={2} 
-            prefix="R$" 
-            valueStyle={{ fontWeight: 600 }}
-            className="[&_.ant-statistic-content-value]:text-purple-600 dark:[&_.ant-statistic-content-value]:text-purple-400 [&_.ant-statistic-content-prefix]:text-purple-600 dark:[&_.ant-statistic-content-prefix]:text-purple-400"
-          />
-        </div>
+      <Col xs={12} sm={8} lg={4}>
+        <StatCard
+          icon={<DollarOutlined className="text-lg text-indigo-600 dark:text-indigo-400" />}
+          iconBg="bg-indigo-100 dark:bg-indigo-900/30"
+          title="Preço Médio"
+          value={formatCurrency(avgPrice)}
+          valueColor="text-indigo-600 dark:text-indigo-400"
+        />
+      </Col>
+      <Col xs={12} sm={8} lg={4}>
+        <StatCard
+          icon={<FileTextOutlined className="text-lg text-orange-600 dark:text-orange-400" />}
+          iconBg="bg-orange-100 dark:bg-orange-900/30"
+          title="Orçamento"
+          value={budgetOnly}
+          valueColor="text-orange-600 dark:text-orange-400"
+        />
+      </Col>
+      <Col xs={12} sm={8} lg={4}>
+        <StatCard
+          icon={<BranchesOutlined className="text-lg text-cyan-600 dark:text-cyan-400" />}
+          iconBg="bg-cyan-100 dark:bg-cyan-900/30"
+          title="Com Variações"
+          value={withVariants}
+          valueColor="text-cyan-600 dark:text-cyan-400"
+        />
       </Col>
     </Row>
   );

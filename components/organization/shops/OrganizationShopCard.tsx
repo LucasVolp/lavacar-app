@@ -2,21 +2,26 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, Badge, Button, Tooltip } from "antd";
+import { Avatar, Badge, Button, Popconfirm, Tooltip } from "antd";
 import {
   ArrowRightOutlined,
+  CalendarOutlined,
   ClockCircleOutlined,
+  DeleteOutlined,
   EnvironmentOutlined,
   SettingOutlined,
   ShopOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
 import type { OrganizationShopOverview } from "@/types/organization";
 
 interface OrganizationShopCardProps {
   shop: OrganizationShopOverview;
+  canDelete?: boolean;
+  onDelete?: (shopId: string) => void;
 }
 
-export function OrganizationShopCard({ shop }: OrganizationShopCardProps) {
+export function OrganizationShopCard({ shop, canDelete, onDelete }: OrganizationShopCardProps) {
   const router = useRouter();
 
   return (
@@ -69,25 +74,51 @@ export function OrganizationShopCard({ shop }: OrganizationShopCardProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <Tooltip title="Agendamentos no dia atual">
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/60 p-2.5">
-              <p className="m-0 text-zinc-500 dark:text-zinc-400">Hoje</p>
-              <p className="m-0 font-semibold text-zinc-900 dark:text-zinc-100">{shop.appointmentsToday} ag.</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/20 p-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <CalendarOutlined className="text-blue-500 dark:text-blue-400 text-xs" />
+              <span className="text-[11px] font-medium text-blue-600/80 dark:text-blue-400/80 uppercase tracking-wider">Hoje</span>
             </div>
-          </Tooltip>
+            <p className="m-0 text-lg font-bold text-blue-700 dark:text-blue-300 leading-tight">
+              {shop.appointmentsToday}
+            </p>
+            <p className="m-0 text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {shop.appointmentsToday === 1 ? "agendamento" : "agendamentos"}
+            </p>
+          </div>
 
-          <Tooltip title="Serviços em andamento agora">
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/60 p-2.5">
-              <p className="m-0 text-zinc-500 dark:text-zinc-400">Agora</p>
-              <p className="m-0 font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
-                <ClockCircleOutlined /> {shop.inProgressNow} em andamento
-              </p>
+          <div className={`rounded-xl border p-3 ${
+            shop.inProgressNow > 0
+              ? "border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20"
+              : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-950/30"
+          }`}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <ThunderboltOutlined className={`text-xs ${
+                shop.inProgressNow > 0
+                  ? "text-emerald-500 dark:text-emerald-400"
+                  : "text-zinc-400 dark:text-zinc-500"
+              }`} />
+              <span className={`text-[11px] font-medium uppercase tracking-wider ${
+                shop.inProgressNow > 0
+                  ? "text-emerald-600/80 dark:text-emerald-400/80"
+                  : "text-zinc-500 dark:text-zinc-500"
+              }`}>Agora</span>
             </div>
-          </Tooltip>
+            <p className={`m-0 text-lg font-bold leading-tight ${
+              shop.inProgressNow > 0
+                ? "text-emerald-700 dark:text-emerald-300"
+                : "text-zinc-400 dark:text-zinc-500"
+            }`}>
+              {shop.inProgressNow}
+            </p>
+            <p className="m-0 text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {shop.inProgressNow === 1 ? "em andamento" : "em andamento"}
+            </p>
+          </div>
         </div>
 
-        <div className="mt-auto grid grid-cols-2 gap-2">
+        <div className={`mt-auto grid gap-2 ${canDelete ? "grid-cols-3" : "grid-cols-2"}`}>
           <Button
             icon={<SettingOutlined />}
             onClick={() => router.push(`/admin/shop/${shop.id}/settings`)}
@@ -101,6 +132,23 @@ export function OrganizationShopCard({ shop }: OrganizationShopCardProps) {
           >
             Gerenciar
           </Button>
+          {canDelete && onDelete && (
+            <Popconfirm
+              title="Excluir estabelecimento"
+              description="Tem certeza? Isso apagará todos os agendamentos e dados desta loja permanentemente."
+              onConfirm={() => onDelete(shop.id)}
+              okText="Excluir"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true }}
+            >
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+              >
+                Excluir
+              </Button>
+            </Popconfirm>
+          )}
         </div>
       </div>
     </div>

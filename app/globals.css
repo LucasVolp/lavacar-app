@@ -317,3 +317,40 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+/* Ant Design: Danger buttons (default variant) should be solid red, not transparent */
+.ant-btn-dangerous:not(.ant-btn-primary):not(.ant-btn-link):not(.ant-btn-text) {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.ant-btn-dangerous:not(.ant-btn-primary):not(.ant-btn-link):not(.ant-btn-text):hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.ant-btn-dangerous:not(.ant-btn-primary):not(.ant-btn-link):not(.ant-btn-text):active {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+/* Dark mode: Ant Design Alert (warning) */
+[data-theme="dark"] .ant-alert-warning {
+  background-color: rgba(120, 53, 15, 0.2) !important;
+  border-color: #92400e !important;
+}
+
+[data-theme="dark"] .ant-alert-warning .ant-alert-icon {
+  color: #fbbf24 !important;
+}
+
+[data-theme="dark"] .ant-alert-warning .ant-alert-message {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ant-alert-warning .ant-alert-description {
+  color: #cbd5e1 !important;
+}

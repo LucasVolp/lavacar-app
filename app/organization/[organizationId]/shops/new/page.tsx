@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useParams } from "next/navigation";
 import { useOrganization } from "@/hooks/useOrganizations";
-import { CreateShopForm } from "@/components/organization/shops/CreateShopForm";
+import { ShopWizard } from "@/components/organization/shops/ShopWizard";
 
-export default function CreateShopPage() {
+function CreateShopContent() {
   const params = useParams();
   const organizationId = params?.organizationId as string;
   const { data: organization, isLoading } = useOrganization(organizationId);
@@ -15,11 +15,19 @@ export default function CreateShopPage() {
   }
 
   return (
-    <div className="animate-fade-in max-w-5xl mx-auto pb-20">
-      <CreateShopForm 
-        organizationId={organizationId} 
-        ownerId={organization?.ownerId} 
+    <div className="animate-fade-in">
+      <ShopWizard
+        organizationId={organizationId}
+        ownerId={organization?.ownerId}
       />
     </div>
+  );
+}
+
+export default function CreateShopPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-zinc-500">Carregando...</div>}>
+      <CreateShopContent />
+    </Suspense>
   );
 }

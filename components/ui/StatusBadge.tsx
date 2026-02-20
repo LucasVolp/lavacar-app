@@ -56,6 +56,30 @@ const statusConfig: Record<
     label: "Aguardando",
     icon: <ClockCircleOutlined />,
   },
+  ACTIVE: {
+    className:
+      "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
+    label: "Ativo",
+    icon: <CheckCircleOutlined />,
+  },
+  INACTIVE: {
+    className:
+      "bg-zinc-100 text-zinc-700 border-zinc-200 dark:bg-zinc-800/60 dark:text-zinc-300 dark:border-zinc-700",
+    label: "Inativo",
+    icon: <CloseCircleOutlined />,
+  },
+  BUDGET_ONLY: {
+    className:
+      "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
+    label: "Orçamento",
+    icon: <ExclamationCircleOutlined />,
+  },
+  HAS_VARIANTS: {
+    className:
+      "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-400 dark:border-cyan-800",
+    label: "Variações",
+    icon: <SyncOutlined />,
+  },
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {

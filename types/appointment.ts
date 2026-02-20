@@ -2,6 +2,7 @@ import { Shop } from './shop';
 import { Vehicle } from './vehicle';
 import { User } from './user';
 import { Checklist } from './checklist';
+import { VehicleSize } from '../../lavacar-api/prisma/generated/enums';
 
 export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
 
@@ -58,6 +59,8 @@ export interface AppointmentService {
     serviceName: string;
     servicePrice: string;
     duration: number;
+    isBudget?: boolean;
+    vehicleSize?: VehicleSize | null;
 
     createdAt: string;
 }

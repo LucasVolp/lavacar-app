@@ -9,6 +9,8 @@ interface ShopsGridProps {
   onCreateShop?: () => void;
   createHref?: string;
   searchTerm?: string;
+  canDelete?: boolean;
+  onDelete?: (shopId: string) => void;
 }
 
 export const ShopsGrid: React.FC<ShopsGridProps> = ({
@@ -16,6 +18,8 @@ export const ShopsGrid: React.FC<ShopsGridProps> = ({
   onCreateShop,
   createHref,
   searchTerm,
+  canDelete,
+  onDelete,
 }) => {
   return (
     <OrganizationShopsCardsGrid
@@ -23,6 +27,8 @@ export const ShopsGrid: React.FC<ShopsGridProps> = ({
       onCreateShop={onCreateShop}
       createHref={createHref}
       searchTerm={searchTerm}
+      canDelete={canDelete}
+      onDelete={onDelete}
     />
   );
 };

@@ -1,3 +1,15 @@
+import { VehicleSize } from '../../lavacar-api/prisma/generated/enums';
+
+export interface ServiceVariant {
+    id: string;
+    size: VehicleSize;
+    price: string;
+    duration: number;
+    serviceId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Services {
     id: string;
     name: string;
@@ -6,9 +18,12 @@ export interface Services {
     price: string;
     duration: number;
     isActive?: boolean;
+    isBudgetOnly?: boolean;
+    hasVariants?: boolean;
 
     shopId: string;
     groupId?: string;
+    variants?: ServiceVariant[];
     
     createdAt: string;
     updatedAt: string;
@@ -21,6 +36,8 @@ export interface CreateServicePayload {
     price: number;
     duration: number;
     isActive?: boolean;
+    isBudgetOnly?: boolean;
+    hasVariants?: boolean;
 
     shopId: string;
     groupId?: string;
@@ -33,6 +50,8 @@ export interface UpdateServicePayload {
     price?: number;
     duration?: number;
     isActive?: boolean;
+    isBudgetOnly?: boolean;
+    hasVariants?: boolean;
 
     groupId?: string;
 }

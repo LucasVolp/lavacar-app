@@ -61,37 +61,41 @@ export default function AppointmentsListPage() {
     return {};
   })();
 
-  const filters = {
-    ...dateFilters,
-    status: statusFilter || undefined,
-    // Calendar needs all appointments for the month; table uses server pagination
-    page: viewType === "calendar" ? 1 : page,
-    perPage: viewType === "calendar" ? 500 : perPage,
-  };
-  const statsFilters = {
+  const queryFilters = {
     ...dateFilters,
     status: statusFilter || undefined,
     page: 1,
     perPage: 5000,
   };
 
-  const { data: appointmentsData, isLoading, refetch } = useShopAppointments(shopId, filters, !!shopId);
-  const { data: statsData, refetch: refetchStats } = useShopAppointments(shopId, statsFilters, !!shopId);
+  const { data: appointmentsData, isLoading, refetch } = useShopAppointments(shopId, queryFilters, !!shopId);
+  const allAppointments = appointmentsData?.data ?? [];
+  const totalAppointments = appointmentsData?.meta?.total ?? allAppointments.length;
 
-  const appointments = appointmentsData?.data ?? [];
-  const statsAppointments = statsData?.data ?? [];
-  const meta = appointmentsData?.meta;
-  const statsMeta = statsData?.meta;
+  const tableStart = (page - 1) * perPage;
+  const tableEnd = tableStart + perPage;
+  const appointments =
+    viewType === "table" ? allAppointments.slice(tableStart, tableEnd) : allAppointments;
+
+  const meta =
+    viewType === "table"
+      ? {
+          total: totalAppointments,
+          page,
+          perPage,
+          totalPages: Math.max(1, Math.ceil(totalAppointments / perPage)),
+        }
+      : undefined;
 
   const stats = {
-    total: statsMeta?.total ?? 0,
-    todayTotal: statsAppointments.filter((a) => dayjs(a.scheduledAt).isSame(today, "day")).length,
-    pending: statsAppointments.filter((a) => a.status === "PENDING").length,
-    confirmed: statsAppointments.filter((a) => a.status === "CONFIRMED" || a.status === "WAITING").length,
-    inProgress: statsAppointments.filter((a) => a.status === "IN_PROGRESS").length,
-    completed: statsAppointments.filter((a) => a.status === "COMPLETED").length,
-    canceled: statsAppointments.filter((a) => a.status === "CANCELED" || a.status === "NO_SHOW").length,
-    revenue: statsAppointments
+    total: totalAppointments,
+    todayTotal: allAppointments.filter((a) => dayjs(a.scheduledAt).isSame(today, "day")).length,
+    pending: allAppointments.filter((a) => a.status === "PENDING").length,
+    confirmed: allAppointments.filter((a) => a.status === "CONFIRMED" || a.status === "WAITING").length,
+    inProgress: allAppointments.filter((a) => a.status === "IN_PROGRESS").length,
+    completed: allAppointments.filter((a) => a.status === "COMPLETED").length,
+    canceled: allAppointments.filter((a) => a.status === "CANCELED" || a.status === "NO_SHOW").length,
+    revenue: allAppointments
       .filter((a) => a.status === "COMPLETED")
       .reduce((acc, a) => acc + parseFloat(a.totalPrice), 0),
   };
@@ -186,7 +190,6 @@ export default function AppointmentsListPage() {
         onViewTypeChange={setViewType}
         onRefresh={() => {
           refetch();
-          refetchStats();
         }}
       />
 

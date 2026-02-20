@@ -1,121 +1,224 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, Card, Row, Col, InputNumber, Select, message } from "antd";
-import { SaveOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import Image from "next/image";
+import axios from "axios";
+import { Form, Input, Button, Card, Row, Col, InputNumber, Select, Steps, Upload, message } from "antd";
+import type { UploadProps } from "antd";
+import { SaveOutlined, ArrowLeftOutlined, UploadOutlined } from "@ant-design/icons";
 import { useCreateShop } from "@/hooks/shop/useCreateShop";
 import { CreateShopDto } from "@/types/shop";
+import { shopService } from "@/services/shop";
 import { formatDocument, generateSlug } from "@/utils/formatters";
 import { validateDocument } from "@/utils/validators";
 import { brasilApiService, BrasilApiStateResponse } from "@/services/brasilApi";
 import { timeApiService } from "@/services/timeApi";
-import { maskCep } from "@/lib/masks";
+import { maskCep, maskPhone } from "@/lib/masks";
 
 interface CreateShopFormProps {
   organizationId: string;
   ownerId?: string;
 }
 
-// Estilos Reutilizáveis (Clean/Linear Style)
-const SECTION_CONTAINER_CLASS = 
+type Availability = "idle" | "checking" | "available" | "taken" | "error";
+
+interface ExistingShopMinimal {
+  id: string;
+  organizationId?: string | null;
+  slug?: string | null;
+  phone?: string | null;
+  document?: string | null;
+}
+
+const SECTION_CONTAINER_CLASS =
   "bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-200";
 
-const INPUT_CLASS = 
+const INPUT_CLASS =
   "w-full bg-white dark:bg-zinc-950/50 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-indigo-500 hover:border-zinc-400 dark:hover:border-zinc-600 rounded-lg";
 
-// Helper para Labels consistentes
 const FormLabel = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-zinc-700 dark:text-zinc-300 font-medium tracking-tight text-sm">
-    {children}
-  </span>
+  <span className="text-zinc-700 dark:text-zinc-300 font-medium tracking-tight text-sm">{children}</span>
 );
 
-export const CreateShopForm: React.FC<CreateShopFormProps> = ({
-  organizationId,
-  ownerId,
-}) => {
+const STEP_FIELDS: Record<number, Array<keyof CreateShopDto>> = {
+  0: ["name", "phone"],
+  1: ["zipCode", "street", "number", "neighborhood", "city", "state"],
+  2: ["slotInterval", "timeZone"],
+};
+
+const normalizeDigits = (value?: string | null) => (value || "").replace(/\D/g, "");
+
+const availabilityUi = (status: Availability, busyText: string, okText: string, takenText: string) => {
+  if (status === "checking") return { validateStatus: "validating" as const, help: busyText };
+  if (status === "available") return { validateStatus: "success" as const, help: okText };
+  if (status === "taken") return { validateStatus: "error" as const, help: takenText };
+  if (status === "error") return { validateStatus: "warning" as const, help: "Não foi possível validar agora." };
+  return { validateStatus: undefined, help: undefined };
+};
+
+export const CreateShopForm: React.FC<CreateShopFormProps> = ({ organizationId, ownerId }) => {
   const router = useRouter();
   const [form] = Form.useForm<CreateShopDto>();
   const selectedState = Form.useWatch("state", form);
+  const watchedSlug = Form.useWatch("slug", form);
+  const watchedPhone = Form.useWatch("phone", form);
+  const watchedDocument = Form.useWatch("document", form);
+
   const createShop = useCreateShop();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [slugTouched, setSlugTouched] = useState(false);
+
   const [states, setStates] = useState<BrasilApiStateResponse[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [loadingByCep, setLoadingByCep] = useState(false);
   const [loadingByCnpj, setLoadingByCnpj] = useState(false);
   const [timezones, setTimezones] = useState<string[]>([]);
 
-  const handleFinish = async (values: CreateShopDto) => {
-    setIsSubmitting(true);
-    try {
-      const payload: CreateShopDto = {
-        ...values,
-        document: values.document?.replace(/\D/g, ''), // Remove formatting before sending
-        organizationId,
-        ownerId,
-      };
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState("");
+  const [bannerPreview, setBannerPreview] = useState("");
 
-      await createShop.mutateAsync(payload);
-      message.success("Estabelecimento criado com sucesso!");
-      router.push(`/organization/${organizationId}/shops`);
-    } catch (error: unknown) {
-      console.error(error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errMsg = (error as any)?.response?.data?.message || "Erro ao criar estabelecimento";
-      message.error(errMsg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const [existingShops, setExistingShops] = useState<ExistingShopMinimal[]>([]);
+  const [slugAvailability, setSlugAvailability] = useState<Availability>("idle");
+  const [phoneAvailability, setPhoneAvailability] = useState<Availability>("idle");
+  const [documentAvailability, setDocumentAvailability] = useState<Availability>("idle");
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    if (!slugTouched) {
-        const slug = generateSlug(name);
-        form.setFieldsValue({ slug });
-    }
-  };
-
-  const handleSlugChange = () => {
-    setSlugTouched(true);
-  };
-
-  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatDocument(e.target.value);
-    form.setFieldsValue({ document: formatted });
-  };
+  useEffect(() => {
+    return () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+      if (bannerPreview) URL.revokeObjectURL(bannerPreview);
+    };
+  }, [logoPreview, bannerPreview]);
 
   useEffect(() => {
     let active = true;
 
     const loadInitialData = async () => {
-      try {
-        const [ufList, timezoneList, ipTimezone] = await Promise.all([
-          brasilApiService.listStates(),
-          timeApiService.listTimezones(),
-          timeApiService.detectTimezoneByIp().catch(() => null),
-        ]);
+      const [ufListRes] = await Promise.allSettled([
+        brasilApiService.listStates(),
+      ]);
 
-        if (!active) return;
-        setStates(ufList);
-        setTimezones(timezoneList);
-        form.setFieldValue("timeZone", ipTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo");
+      if (!active) return;
+
+      if (ufListRes.status === "fulfilled") {
+        setStates(ufListRes.value);
+      } else {
+        setStates([]);
+      }
+
+      setTimezones(timeApiService.listTimezones());
+      form.setFieldValue(
+        "timeZone",
+        timeApiService.detectTimezone()
+      );
+    };
+
+    const loadExistingShops = async () => {
+      try {
+        const response = await shopService.findAll();
+        const list = Array.isArray(response)
+          ? response
+          : Array.isArray((response as { data?: ExistingShopMinimal[] })?.data)
+            ? (response as { data: ExistingShopMinimal[] }).data
+            : [];
+        if (active) setExistingShops(list);
       } catch {
-        if (!active) return;
-        const fallbackTimezones = typeof Intl.supportedValuesOf === "function"
-          ? Intl.supportedValuesOf("timeZone")
-          : ["America/Sao_Paulo"];
-        setTimezones(fallbackTimezones);
+        if (active) setExistingShops([]);
       }
     };
 
     loadInitialData();
+    loadExistingShops();
+
     return () => {
       active = false;
     };
   }, [form]);
+
+  useEffect(() => {
+    const slug = String(watchedSlug || "").trim().toLowerCase();
+    if (!slug || slug.length < 3) {
+      setSlugAvailability("idle");
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSlugAvailability("checking");
+      try {
+        await shopService.findBySlug(slug);
+        setSlugAvailability("taken");
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setSlugAvailability("available");
+          return;
+        }
+        setSlugAvailability("error");
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [watchedSlug]);
+
+  useEffect(() => {
+    const phoneDigits = normalizeDigits(String(watchedPhone || ""));
+    if (phoneDigits.length < 10) {
+      setPhoneAvailability("idle");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setPhoneAvailability("checking");
+      const exists = existingShops.some((shop) => normalizeDigits(shop.phone) === phoneDigits);
+      setPhoneAvailability(exists ? "taken" : "available");
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [watchedPhone, existingShops]);
+
+  useEffect(() => {
+    const docDigits = normalizeDigits(String(watchedDocument || ""));
+    if (docDigits.length !== 11 && docDigits.length !== 14) {
+      setDocumentAvailability("idle");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setDocumentAvailability("checking");
+      const existsOutsideOrg = existingShops.some(
+        (shop) =>
+          normalizeDigits(shop.document) === docDigits &&
+          shop.organizationId &&
+          shop.organizationId !== organizationId
+      );
+      const existsWithoutOrgInfo = existingShops.some(
+        (shop) => normalizeDigits(shop.document) === docDigits && !shop.organizationId
+      );
+      const exists = existsOutsideOrg || existsWithoutOrgInfo;
+      setDocumentAvailability(exists ? "taken" : "available");
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [watchedDocument, existingShops, organizationId]);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    if (!slugTouched) {
+      form.setFieldsValue({ slug: generateSlug(name) });
+    }
+  };
+
+  const handleSlugChange = () => setSlugTouched(true);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setFieldValue("phone", maskPhone(e.target.value));
+  };
+
+  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setFieldValue("document", formatDocument(e.target.value));
+  };
 
   const handleStateChange = async (state: string) => {
     form.setFieldValue("state", state);
@@ -129,12 +232,14 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
     }
   };
 
+  const handleZipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setFieldValue("zipCode", maskCep(e.target.value));
+  };
+
   const handleZipCodeBlur = async () => {
     const zipCode = String(form.getFieldValue("zipCode") || "");
-    const cepDigits = zipCode.replace(/\D/g, "");
-    if (cepDigits.length !== 8) {
-      return;
-    }
+    const cepDigits = normalizeDigits(zipCode);
+    if (cepDigits.length !== 8) return;
 
     setLoadingByCep(true);
     try {
@@ -165,10 +270,8 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
 
   const handleDocumentBlur = async () => {
     const document = String(form.getFieldValue("document") || "");
-    const digits = document.replace(/\D/g, "");
-    if (digits.length !== 14) {
-      return;
-    }
+    const digits = normalizeDigits(document);
+    if (digits.length !== 14) return;
 
     setLoadingByCnpj(true);
     try {
@@ -199,16 +302,153 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
     }
   };
 
-  const handleZipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setFieldValue("zipCode", maskCep(e.target.value));
+  const pickImageUpload = (type: "logo" | "banner"): UploadProps["customRequest"] => {
+    return async ({ file, onSuccess, onError }) => {
+      const image = file as File;
+
+      if (image.size > 12 * 1024 * 1024) {
+        message.error(`Imagem de ${type} excede 12MB.`);
+        onError?.(new Error("File too large"));
+        return;
+      }
+
+      const preview = URL.createObjectURL(image);
+      if (type === "logo") {
+        if (logoPreview) URL.revokeObjectURL(logoPreview);
+        setLogoFile(image);
+        setLogoPreview(preview);
+      } else {
+        if (bannerPreview) URL.revokeObjectURL(bannerPreview);
+        setBannerFile(image);
+        setBannerPreview(preview);
+      }
+
+      onSuccess?.("ok");
+    };
   };
 
+  const hasUniquenessBlocker = () => slugAvailability === "taken" || phoneAvailability === "taken" || documentAvailability === "taken";
+
+  const goToNextStep = async () => {
+    const fields = STEP_FIELDS[currentStep] || [];
+    if (fields.length) {
+      try {
+        await form.validateFields(fields);
+      } catch {
+        return;
+      }
+    }
+
+    if (currentStep === 0 && hasUniquenessBlocker()) {
+      message.error("Corrija os campos com duplicidade antes de avançar.");
+      return;
+    }
+
+    setCurrentStep((prev) => Math.min(prev + 1, 2));
+  };
+
+  const goToPreviousStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+
+  const handleCreateShop = async () => {
+    if (hasUniquenessBlocker()) {
+      message.error("Corrija os campos com duplicidade antes de criar.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const allRequiredFields = Array.from(new Set(Object.values(STEP_FIELDS).flat()));
+      await form.validateFields(allRequiredFields);
+      const values = form.getFieldsValue(true) as CreateShopDto;
+      const phoneDigits = normalizeDigits(values.phone);
+      const phoneNormalized =
+        phoneDigits.length >= 10 && phoneDigits.length <= 11 ? `+55${phoneDigits}` : values.phone;
+      const payload: CreateShopDto = {
+        ...values,
+        slug: String(values.slug || "").trim().toLowerCase(),
+        phone: phoneNormalized,
+        zipCode: normalizeDigits(values.zipCode),
+        state: String(values.state || "").trim().toUpperCase(),
+        document: values.document?.replace(/\D/g, ""),
+        organizationId,
+        ownerId,
+      };
+
+      const createdShop = await createShop.mutateAsync(payload);
+      const uploadErrors: string[] = [];
+
+      if (logoFile) {
+        try {
+          await shopService.uploadLogo(createdShop.id, logoFile);
+        } catch {
+          uploadErrors.push("logo");
+        }
+      }
+
+      if (bannerFile) {
+        try {
+          await shopService.uploadBanner(createdShop.id, bannerFile);
+        } catch {
+          uploadErrors.push("banner");
+        }
+      }
+
+      if (uploadErrors.length) {
+        message.warning(`Loja criada, mas houve erro no upload de: ${uploadErrors.join(", ")}.`);
+      } else {
+        message.success("Estabelecimento criado com sucesso!");
+      }
+
+      router.push(`/organization/${organizationId}/shops`);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const dataMessage = error.response?.data?.message;
+        if (Array.isArray(dataMessage) && dataMessage.length) {
+          message.error("Não foi possível salvar. Revise os campos obrigatórios e tente novamente.");
+        } else {
+          message.error(String(dataMessage || "Erro ao criar estabelecimento"));
+        }
+      } else {
+        message.error("Erro ao criar estabelecimento");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const stepItems = useMemo(
+    () => [
+      { title: "Dados Básicos" },
+      { title: "Endereço" },
+      { title: "Agendamento" },
+    ],
+    []
+  );
+
+  const slugUi = availabilityUi(
+    slugAvailability,
+    "Validando slug...",
+    "Slug disponível",
+    "Slug já está em uso"
+  );
+  const phoneUi = availabilityUi(
+    phoneAvailability,
+    "Validando telefone...",
+    "Telefone disponível",
+    "Telefone já cadastrado"
+  );
+  const docUi = availabilityUi(
+    documentAvailability,
+    "Validando documento...",
+    "Documento disponível",
+    "Documento já cadastrado"
+  );
 
   return (
     <Form
       form={form}
       layout="vertical"
-      onFinish={handleFinish}
       initialValues={{
         slotInterval: 30,
         bufferBetweenSlots: 0,
@@ -216,351 +456,336 @@ export const CreateShopForm: React.FC<CreateShopFormProps> = ({
         minAdvanceMinutes: 60,
         timeZone: "America/Sao_Paulo",
       }}
-      className="max-w-5xl mx-auto pb-24 space-y-8"
-      requiredMark={false}
+      className="max-w-5xl mx-auto pb-24 space-y-4"
+      requiredMark
     >
-      {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div className="space-y-1">
-           <Button 
-             type="text" 
-             icon={<ArrowLeftOutlined />} 
-             className="pl-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 flex items-center mb-1"
-             onClick={() => router.back()}
-           >
-             Voltar para listagem
-           </Button>
-           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-             Novo Estabelecimento
-           </h1>
-           <p className="text-zinc-500 dark:text-zinc-400 text-base max-w-2xl">
-             Cadastre uma nova unidade da sua organização. As configurações iniciais podem ser editadas posteriormente.
-           </p>
-        </div>
-        
-        <div className="flex items-center gap-3 pt-6 md:pt-0">
-            <Button 
-              size="large" 
-              type="text"
-              onClick={() => router.back()} 
-              className="text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
-              size="large"
-              loading={isSubmitting}
-              icon={<SaveOutlined />}
-              className="bg-zinc-900 dark:bg-indigo-600 hover:!bg-zinc-800 dark:hover:!bg-indigo-500 shadow-xl shadow-black/10 dark:shadow-indigo-900/20 border-0"
-            >
-              Criar Loja
-            </Button>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            className="pl-0 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 flex items-center mb-1"
+            onClick={() => router.back()}
+          >
+            Voltar para listagem
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Novo Estabelecimento</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 text-base max-w-2xl">
+            Cadastro guiado por etapas para manter tudo organizado.
+          </p>
         </div>
       </div>
 
-      {/* --- DADOS GERAIS --- */}
       <div className={SECTION_CONTAINER_CLASS}>
-        <Card 
-          bordered={false} 
-          title={<span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Dados Gerais</span>}
-          className="bg-transparent"
-          styles={{ 
-            header: { padding: '24px 32px 0 32px', borderBottom: 'none' },
-            body: { padding: '32px' } 
-          }}
-        >
-          <Row gutter={[24, 24]}>
-            <Col span={24} md={12}>
-              <Form.Item
-                name="name"
-                label={<FormLabel>Nome do Estabelecimento</FormLabel>}
-                rules={[{ required: true, message: "O nome é obrigatório" }]}
-              >
-                <Input 
-                  size="large" 
-                  placeholder="Ex: Lava Jato Centro" 
-                  onChange={handleNameChange} 
-                  className={INPUT_CLASS} 
-                />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={12}>
-              <Form.Item
-                name="slug"
-                label={<FormLabel>Slug (URL)</FormLabel>}
-                tooltip="Este campo define o endereço web do seu shop"
-                extra={<span className="text-xs text-zinc-500">Identificador único (ex: lavacar.com.br/loja/<strong>seu-slug</strong>)</span>}
-              >
-                <Input 
-                  size="large" 
-                  placeholder="ex: lava-jato-centro" 
-                  className={INPUT_CLASS}
-                  onChange={handleSlugChange}
-                />
-              </Form.Item>
-            </Col>
-
-             <Col span={24} md={8}>
-              <Form.Item
-                name="phone"
-                label={<FormLabel>Telefone / WhatsApp</FormLabel>}
-                rules={[{ required: true, message: "O telefone é obrigatório" }]}
-              >
-                <Input size="large" placeholder="(00) 00000-0000" className={INPUT_CLASS} />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={8}>
-              <Form.Item
-                name="email"
-                label={<FormLabel>Email de Contato</FormLabel>}
-                rules={[{ type: "email", message: "Email inválido" }]}
-              >
-                <Input size="large" placeholder="contato@loja.com" className={INPUT_CLASS} />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={8}>
-              <Form.Item
-                name="document"
-                label={<FormLabel>CNPJ / CPF</FormLabel>}
-                rules={[
-                  { 
-                    validator: (_, value) => {
-                      if (!value) return Promise.resolve();
-                      if (validateDocument(value)) return Promise.resolve();
-                      return Promise.reject(new Error("CPF ou CNPJ inválido"));
-                    }
-                  }
-                ]}
-              >
-                <Input 
-                  size="large" 
-                  placeholder="00.000.000/0000-00" 
-                  className={INPUT_CLASS} 
-                  maxLength={18}
-                  onChange={handleDocumentChange}
-                  onBlur={handleDocumentBlur}
-                />
-              </Form.Item>
-              {loadingByCnpj && (
-                <p className="text-xs text-zinc-500 -mt-4">Buscando dados do CNPJ...</p>
-              )}
-            </Col>
-
-            <Col span={24}>
-              <Form.Item
-                name="description"
-                label={<FormLabel>Descrição (Opcional)</FormLabel>}
-              >
-                <Input.TextArea 
-                  size="large" 
-                  rows={4} 
-                  placeholder="Descreva os serviços, diferenciais e horário de funcionamento..." 
-                  className={INPUT_CLASS} 
-                />
-              </Form.Item>
-            </Col>
-          </Row>
+        <Card bordered={false} className="bg-transparent" styles={{ body: { padding: 24 } }}>
+          <Steps current={currentStep} items={stepItems} />
         </Card>
       </div>
 
-      {/* --- ENDEREÇO --- */}
-      <div className={SECTION_CONTAINER_CLASS}>
-        <Card 
-          bordered={false} 
-          title={<span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Endereço</span>}
-          className="bg-transparent"
-          styles={{ 
-            header: { padding: '24px 32px 0 32px', borderBottom: 'none' },
-            body: { padding: '32px' } 
-          }}
-        >
-          <Row gutter={[24, 24]}>
-            <Col span={24} md={6}>
-              <Form.Item
-                name="zipCode"
-                label={<FormLabel>CEP</FormLabel>}
-                rules={[{ required: true, message: "CEP é obrigatório" }]}
-              >
-                <Input
-                  size="large"
-                  placeholder="00000-000"
-                  maxLength={9}
-                  className={INPUT_CLASS}
-                  onChange={handleZipCodeChange}
-                  onBlur={handleZipCodeBlur}
-                />
-              </Form.Item>
-              {loadingByCep && (
-                <p className="text-xs text-zinc-500 -mt-4">Buscando CEP...</p>
-              )}
-            </Col>
-            <Col span={24} md={14}>
-              <Form.Item
-                name="street"
-                label={<FormLabel>Logradouro</FormLabel>}
-                rules={[{ required: true, message: "Rua/Av é obrigatório" }]}
-              >
-                <Input size="large" placeholder="Rua das Flores" className={INPUT_CLASS} />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={4}>
-              <Form.Item
-                name="number"
-                label={<FormLabel>Número</FormLabel>}
-                rules={[{ required: true, message: "Número é obrigatório" }]}
-              >
-                <Input size="large" placeholder="123" className={INPUT_CLASS} />
-              </Form.Item>
-            </Col>
-          </Row>
+      {currentStep === 0 && (
+        <div className={SECTION_CONTAINER_CLASS}>
+          <Card
+            bordered={false}
+            title={<span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Dados Gerais</span>}
+            className="bg-transparent"
+            styles={{ header: { padding: "24px 32px 0", borderBottom: "none" }, body: { padding: 32 } }}
+          >
+            <div className="space-y-4">
+              <Row gutter={[24, 24]}>
+                <Col span={24} md={12}>
+                  <Form.Item name="name" label={<FormLabel>Nome do Estabelecimento</FormLabel>} rules={[{ required: true, message: "O nome é obrigatório" }]}>
+                    <Input size="large" placeholder="Ex: Lava Jato Centro" onChange={handleNameChange} className={INPUT_CLASS} />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={12}>
+                  <Form.Item
+                    name="slug"
+                    label={<FormLabel>Slug (URL)</FormLabel>}
+                    tooltip="Este campo define o endereço web do seu shop"
+                    extra={<span className="text-xs text-zinc-500">Identificador único para URL pública</span>}
+                    validateStatus={slugUi.validateStatus}
+                    help={slugUi.help}
+                    rules={[{ required: true, message: "O slug é obrigatório" }]}
+                  >
+                    <Input size="large" placeholder="ex: lava-jato-centro" className={INPUT_CLASS} onChange={handleSlugChange} />
+                  </Form.Item>
+                </Col>
 
-          <Row gutter={[24, 24]}>
-            <Col span={24} md={10}>
-              <Form.Item
-                name="neighborhood"
-                label={<FormLabel>Bairro</FormLabel>}
-                rules={[{ required: true, message: "Bairro é obrigatório" }]}
-              >
-                <Input size="large" placeholder="Bairro Centro" className={INPUT_CLASS} />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={14}>
-              <Form.Item
-                name="complement"
-                label={<FormLabel>Complemento</FormLabel>}
-              >
-                <Input size="large" placeholder="Apto 101, Fundos, Próximo ao mercado..." className={INPUT_CLASS} />
-              </Form.Item>
-            </Col>
-        </Row>
-        <Row gutter={[24, 24]}>
-            <Col span={24} md={18}>
-              <Form.Item
-                name="city"
-                label={<FormLabel>Cidade</FormLabel>}
-                rules={[{ required: true, message: "Cidade é obrigatória" }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Selecione a cidade"
-                  optionFilterProp="label"
-                  disabled={!selectedState}
-                  options={cities.map((city) => ({ value: city, label: city }))}
-                  onChange={(city) => form.setFieldValue("city", city)}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={24} md={6}>
-              <Form.Item
-                name="state"
-                label={<FormLabel>UF</FormLabel>}
-                rules={[{ required: true, message: "UF obrigatória" }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="UF"
-                  optionFilterProp="label"
-                  options={states.map((state) => ({
-                    value: state.sigla,
-                    label: `${state.sigla} - ${state.nome}`,
-                  }))}
-                  onChange={handleStateChange}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Card>
-      </div>
+                <Col span={24} md={8}>
+                  <Form.Item
+                    name="phone"
+                    label={<FormLabel>Telefone / WhatsApp</FormLabel>}
+                    rules={[{ required: true, message: "O telefone é obrigatório" }]}
+                    validateStatus={phoneUi.validateStatus}
+                    help={phoneUi.help}
+                  >
+                    <Input size="large" placeholder="(00) 00000-0000" className={INPUT_CLASS} onChange={handlePhoneChange} maxLength={15} />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={8}>
+                  <Form.Item name="email" label={<FormLabel>Email de Contato</FormLabel>} rules={[{ type: "email", message: "Email inválido" }]}>
+                    <Input size="large" placeholder="contato@loja.com" className={INPUT_CLASS} />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={8}>
+                  <Form.Item
+                    name="document"
+                    label={<FormLabel>CNPJ / CPF</FormLabel>}
+                    validateStatus={docUi.validateStatus}
+                    help={docUi.help}
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve();
+                          if (validateDocument(value)) return Promise.resolve();
+                          return Promise.reject(new Error("CPF ou CNPJ inválido"));
+                        },
+                      },
+                    ]}
+                  >
+                    <Input
+                      size="large"
+                      placeholder="00.000.000/0000-00"
+                      className={INPUT_CLASS}
+                      maxLength={18}
+                      onChange={handleDocumentChange}
+                      onBlur={handleDocumentBlur}
+                    />
+                  </Form.Item>
+                  {loadingByCnpj && <p className="text-xs text-zinc-500 -mt-4">Buscando dados do CNPJ...</p>}
+                </Col>
 
-       {/* --- CONFIGURAÇÕES DE AGENDAMENTO --- */}
-       <div className={SECTION_CONTAINER_CLASS}>
-        <Card 
-          bordered={false} 
-          title={<span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Configurações de Agendamento</span>}
-          className="bg-transparent"
-          styles={{ 
-            header: { padding: '24px 32px 0 32px', borderBottom: 'none' },
-            body: { padding: '32px' } 
-          }}
-        >
-         <Row gutter={[24, 24]}>
-           <Col span={24} md={6}>
-             <Form.Item
-               name="slotInterval"
-               label={<FormLabel>Intervalo de Agenda (min)</FormLabel>}
-               rules={[{ required: true }]}
-               extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Tempo padrão de cada horário</span>}
-             >
-               <InputNumber size="large" min={15} max={120} step={15} className="w-full" />
-             </Form.Item>
-           </Col>
-           <Col span={24} md={6}>
-             <Form.Item
-               name="bufferBetweenSlots"
-               label={<FormLabel>Intervalo entre serviços (min)</FormLabel>}
-               extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Tempo de folga/trânsito entre agendamentos</span>}
-             >
-               <InputNumber size="large" min={0} max={60} step={5} className="w-full" />
-             </Form.Item>
-           </Col>
-           <Col span={24} md={6}>
-             <Form.Item
-               name="minAdvanceMinutes"
-               label={<FormLabel>Antecedência Mínima (min)</FormLabel>}
-               extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Bloqueia agendamentos muito em cima da hora</span>}
-             >
-               <InputNumber size="large" min={0} step={15} className="w-full" />
-             </Form.Item>
-           </Col>
-           <Col span={24} md={6}>
-             <Form.Item
-               name="maxAdvanceDays"
-               label={<FormLabel>Agenda Aberta (dias)</FormLabel>}
-               extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Quantos dias à frente o cliente vê</span>}
-             >
-               <InputNumber size="large" min={1} max={365} className="w-full" />
-             </Form.Item>
-           </Col>
-           <Col span={24}>
-             <Form.Item
-               name="timeZone"
-               label={<FormLabel>Timezone da Loja</FormLabel>}
-               rules={[{ required: true, message: "Selecione o timezone" }]}
-               extra={<span className="text-xs text-zinc-500 dark:text-zinc-500 block mt-1">Usado para agenda, bloqueios e cálculos de disponibilidade</span>}
-             >
-               <Select
-                 showSearch
-                 placeholder="Selecione o timezone"
-                 optionFilterProp="label"
-                 options={timezones.map((tz) => ({ value: tz, label: tz }))}
-               />
-             </Form.Item>
-           </Col>
-         </Row>
-      </Card>
-      </div>
+                <Col span={24}>
+                  <Form.Item name="description" label={<FormLabel>Descrição (Opcional)</FormLabel>}>
+                    <Input.TextArea
+                      size="large"
+                      rows={4}
+                      placeholder="Descreva os serviços, diferenciais e horário de funcionamento..."
+                      className={INPUT_CLASS}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-      {/* --- FOOTER ACTIONS --- */}
-      <div className="flex justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-        <Button 
-          size="large" 
-          onClick={() => router.back()}
-          className="text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-        >
-          Cancelar
-        </Button>
-        <Button 
-          type="primary" 
-          htmlType="submit" 
-          size="large"
-          loading={isSubmitting}
-          icon={<SaveOutlined />}
-          className="bg-zinc-900 dark:bg-indigo-600 hover:!bg-zinc-800 dark:hover:!bg-indigo-500 shadow-xl shadow-black/10 dark:shadow-indigo-900/20 border-0"
-        >
-          Criar Loja
-        </Button>
+              <div className="space-y-4 pt-2">
+                <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Imagens da Loja</h3>
+                <Row gutter={[16, 16]}>
+                  <Col span={24} md={10}>
+                    <div className="space-y-4 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+                      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Logo</p>
+                      <Upload.Dragger
+                        accept="image/*"
+                        showUploadList={false}
+                        customRequest={pickImageUpload("logo")}
+                        className="!bg-transparent !border-zinc-300 dark:!border-zinc-700 hover:!border-indigo-500 !rounded-xl"
+                      >
+                        <div className="space-y-4 py-3">
+                          <Button icon={<UploadOutlined />}>Selecionar Logo</Button>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">PNG, JPG ou WEBP até 12MB</p>
+                        </div>
+                      </Upload.Dragger>
+                      {logoPreview ? (
+                        <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-2 bg-zinc-50 dark:bg-zinc-900">
+                          <Image
+                            src={logoPreview}
+                            alt="Preview logo"
+                            width={128}
+                            height={128}
+                            className="h-32 w-32 rounded-lg object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-32 w-32 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-xs text-zinc-500">
+                          Sem logo
+                        </div>
+                      )}
+                    </div>
+                  </Col>
+                  <Col span={24} md={14}>
+                    <div className="space-y-4 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4">
+                      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Banner</p>
+                      <Upload.Dragger
+                        accept="image/*"
+                        showUploadList={false}
+                        customRequest={pickImageUpload("banner")}
+                        className="!bg-transparent !border-zinc-300 dark:!border-zinc-700 hover:!border-indigo-500 !rounded-xl"
+                      >
+                        <div className="space-y-4 py-3">
+                          <Button icon={<UploadOutlined />}>Selecionar Banner</Button>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">Formato horizontal recomendado</p>
+                        </div>
+                      </Upload.Dragger>
+                      {bannerPreview ? (
+                        <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-2 bg-zinc-50 dark:bg-zinc-900">
+                          <Image
+                            src={bannerPreview}
+                            alt="Preview banner"
+                            width={560}
+                            height={112}
+                            className="h-28 w-full rounded-lg object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-28 w-full rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-xs text-zinc-500">
+                          Sem banner
+                        </div>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {currentStep === 1 && (
+        <div className={SECTION_CONTAINER_CLASS}>
+          <Card
+            bordered={false}
+            title={<span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Endereço</span>}
+            className="bg-transparent"
+            styles={{ header: { padding: "24px 32px 0", borderBottom: "none" }, body: { padding: 32 } }}
+          >
+            <div className="space-y-4">
+              <Row gutter={[24, 24]}>
+                <Col span={24} md={6}>
+                  <Form.Item name="zipCode" label={<FormLabel>CEP</FormLabel>} rules={[{ required: true, message: "CEP é obrigatório" }]}>
+                    <Input size="large" placeholder="00000-000" maxLength={9} className={INPUT_CLASS} onChange={handleZipCodeChange} onBlur={handleZipCodeBlur} />
+                  </Form.Item>
+                  {loadingByCep && <p className="text-xs text-zinc-500 -mt-4">Buscando CEP...</p>}
+                </Col>
+                <Col span={24} md={14}>
+                  <Form.Item name="street" label={<FormLabel>Logradouro</FormLabel>} rules={[{ required: true, message: "Rua/Av é obrigatório" }]}>
+                    <Input size="large" placeholder="Rua das Flores" className={INPUT_CLASS} />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={4}>
+                  <Form.Item name="number" label={<FormLabel>Número</FormLabel>} rules={[{ required: true, message: "Número é obrigatório" }]}>
+                    <Input size="large" placeholder="123" className={INPUT_CLASS} />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={[24, 24]}>
+                <Col span={24} md={10}>
+                  <Form.Item name="neighborhood" label={<FormLabel>Bairro</FormLabel>} rules={[{ required: true, message: "Bairro é obrigatório" }]}>
+                    <Input size="large" placeholder="Bairro Centro" className={INPUT_CLASS} />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={14}>
+                  <Form.Item name="complement" label={<FormLabel>Complemento</FormLabel>}>
+                    <Input size="large" placeholder="Apto 101, Fundos, Próximo ao mercado..." className={INPUT_CLASS} />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={[24, 24]}>
+                <Col span={24} md={18}>
+                  <Form.Item name="city" label={<FormLabel>Cidade</FormLabel>} rules={[{ required: true, message: "Cidade é obrigatória" }]}>
+                    <Select
+                      showSearch
+                      placeholder="Selecione a cidade"
+                      optionFilterProp="label"
+                      disabled={!selectedState}
+                      options={cities.map((city) => ({ value: city, label: city }))}
+                      onChange={(city) => form.setFieldValue("city", city)}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={6}>
+                  <Form.Item name="state" label={<FormLabel>UF</FormLabel>} rules={[{ required: true, message: "UF obrigatória" }]}>
+                    <Select
+                      showSearch
+                      placeholder="UF"
+                      optionFilterProp="label"
+                      options={states.map((state) => ({ value: state.sigla, label: `${state.sigla} - ${state.nome}` }))}
+                      onChange={handleStateChange}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {currentStep === 2 && (
+        <div className={SECTION_CONTAINER_CLASS}>
+          <Card
+            bordered={false}
+            title={<span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Configurações de Agendamento</span>}
+            className="bg-transparent"
+            styles={{ header: { padding: "24px 32px 0", borderBottom: "none" }, body: { padding: 32 } }}
+          >
+            <div className="space-y-4">
+              <Row gutter={[24, 24]}>
+                <Col span={24} md={6}>
+                  <Form.Item name="slotInterval" label={<FormLabel>Intervalo de Agenda (min)</FormLabel>} rules={[{ required: true }]}>
+                    <InputNumber size="large" min={15} max={120} step={15} className="w-full" />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={6}>
+                  <Form.Item name="bufferBetweenSlots" label={<FormLabel>Intervalo entre serviços (min)</FormLabel>}>
+                    <InputNumber size="large" min={0} max={60} step={5} className="w-full" />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={6}>
+                  <Form.Item name="minAdvanceMinutes" label={<FormLabel>Antecedência Mínima (min)</FormLabel>}>
+                    <InputNumber size="large" min={0} step={15} className="w-full" />
+                  </Form.Item>
+                </Col>
+                <Col span={24} md={6}>
+                  <Form.Item name="maxAdvanceDays" label={<FormLabel>Agenda Aberta (dias)</FormLabel>}>
+                    <InputNumber size="large" min={1} max={365} className="w-full" />
+                  </Form.Item>
+                </Col>
+                <Col span={24}>
+                  <Form.Item name="timeZone" label={<FormLabel>Timezone da Loja</FormLabel>} rules={[{ required: true, message: "Selecione o timezone" }]}>
+                    <Select
+                      showSearch
+                      placeholder="Selecione o timezone"
+                      optionFilterProp="label"
+                      options={timezones.map((tz) => ({ value: tz, label: tz }))}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      <div className="flex justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="flex gap-2">
+          <Button size="large" onClick={() => router.back()} className="text-zinc-600 dark:text-zinc-300">
+            Cancelar
+          </Button>
+          {currentStep > 0 && (
+            <Button size="large" onClick={goToPreviousStep}>
+              Voltar
+            </Button>
+          )}
+        </div>
+
+        {currentStep < 2 ? (
+          <Button type="primary" size="large" onClick={goToNextStep}>
+            Próximo
+          </Button>
+        ) : (
+          <Button
+            type="primary"
+            size="large"
+            loading={isSubmitting}
+            icon={<SaveOutlined />}
+            className="bg-zinc-900 dark:bg-indigo-600 hover:!bg-zinc-800 dark:hover:!bg-indigo-500 border-0"
+            onClick={handleCreateShop}
+          >
+            Criar Loja
+          </Button>
+        )}
       </div>
     </Form>
   );

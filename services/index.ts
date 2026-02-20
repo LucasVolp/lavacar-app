@@ -6,6 +6,7 @@ export type { CreateAppointmentRequest } from "./appointment";
 
 export { shopService } from "./shop";
 export { serviceService } from "./service";
+export { serviceVariantService } from "./serviceVariant";
 export { vehicleService } from "./vehicle";
 export { scheduleService } from "./schedule";
 export { usersService } from "./users";

@@ -51,32 +51,8 @@ export default function SchedulesPage() {
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    let active = true;
-
-    const loadTimezones = async () => {
-      try {
-        const [zones, ipZone] = await Promise.all([
-          timeApiService.listTimezones(),
-          timeApiService.detectTimezoneByIp().catch(() => null),
-        ]);
-
-        if (!active) return;
-        setTimezones(zones);
-        setSelectedTimezone(shop?.timeZone || ipZone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo");
-      } catch {
-        const fallbackZones = typeof Intl.supportedValuesOf === "function"
-          ? Intl.supportedValuesOf("timeZone")
-          : ["America/Sao_Paulo"];
-        if (!active) return;
-        setTimezones(fallbackZones);
-        setSelectedTimezone(shop?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Sao_Paulo");
-      }
-    };
-
-    loadTimezones();
-    return () => {
-      active = false;
-    };
+    setTimezones(timeApiService.listTimezones());
+    setSelectedTimezone(shop?.timeZone || timeApiService.detectTimezone());
   }, [shop?.timeZone]);
 
   // Carregar dados existentes

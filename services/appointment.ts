@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { Appointment, AppointmentStatus } from '../types/appointment';
 import { PaginatedResult } from '@/types/pagination';
+import { VehicleSize } from '../../lavacar-api/prisma/generated/enums';
 
 const base = '/appointments';
 
@@ -19,6 +20,8 @@ export interface CreateAppointmentRequest {
     serviceName: string;
     servicePrice: number;
     duration: number;
+    isBudget?: boolean;
+    vehicleSize?: VehicleSize;
   }[];
 }
 

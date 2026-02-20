@@ -99,21 +99,7 @@ export default function BookingPage({ params }: BookingPageProps) {
   }, [slug, setShopBySlug]);
 
   useEffect(() => {
-    let active = true;
-
-    timeApiService.detectTimezoneByIp()
-      .then((tz) => {
-        if (!active) return;
-        setUserTimezone(tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "");
-      })
-      .catch(() => {
-        if (!active) return;
-        setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "");
-      });
-
-    return () => {
-      active = false;
-    };
+    setUserTimezone(timeApiService.detectTimezone());
   }, []);
 
   // Restore draft from sessionStorage
