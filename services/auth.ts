@@ -15,6 +15,7 @@ export interface AuthUser {
   updatedAt: string;
   hasPassword?: boolean;
   provider?: string;
+  isGuest?: boolean;
 }
 
 export interface LoginCredentials {
@@ -31,14 +32,53 @@ export interface RegisterPayload {
   cpf?: string;
 }
 
+export interface GuestLoginPayload {
+  phone: string;
+  firstName?: string;
+  lastName?: string;
+  vehicle?: {
+    type: string;
+    brand: string;
+    model: string;
+    size: string;
+    plate?: string;
+    color?: string;
+    year?: number;
+  };
+}
+
 export interface AuthResponse {
-  accessToken: string;
+  access_token?: string;
+  accessToken?: string;
   user: AuthUser;
 }
 
 const base = "/auth";
 
 export const authService = {
+  /**
+   * Login/Create Guest User
+   * POST /auth/guest
+   */
+  guestLogin: async (payload: GuestLoginPayload): Promise<AuthResponse> => {
+    try {
+      const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
+        `${base}/guest`,
+        payload
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro no login de guest (${status || "desconhecido"}):`, message);
+      } else {
+        console.error("Erro desconhecido no login de guest:", error);
+      }
+      throw error;
+    }
+  },
+
   /**
    * Login do usuário
    * POST /auth/login

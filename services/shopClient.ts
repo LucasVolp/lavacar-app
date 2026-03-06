@@ -40,6 +40,21 @@ export const shopClientService = {
     return response.data;
   },
 
+  findByShopAndUser: async (shopId: string, userId: string): Promise<ShopClient | null> => {
+    try {
+      const response: AxiosResponse<ShopClient> = await axiosInstance.get(
+        `${base}/shop-and-user`,
+        { params: { shopId, userId } }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
   countByShopId: async (shopId: string): Promise<number> => {
     const response: AxiosResponse<number> = await axiosInstance.get(`${base}/shop/${shopId}/count`);
     return response.data;

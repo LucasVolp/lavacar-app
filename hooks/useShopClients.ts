@@ -16,6 +16,7 @@ export const shopClientKeys = {
   count: (shopId: string) => [...shopClientKeys.all, "count", { shopId }] as const,
   details: () => [...shopClientKeys.all, "detail"] as const,
   detail: (id: string) => [...shopClientKeys.details(), id] as const,
+  check: (shopId: string, userId: string) => [...shopClientKeys.all, "check", shopId, userId] as const,
 };
 
 export function useShopClients(filters?: ShopClientFilters, enabled = true) {
@@ -51,6 +52,15 @@ export function useShopClientsByShop(
     },
     enabled: enabled && !!shopId,
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useCheckShopClient(shopId: string | null, userId: string | null, enabled = true) {
+  return useQuery({
+    queryKey: shopClientKeys.check(shopId || "", userId || ""),
+    queryFn: () => shopClientService.findByShopAndUser(shopId!, userId!),
+    enabled: enabled && !!shopId && !!userId,
+    retry: false, // Don't retry if not found
   });
 }
 

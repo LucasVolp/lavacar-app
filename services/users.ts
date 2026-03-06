@@ -71,6 +71,25 @@ export const usersService = {
     }
   },
 
+  findPublicUser: async (phone: string) => {
+    try {
+      const response = await axiosInstance.get(`${base}/public/phone/${phone}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          return null; // Return null if not found
+        }
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`Erro ao buscar usuário público por telefone (${status || 'desconhecido'}):`, message);
+      } else {
+        console.error('Erro desconhecido ao buscar usuário público por telefone:', error);
+      }
+      throw error;
+    }
+  },
+
   update: async (id: string, payload: Partial<User>) => {
     try {
       const response: AxiosResponse<User> = await axiosInstance.patch(`${base}/${id}`, payload);

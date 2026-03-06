@@ -10,7 +10,7 @@ import { Vehicle } from "@/types/vehicle";
 const { Option } = Select;
 
 type VehicleFormValues = {
-  plate: string;
+  plate?: string;
   brand: string;
   model: string;
   year?: number;
@@ -26,7 +26,7 @@ interface AddVehicleModalProps {
   vehicle?: Vehicle | null;
 }
 
-const normalizePlate = (plate: string) => plate.toUpperCase().replace(/[^A-Z0-9]/g, "");
+const normalizePlate = (plate?: string) => (plate || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
 export function AddVehicleModal({ open, onClose, onSuccess, vehicle }: AddVehicleModalProps) {
   const [form] = Form.useForm<VehicleFormValues>();
@@ -114,9 +114,10 @@ export function AddVehicleModal({ open, onClose, onSuccess, vehicle }: AddVehicl
       return;
     }
 
+    const normalizedPlate = normalizePlate(values.plate);
     const payload = {
       ...values,
-      plate: normalizePlate(values.plate),
+      plate: normalizedPlate || undefined,
       color: values.color?.trim() || undefined,
     };
 
@@ -161,9 +162,8 @@ export function AddVehicleModal({ open, onClose, onSuccess, vehicle }: AddVehicl
       >
         <Form.Item
           name="plate"
-          label="Placa"
+          label="Placa (Opcional)"
           rules={[
-            { required: true, message: "Informe a placa do veículo" },
             {
               pattern: /^[A-Za-z]{3}[0-9][A-Za-z0-9][0-9]{2}$/,
               message: "Placa inválida (ex: ABC1D23 ou ABC1234)",

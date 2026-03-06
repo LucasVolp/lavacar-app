@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersService } from "@/services/users";
-import { User, UpdateUserPayload } from "@/types/user";
+import { User, UpdateUserPayload, ShadowUser } from "@/types/user";
 
 // Query Keys
 export const userKeys = {
@@ -9,6 +9,7 @@ export const userKeys = {
   details: () => [...userKeys.all, "detail"] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
   byEmail: (email: string) => [...userKeys.all, "email", email] as const,
+  publicByPhone: (phone: string) => [...userKeys.all, "public", "phone", phone] as const,
 };
 
 /**
@@ -44,6 +45,19 @@ export function useUserByEmail(email: string | null, enabled = true) {
     queryFn: () => usersService.findByEmail(email!),
     enabled: enabled && !!email,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Hook para buscar dados públicos do usuário pelo telefone
+ */
+export function usePublicUserByPhone(phone: string | null, enabled = true) {
+  return useQuery<ShadowUser | null>({
+    queryKey: userKeys.publicByPhone(phone || ""),
+    queryFn: () => usersService.findPublicUser(phone!),
+    enabled: enabled && !!phone,
+    staleTime: 5 * 60 * 1000,
+    retry: false, // Don't retry if not found
   });
 }
 

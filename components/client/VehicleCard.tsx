@@ -8,7 +8,7 @@ import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
 export interface VehicleCardData {
   id: string;
-  plate: string;
+  plate?: string;
   brand: string;
   model: string;
   color: string;

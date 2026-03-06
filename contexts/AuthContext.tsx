@@ -54,7 +54,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await authService.login(credentials);
       
-      Cookies.set("access_token", response.accessToken, { expires: 7, secure: true, sameSite: 'Strict' });
+      const token = response.accessToken || response.access_token || "";
+      Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
       setUser(response.user);
       
       message.success("Login realizado com sucesso!");
@@ -90,7 +91,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await authService.register(payload);
       
-      Cookies.set("access_token", response.accessToken, { expires: 7, secure: true, sameSite: 'Strict' });
+      const token = response.accessToken || response.access_token || "";
+      Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
       setUser(response.user);
       
       message.success("Conta criada com sucesso!");

@@ -2,7 +2,7 @@ import { VehicleSize, VehicleType } from '../../lavacar-api/prisma/generated/enu
 import { Appointment } from './appointment';
 export interface Vehicle {
     id: string;
-    plate: string;
+    plate?: string;
     brand: string;
     model: string;
     year?: number;
@@ -12,13 +12,13 @@ export interface Vehicle {
 
     userId: string;
     appointments: Appointment[];
-    
+
     createdAt: string;
     updatedAt: string;
 }
 
 export interface CreateVehiclePayload {
-    plate: string;
+    plate?: string;
     brand: string;
     model: string;
     year?: number;
@@ -27,7 +27,6 @@ export interface CreateVehiclePayload {
     type: VehicleType;
     userId: string;
 }
-
 export interface UpdateVehiclePayload {
     plate?: string;
     brand?: string;

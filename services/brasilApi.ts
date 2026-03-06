@@ -156,29 +156,14 @@ function normalizeText(value: string): string {
 }
 
 const MODEL_SPEC_WORDS = new Set([
-  "tfsi",
-  "fsi",
-  "tsi",
-  "tdi",
-  "tgi",
-  "v6",
-  "v8",
-  "v10",
-  "turbo",
-  "aspirado",
-  "quattro",
-  "4x4",
-  "4wd",
-  "s-tronic",
-  "stronic",
-  "tiptronic",
-  "multitronic",
-  "manual",
-  "automatico",
-  "automatica",
-  "at",
-  "mt",
-  "cv",
+  "tfsi", "fsi", "tsi", "tdi", "tgi", "v6", "v8", "v10", "turbo", "aspirado",
+  "quattro", "4x4", "4wd", "awd", "s-tronic", "stronic", "tiptronic", "multitronic",
+  "manual", "automatico", "automatica", "at", "mt", "cv", "cvt",
+  "flex", "gasolina", "diesel", "etanol", "gnv", "hybrid", "phev", "hev", "ev",
+  "8v", "16v", "20v", "24v",
+  "ex", "lx", "exl", "ext", "touring", "xls", "xlt", "srv", "srx", "std", "adv",
+  "cd", "cs", "ce", "active", "allure", "griffe", "style", "premier", "joy", "black", "amg",
+  "abs", "cbs", "c-abs"
 ]);
 
 const BODY_STYLE_WORDS = new Set([
@@ -222,10 +207,11 @@ function compactModelName(name: string): string {
   let reachedSpec = false;
 
   for (const token of tokens) {
-    const pureNumber = /^\d+(\.\d+)?$/.test(token);
+    const isDisplacement = /^\d\.\d+$/.test(token);
+    const isYear = /^(19|20)\d{2}$/.test(token);
     const powerPattern = /^\d{2,4}cv$/.test(token);
 
-    if (pureNumber || powerPattern || MODEL_SPEC_WORDS.has(token)) {
+    if (isDisplacement || isYear || powerPattern || MODEL_SPEC_WORDS.has(token)) {
       reachedSpec = true;
       continue;
     }
