@@ -1,4 +1,4 @@
-import { VehicleSize, VehicleType } from '../../lavacar-api/prisma/generated/enums';
+import { VehicleSize, VehicleType } from './enums';
 import { Appointment } from './appointment';
 export interface Vehicle {
     id: string;

@@ -1,4 +1,4 @@
-import { Role } from "../../lavacar-api/prisma/generated/enums";
+import { Role } from "./enums";
 import { Appointment } from "./appointment";
 import { Evaluation } from "./evaluation";
 import { Organization, OrganizationMember } from "./organization";

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
-import { VehicleSize } from '../../lavacar-api/prisma/generated/enums';
+import { VehicleSize } from '@/types/enums';
 import { PaginatedResult } from '@/types/pagination';
 import { ServiceVariant } from '@/types/services';
 

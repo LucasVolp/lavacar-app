@@ -2,7 +2,7 @@ import { Shop } from './shop';
 import { Vehicle } from './vehicle';
 import { User } from './user';
 import { Checklist } from './checklist';
-import { VehicleSize } from '../../lavacar-api/prisma/generated/enums';
+import { VehicleSize } from './enums';
 
 export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
 

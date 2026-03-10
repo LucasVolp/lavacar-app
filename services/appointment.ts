@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { Appointment, AppointmentStatus } from '../types/appointment';
 import { PaginatedResult } from '@/types/pagination';
-import { VehicleSize } from '../../lavacar-api/prisma/generated/enums';
+import { VehicleSize } from '@/types/enums';
 
 const base = '/appointments';
 
