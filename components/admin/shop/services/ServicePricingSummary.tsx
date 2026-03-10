@@ -3,7 +3,7 @@
 import React from "react";
 import { Typography } from "antd";
 import { Services } from "@/types/services";
-import { VEHICLE_SIZE_LABEL, formatCurrency } from "./serviceUi";
+import { VEHICLE_SIZE_LABEL, VehicleSizeValue, formatCurrency } from "./serviceUi";
 const { Text } = Typography;
 
 interface ServicePricingSummaryProps {
@@ -40,7 +40,7 @@ export const ServicePricingSummary: React.FC<ServicePricingSummaryProps> = ({ se
         <div className="space-y-0.5">
           {sorted.map((variant) => (
             <div key={variant.id} className="text-xs text-zinc-500 dark:text-zinc-400">
-              {VEHICLE_SIZE_LABEL[variant.size]}: {formatCurrency(variant.price)} • {variant.duration} min
+              {VEHICLE_SIZE_LABEL[variant.size as VehicleSizeValue]}: {formatCurrency(variant.price)} • {variant.duration} min
             </div>
           ))}
         </div>
