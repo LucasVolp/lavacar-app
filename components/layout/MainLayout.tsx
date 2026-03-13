@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Layout } from "antd";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { Footer } from "./Footer";
@@ -41,9 +42,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-            <span className="text-primary-content font-bold text-xl">N</span>
-          </div>
+          <NexoLogo size={62} className="animate-pulse" />
           <span className="text-base-content/60 text-sm">Carregando NexoCar...</span>
         </div>
       </div>

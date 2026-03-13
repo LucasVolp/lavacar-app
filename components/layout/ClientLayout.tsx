@@ -18,6 +18,7 @@ import {
   ContactsOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 import { useTheme } from "next-themes";
 import type { MenuProps } from "antd";
 import Link from "next/link";
@@ -183,9 +184,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
         theme={isDarkMode ? "dark" : "light"}
       >
         <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-lg shadow-indigo-500/20">
-            <UserOutlined className="text-xl" />
-          </div>
+          <NexoLogo size={60} />
           {!collapsed && (
             <div className="flex flex-col overflow-hidden">
               <Text strong className="text-sm leading-tight truncate text-zinc-800 dark:text-zinc-100">

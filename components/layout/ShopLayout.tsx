@@ -30,6 +30,7 @@ import type { MenuProps } from "antd";
 import { useAuth } from "@/contexts/AuthContext";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import Link from "next/link";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 
 const { Sider, Header: AntHeader, Content, Footer: AntFooter } = Layout;
 const { Text } = Typography;
@@ -234,9 +235,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
         theme={isDarkMode ? "dark" : "light"}
       >
         <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-lg shadow-indigo-500/20">
-              <ShopOutlined className="text-xl" />
-            </div>
+            <NexoLogo size={62} />
             
             {!collapsed && (
               <div className="flex flex-col overflow-hidden">

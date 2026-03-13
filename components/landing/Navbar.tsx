@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button, Dropdown, Avatar } from "antd";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 import { LoginOutlined, UserOutlined, DashboardOutlined, LogoutOutlined, CarOutlined } from "@ant-design/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,9 +42,7 @@ export const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-base-content/5 bg-base-100/80 backdrop-blur-md transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">N</span>
-          </div>
+          <NexoLogo size={62} />
           <span className="text-base-content font-semibold text-lg tracking-tight">
             NexoCar
           </span>

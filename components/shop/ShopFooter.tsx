@@ -1,7 +1,7 @@
 "use client";
 
-import { CarFilled } from "@ant-design/icons";
 import Link from "next/link";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 
 interface ShopFooterProps {
   shopName: string;
@@ -14,9 +14,7 @@ export function ShopFooter({ shopName }: ShopFooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 items-center">
           <div className="flex flex-col items-center md:items-start gap-4">
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                  <CarFilled className="text-white text-lg" />
-               </div>
+               <NexoLogo size={60} />
                <span className="text-slate-900 dark:text-slate-50 font-bold text-xl tracking-tight transition-colors duration-300">{shopName}</span>
             </div>
           </div>

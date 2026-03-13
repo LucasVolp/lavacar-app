@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Layout, Menu, Typography, Badge } from "antd";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 import {
   ShopOutlined,
   ScheduleOutlined,
@@ -224,9 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
             : "linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.03) 100%)"
         }}
       >
-        <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform hover:scale-105 transition-transform cursor-pointer">
-          <span className="text-white font-bold text-xl">N</span>
-        </div>
+        <NexoLogo size={72} />
         {!collapsed && (
           <div className="flex flex-col">
             <Text strong className="text-xl leading-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">

@@ -6,6 +6,7 @@ import { MailOutlined, LockOutlined, GoogleOutlined, ArrowLeftOutlined } from "@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 
 interface LoginFormValues {
   email: string;
@@ -166,8 +167,8 @@ function LoginForm() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-purple-600/30" />
         
         <div className="relative z-10 max-w-lg text-center p-12">
-          <div className="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/20 shadow-2xl">
-            <span className="text-3xl font-bold text-white">L</span>
+          <div className="w-24 h-24 flex items-center justify-center mx-auto mb-8">
+            <NexoLogo size={62} />
           </div>
           <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
             Gerencie sua estética automotiva com excelência

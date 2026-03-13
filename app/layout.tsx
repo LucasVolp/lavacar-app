@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeAwareConfigProvider, { Providers } from "./providers";
 import ptBR from "antd/locale/pt_BR";
+import { BRAND_CONFIG } from "@/config/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NexoCar - Sistema de Gestão de Agendamentos",
-  description: "NexoCar - Sistema SaaS de gestão de agendamentos para estética automotiva",
+  title: `${BRAND_CONFIG.COMPANY_NAME} - Sistema de Gestão de Agendamentos`,
+  description: `${BRAND_CONFIG.COMPANY_NAME} - Sistema SaaS de gestão de agendamentos para estética automotiva`,
+  icons: {
+    icon: [
+      {
+        url: BRAND_CONFIG.FAVICON_URL,
+        type: "image/png",
+      },
+      {
+        url: BRAND_CONFIG.LOGO_LARGE_URL,
+        type: "image/png",
+        sizes: "any",
+      },
+    ],
+    apple: BRAND_CONFIG.FAVICON_URL,
+  },
+  openGraph: {
+    title: `${BRAND_CONFIG.COMPANY_NAME}`,
+    description: `Sistema SaaS de gestão de agendamentos para estética automotiva`,
+    images: [
+      {
+        url: BRAND_CONFIG.LOGO_LARGE_URL,
+        width: 1200,
+        height: 630,
+        alt: BRAND_CONFIG.COMPANY_NAME,
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

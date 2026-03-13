@@ -4,6 +4,7 @@ import React from "react";
 import { Layout, Typography, Space, Divider } from "antd";
 import { GithubOutlined, HeartFilled, MailOutlined, PhoneOutlined } from "@ant-design/icons";
 import { useTheme } from "next-themes";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 
 const { Footer: AntFooter } = Layout;
 const { Text, Link } = Typography;
@@ -31,9 +32,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">N</span>
-            </div>
+            <NexoLogo size={48} />
             <div className="flex flex-col">
               <Text strong className="text-sm">
                 NexoCar

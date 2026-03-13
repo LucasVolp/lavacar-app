@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, Badge, Button, Dropdown, Layout, Typography } from "antd";
+import { NexoLogo } from "@/components/ui/NexoLogo";
 import { useTheme } from "next-themes";
 
 const { Header: AntHeader } = Layout;
@@ -78,9 +79,7 @@ export const Header: React.FC<HeaderProps> = ({ collapsed, onToggleSidebar }) =>
         />
 
         <div className="hidden sm:flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">N</span>
-          </div>
+          <NexoLogo size={62} />
           <div className="flex flex-col">
             <Text strong className="text-lg leading-tight">
               NexoCar
