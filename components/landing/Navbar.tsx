@@ -40,17 +40,15 @@ export const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-base-content/5 bg-base-100/80 backdrop-blur-md transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">L</span>
+            <span className="text-white font-bold text-lg">N</span>
           </div>
           <span className="text-base-content font-semibold text-lg tracking-tight">
-            Lavacar
+            NexoCar
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-1 bg-base-200/60 dark:bg-base-200/40 p-1 rounded-xl border border-base-content/[0.06] backdrop-blur-xl shadow-sm">
             <NavLink href="#benefits">Benefícios</NavLink>
@@ -59,7 +57,6 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <Dropdown menu={{ items: menuItems }} placement="bottomRight" arrow>
@@ -110,13 +107,10 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
       onClick={handleClick}
       className="group relative px-4 py-2 rounded-lg"
     >
-      {/* Subtle background on idle + stronger on hover */}
       <span className="absolute inset-0 rounded-lg bg-base-content/[0.03] group-hover:bg-base-content/[0.08] transition-all duration-200" />
-      
-      {/* Left accent bar */}
+
       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-0 bg-gradient-to-b from-blue-500 to-cyan-400 rounded-full group-hover:h-4 transition-all duration-200" />
-      
-      {/* Text */}
+
       <span className="relative z-10 text-[13px] font-medium tracking-wide text-base-content/70 group-hover:text-base-content transition-colors duration-200">
         {children}
       </span>

@@ -26,13 +26,11 @@ export const SettingsInfoForm: React.FC<SettingsInfoFormProps> = ({
   onFinish,
   saving,
 }) => {
-  // Handler for CPF/CNPJ mask
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const masked = maskCpfCnpj(e.target.value);
     form.setFieldValue("document", masked);
   };
 
-  // Handler for phone mask
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const masked = maskPhone(e.target.value);
     form.setFieldValue("phone", masked);

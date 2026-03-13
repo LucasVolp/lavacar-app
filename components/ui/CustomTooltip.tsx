@@ -8,8 +8,8 @@ export const CustomTooltip: React.FC<TooltipProps> = (props) => {
     <Tooltip
       {...props}
       overlayInnerStyle={{
-        background: '#18181b', // zinc-900
-        color: '#fafafa', // zinc-50
+        background: '#18181b',
+        color: '#fafafa',
       }}
     >
       {props.children}

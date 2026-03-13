@@ -15,7 +15,6 @@ import dayjs from "dayjs";
 import { SalesGoal } from "@/types/salesGoal";
 import { formatCurrency } from "@/lib/security";
 
-// Components
 import { MetricCard } from "@/components/admin/shop/sales-goals/MetricCard";
 import { GoalCard } from "@/components/admin/shop/sales-goals/GoalCard";
 import { CreateGoalModal } from "@/components/admin/shop/sales-goals/CreateGoalModal";
@@ -32,7 +31,6 @@ export default function SalesGoalsPage() {
   const updateGoal = useUpdateSalesGoal();
   const deleteGoal = useDeleteSalesGoal();
 
-  // Calculate stats
   const stats = useMemo(() => {
     const now = dayjs();
     const activeGoals = salesGoals.filter(g => now.isAfter(g.startDate) && now.isBefore(g.endDate));
@@ -78,7 +76,6 @@ export default function SalesGoalsPage() {
 
   return (
     <div className="animate-fade-in space-y-8">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">
@@ -99,7 +96,6 @@ export default function SalesGoalsPage() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           icon={<TrophyOutlined className="text-xl" />}
@@ -131,7 +127,6 @@ export default function SalesGoalsPage() {
         />
       </div>
 
-      {/* Goals Grid */}
       {salesGoals.length === 0 ? (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -165,7 +160,6 @@ export default function SalesGoalsPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
       <CreateGoalModal
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}

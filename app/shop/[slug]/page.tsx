@@ -99,7 +99,6 @@ export default function ShopPage({ params }: ShopPageProps) {
   const tiktokUrl = ensureSocialUrl("tiktok", socialLinks.tiktok);
   const whatsappUrl = ensureSocialUrl("whatsapp", socialLinks.whatsapp || shop?.phone || null);
 
-  // Loading state
   if (shopLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] transition-colors duration-300">
@@ -111,7 +110,6 @@ export default function ShopPage({ params }: ShopPageProps) {
     );
   }
 
-  // Error state
   if (shopError || !shop) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-4 transition-colors duration-300">
@@ -138,7 +136,6 @@ export default function ShopPage({ params }: ShopPageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-slate-50 selection:bg-indigo-500/30 selection:text-indigo-600 dark:selection:text-indigo-200 transition-colors duration-300">
-      {/* Hero Section */}
       <HeroSection
         shop={shop}
         averageRating={averageRating}
@@ -151,21 +148,18 @@ export default function ShopPage({ params }: ShopPageProps) {
         whatsappUrl={whatsappUrl}
       />
 
-      {/* Services Section */}
       <ServicesSection
         services={services}
         isLoading={servicesLoading}
         onBooking={handleBooking}
       />
 
-      {/* Info Section */}
       <InfoSection
         shop={shop}
         schedules={schedules}
         isLoading={schedulesLoading}
       />
 
-      {/* Reviews Section */}
       <ReviewsSection
         reviews={curatedReviews}
         averageRating={averageRating}
@@ -173,13 +167,11 @@ export default function ShopPage({ params }: ShopPageProps) {
         isLoading={reviewsLoading}
       />
 
-      {/* CTA Section */}
       <CTASection
         shopName={shop.name}
         onBooking={handleBooking}
       />
 
-      {/* Footer */}
       <ShopFooter shopName={shop.name} />
 
       {whatsappUrl && (

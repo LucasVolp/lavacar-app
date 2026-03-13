@@ -10,10 +10,6 @@ interface RequireAuthProps {
   fallbackUrl?: string;
 }
 
-/**
- * Componente que protege rotas que requerem autenticação.
- * Redireciona para login se o usuário não estiver autenticado.
- */
 export function RequireAuth({ children, fallbackUrl }: RequireAuthProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -27,7 +23,6 @@ export function RequireAuth({ children, fallbackUrl }: RequireAuthProps) {
     }
   }, [isLoading, isAuthenticated, router, pathname, fallbackUrl]);
 
-  // Mostrar loading enquanto verifica autenticação
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -36,7 +31,6 @@ export function RequireAuth({ children, fallbackUrl }: RequireAuthProps) {
     );
   }
 
-  // Não renderizar conteúdo se não autenticado
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -1,5 +1,3 @@
-// Types baseados no schema Prisma
-
 export type ShopStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
 export interface ShopSocialLinks {
@@ -21,7 +19,6 @@ export interface Shop {
   logoUrl?: string | null;
   bannerUrl?: string | null;
 
-  // Endereço
   zipCode: string;
   street: string;
   number: string;
@@ -32,13 +29,11 @@ export interface Shop {
   timeZone?: string | null;
   socialLinks?: ShopSocialLinks | string | null;
 
-  // Configurações
   slotInterval: number;
   bufferBetweenSlots: number;
   maxAdvanceDays: number;
   minAdvanceMinutes: number;
 
-  // Relacionamentos
   organizationId: string;
   ownerId?: string;
 
@@ -81,7 +76,6 @@ export interface FindAllShopDto {
   search?: string;
 }
 
-// Helpers para status
 export const SHOP_STATUS_MAP: Record<ShopStatus, { label: string; color: string; badgeClass: string }> = {
   ACTIVE: { label: 'Ativo', color: '#52c41a', badgeClass: 'badge-success' },
   INACTIVE: { label: 'Inativo', color: '#faad14', badgeClass: 'badge-warning' },

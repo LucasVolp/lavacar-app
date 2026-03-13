@@ -113,7 +113,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                 key={apt.id}
                 className="flex flex-col p-4 mb-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800"
               >
-                {/* Header: Client + Status */}
+
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
@@ -131,7 +131,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                   <StatusBadge status={apt.status} className="m-0 px-3 py-0.5 rounded-full font-medium flex-shrink-0" />
                 </div>
 
-                {/* Vehicle + Time */}
+
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3 text-sm">
                   {apt.vehicle && (
                     <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300">
@@ -151,7 +151,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                   </div>
                 </div>
 
-                {/* Services */}
+
                 {apt.services.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {apt.services.map((service) => (
@@ -165,7 +165,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
                   </div>
                 )}
 
-                {/* Action Buttons */}
+
                 <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-700">
                   <Button
                     type="primary"

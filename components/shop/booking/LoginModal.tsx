@@ -16,9 +16,6 @@ export function LoginModal({ open, onCancel }: LoginModalProps) {
   const router = useRouter();
 
   const handleLogin = () => {
-    // Redirect to login with a return url to the current page
-    // Since we are in a modal, we probably want to redirect to the full login page
-    // and then come back.
     const currentPath = window.location.pathname;
     router.push(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
   };

@@ -96,7 +96,6 @@ export default function ShopFilters({
   return (
     <div className="card bg-base-100 shadow-sm border border-base-200 mb-6">
       <div className="card-body p-4">
-        {/* Main filters row */}
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} sm={24} md={10} lg={8}>
             <Search
@@ -180,7 +179,6 @@ export default function ShopFilters({
           </Col>
         </Row>
 
-        {/* Active filters tags */}
         {activeFilters.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="text-base-content/60 text-sm">Filtros ativos:</span>

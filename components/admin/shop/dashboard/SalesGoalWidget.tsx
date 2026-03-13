@@ -18,10 +18,8 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
   const router = useRouter();
   const { data: salesGoalsData, isLoading } = useShopSalesGoals(shopId);
 
-  // Ensure salesGoals is an array to prevent runtime errors
   const salesGoals = Array.isArray(salesGoalsData) ? salesGoalsData : [];
 
-  // Find the active goal for the current date
   const now = new Date();
   const activeGoals = salesGoals.filter(goal => {
     return isWithinInterval(now, {
@@ -30,8 +28,6 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
     });
   });
 
-  // Prioritize incomplete goals (show incomplete ones first if available)
-  // If currentRevenue >= goal.amount, it is considered completed
   activeGoals.sort((a, b) => {
     const aCompleted = currentRevenue >= a.amount;
     const bCompleted = currentRevenue >= b.amount;
@@ -45,7 +41,6 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
     return <Card loading className="w-full h-full rounded-2xl border-zinc-200 dark:border-zinc-800" />;
   }
 
-  // If no active goal, show CTA
   if (!activeGoal) {
     return (
       <div className="space-y-4">
@@ -88,7 +83,6 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
     );
   }
 
-  // Calculate percentage
   const percent = Math.min(Math.round((currentRevenue / activeGoal.amount) * 100), 100);
   const remaining = Math.max(activeGoal.amount - currentRevenue, 0);
   const isCompleted = currentRevenue >= activeGoal.amount;

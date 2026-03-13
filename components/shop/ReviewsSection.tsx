@@ -70,7 +70,6 @@ function ReviewCard({ review }: { review: EvaluationWithRelations }) {
         &ldquo;{review.comment?.trim() || "O cliente não escreveu nada."}&rdquo;
       </p>
 
-      {/* Photos */}
       {review.photos && review.photos.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           <Image.PreviewGroup>

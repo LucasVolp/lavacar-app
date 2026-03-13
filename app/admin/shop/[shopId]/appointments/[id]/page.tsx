@@ -22,7 +22,6 @@ import { formatCurrency, sanitizeText } from "@/lib/security";
 import { ChecklistModal } from "@/components/modals/ChecklistModal";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
 
-// Components
 import { AppointmentDetailHeader } from "@/components/admin/shop/appointments/details/AppointmentDetailHeader";
 import { AppointmentStatusCard } from "@/components/admin/shop/appointments/details/AppointmentStatusCard";
 import { AppointmentClientVehicle } from "@/components/admin/shop/appointments/details/AppointmentClientVehicle";

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lavacar - Sistema de Agendamentos",
-  description: "Lavacar - Sistema SaaS de agendamentos para lava-car",
+  title: "NexoCar - Sistema de Gestão de Agendamentos",
+  description: "NexoCar - Sistema SaaS de gestão de agendamentos para estética automotiva",
 };
 
 export default function RootLayout({

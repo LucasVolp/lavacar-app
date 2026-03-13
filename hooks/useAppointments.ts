@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { appointmentService, CreateAppointmentRequest, AppointmentFilters } from "@/services/appointment";
+import { appointmentService, CreateAppointmentRequest, CreateWalkInRequest, AppointmentFilters } from "@/services/appointment";
 import { Appointment } from "@/types/appointment";
 import { handleQueryForbidden } from "./handleQueryForbidden";
 
@@ -11,6 +11,8 @@ export const appointmentKeys = {
   byUser: (userId: string, filters?: object) => [...appointmentKeys.lists(), { userId, ...filters }] as const,
   byShopAndDate: (shopId: string, date: string) =>
     [...appointmentKeys.lists(), { shopId, date }] as const,
+  byVehiclePlate: (plate: string, shopId: string) =>
+    [...appointmentKeys.lists(), "vehicle-plate", { plate, shopId }] as const,
   publicAvailability: (shopId: string, date: string, serviceIds: string[]) =>
     [...appointmentKeys.lists(), "public-availability", { shopId, date, serviceIds: serviceIds.join(",") }] as const,
   details: () => [...appointmentKeys.all, "detail"] as const,
@@ -50,7 +52,7 @@ export function useShopAppointments(shopId: string | null, filters: Omit<Appoint
     enabled: enabled && !!shopId,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
-    refetchInterval: 15000, // Poll every 15 seconds
+    refetchInterval: 15000,
   });
 }
 
@@ -69,7 +71,7 @@ export function useUserAppointments(userId: string | null, filters: Omit<Appoint
     enabled: enabled && !!userId,
     staleTime: 1 * 60 * 1000,
     placeholderData: keepPreviousData,
-    refetchInterval: 60000, // Poll every 60 seconds for real-time updates
+    refetchInterval: 60000,
   });
 }
 
@@ -143,6 +145,7 @@ export function useAppointment(id: string | null, enabled = true) {
 }
 
 export type { CreateAppointmentRequest as CreateAppointmentPayload };
+export type { CreateWalkInRequest as CreateWalkInPayload };
 
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
@@ -151,7 +154,6 @@ export function useCreateAppointment() {
     mutationFn: (payload: CreateAppointmentRequest) => appointmentService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
-      queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
     },
   });
 }
@@ -204,5 +206,30 @@ export function useUpdateAppointmentStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
     },
+  });
+}
+
+export function useCreateWalkIn() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateWalkInRequest) => appointmentService.createWalkIn(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+    },
+  });
+}
+
+export function useUpcomingAppointmentsByPlate(
+  plate: string | null,
+  shopId: string | null,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: appointmentKeys.byVehiclePlate(plate || "", shopId || ""),
+    queryFn: () => appointmentService.findByVehiclePlate(plate!, shopId!),
+    enabled: enabled && !!plate && plate.length >= 7 && !!shopId,
+    staleTime: 1 * 60 * 1000,
+    retry: false,
   });
 }

@@ -120,7 +120,6 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({ evaluations, loa
                         <span className="italic text-zinc-500 dark:text-zinc-500 text-sm">Avaliação sem comentário</span>
                     )}
 
-                    {/* Photos Gallery */}
                     {photos.length > 0 && (
                       <div className="mt-3">
                         <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-1.5">

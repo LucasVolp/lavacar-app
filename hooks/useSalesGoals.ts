@@ -3,7 +3,6 @@ import { salesGoalService } from "@/services/salesGoal";
 import { CreateSalesGoalPayload, UpdateSalesGoalPayload, SalesGoal } from "@/types/salesGoal";
 import { handleQueryForbidden } from "./handleQueryForbidden";
 
-// Query Keys
 export const salesGoalKeys = {
   all: ["salesGoals"] as const,
   lists: () => [...salesGoalKeys.all, "list"] as const,
@@ -13,9 +12,6 @@ export const salesGoalKeys = {
   detail: (id: string) => [...salesGoalKeys.details(), id] as const,
 };
 
-/**
- * Hook para buscar todas as metas de vendas
- */
 export function useSalesGoals(enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.lists(),
@@ -36,9 +32,6 @@ export function useSalesGoals(enabled = true) {
   });
 }
 
-/**
- * Hook para buscar metas de vendas por loja
- */
 export function useShopSalesGoals(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.byShop(shopId || ""),
@@ -59,9 +52,6 @@ export function useShopSalesGoals(shopId: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para buscar metas de vendas por organização
- */
 export function useOrganizationSalesGoals(organizationId: string | null, enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.byOrganization(organizationId || ""),
@@ -82,9 +72,6 @@ export function useOrganizationSalesGoals(organizationId: string | null, enabled
   });
 }
 
-/**
- * Hook para buscar uma meta específica
- */
 export function useSalesGoal(id: string | null, enabled = true) {
   return useQuery({
     queryKey: salesGoalKeys.detail(id || ""),
@@ -103,19 +90,14 @@ export function useSalesGoal(id: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para criar uma meta de vendas
- */
 export function useCreateSalesGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: CreateSalesGoalPayload) => salesGoalService.create(payload),
     onSuccess: (data, variables) => {
-      // Invalidate all sales goals queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: salesGoalKeys.all });
 
-      // Also specifically invalidate the shop query if shopId is provided
       if (variables.shopId) {
         queryClient.invalidateQueries({
           queryKey: salesGoalKeys.byShop(variables.shopId),
@@ -123,7 +105,6 @@ export function useCreateSalesGoal() {
         });
       }
 
-      // Invalidate organization query if organizationId is provided
       if (variables.organizationId) {
         queryClient.invalidateQueries({
           queryKey: salesGoalKeys.byOrganization(variables.organizationId),
@@ -134,9 +115,6 @@ export function useCreateSalesGoal() {
   });
 }
 
-/**
- * Hook para atualizar uma meta de vendas
- */
 export function useUpdateSalesGoal() {
   const queryClient = useQueryClient();
 
@@ -144,16 +122,13 @@ export function useUpdateSalesGoal() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateSalesGoalPayload }) =>
       salesGoalService.update(id, payload),
     onSuccess: (data) => {
-      // Invalidate all sales goals queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: salesGoalKeys.all });
 
-      // Invalidate the specific detail query
       queryClient.invalidateQueries({
         queryKey: salesGoalKeys.detail(data.id),
         exact: true
       });
 
-      // Invalidate shop-specific query if applicable
       if (data.shopId) {
         queryClient.invalidateQueries({
           queryKey: salesGoalKeys.byShop(data.shopId),
@@ -161,7 +136,6 @@ export function useUpdateSalesGoal() {
         });
       }
 
-      // Invalidate organization-specific query if applicable
       if (data.organizationId) {
         queryClient.invalidateQueries({
           queryKey: salesGoalKeys.byOrganization(data.organizationId),
@@ -172,16 +146,12 @@ export function useUpdateSalesGoal() {
   });
 }
 
-/**
- * Hook para deletar uma meta de vendas
- */
 export function useDeleteSalesGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => salesGoalService.remove(id),
     onSuccess: () => {
-      // Invalidate all sales goals queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: salesGoalKeys.all });
     },
   });

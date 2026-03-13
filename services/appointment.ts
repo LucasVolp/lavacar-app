@@ -43,19 +43,37 @@ export interface PublicAvailabilityResponse {
   availableSlots: string[];
 }
 
+export interface CreateAppointmentResponse extends Appointment {
+  trackingUrl?: string;
+}
+
+export interface CreateWalkInRequest {
+  shopId: string;
+  user: {
+    id?: string;
+    firstName: string;
+    phone: string;
+    email?: string;
+  };
+  vehicle: {
+    id?: string;
+    plate?: string;
+    brand: string;
+    model: string;
+    color?: string;
+    type?: string;
+    size?: string;
+  };
+  serviceIds: string[];
+  notes?: string;
+}
+
 export const appointmentService = {
   create: async (payload: CreateAppointmentRequest) => {
     try {
-      const response: AxiosResponse<Appointment> = await axiosInstance.post(base, payload);
+      const response: AxiosResponse<CreateAppointmentResponse> = await axiosInstance.post(base, payload);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao criar agendamento (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error('Erro desconhecido ao criar agendamento:', error);
-      }
       throw error;
     }
   },
@@ -77,13 +95,6 @@ export const appointmentService = {
       const response: AxiosResponse<PaginatedResult<Appointment>> = await axiosInstance.get(base, { params });
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar agendamentos (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error('Erro desconhecido ao buscar agendamentos:', error);
-      }
       throw error;
     }
   },
@@ -95,13 +106,6 @@ export const appointmentService = {
       });
       return response.data || [];
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar agendamentos públicos (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error('Erro desconhecido ao buscar agendamentos públicos:', error);
-      }
       throw error;
     }
   },
@@ -121,13 +125,6 @@ export const appointmentService = {
       });
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar disponibilidade pública (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error('Erro desconhecido ao buscar disponibilidade pública:', error);
-      }
       throw error;
     }
   },
@@ -137,13 +134,6 @@ export const appointmentService = {
       const response: AxiosResponse<Appointment> = await axiosInstance.get(`${base}/${id}`);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar agendamento ${id} (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao buscar agendamento ${id}:`, error);
-      }
       throw error;
     }
   },
@@ -153,13 +143,6 @@ export const appointmentService = {
       const response: AxiosResponse<Appointment> = await axiosInstance.patch(`${base}/${id}`, payload);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao atualizar agendamento ${id} (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao atualizar agendamento ${id}:`, error);
-      }
       throw error;
     }
   },
@@ -169,15 +152,50 @@ export const appointmentService = {
       const response = await axiosInstance.delete(`${base}/${id}`, { data: { reason } });
       return response.data;
     } catch (error: unknown) {
+      throw error;
+    }
+  },
+
+  createWalkIn: async (payload: CreateWalkInRequest) => {
+    try {
+      const response: AxiosResponse<CreateAppointmentResponse> = await axiosInstance.post(`${base}/walk-in`, payload);
+      return response.data;
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
+  findByVehiclePlate: async (plate: string, shopId: string): Promise<Appointment[]> => {
+    try {
+      const normalized = plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const response: AxiosResponse<Appointment[]> = await axiosInstance.get(`${base}/vehicle-plate/${normalized}`, {
+        params: { shopId },
+      });
+      return response.data;
+    } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao cancelar agendamento ${id} (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao cancelar agendamento ${id}:`, error);
+        if (error.response?.status === 404) return [];
       }
       throw error;
     }
+  },
+
+  confirmByTracking: async (token: string) => {
+    const response: AxiosResponse<Appointment> = await axiosInstance.patch(
+      `${base}/track/confirm`,
+      {},
+      { params: { token } },
+    );
+    return response.data;
+  },
+
+  cancelByTracking: async (token: string, reason?: string) => {
+    const response: AxiosResponse<Appointment> = await axiosInstance.patch(
+      `${base}/track/cancel`,
+      { reason },
+      { params: { token } },
+    );
+    return response.data;
   },
 };
 

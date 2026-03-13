@@ -13,6 +13,8 @@ import {
   Space,
   Spin,
   App,
+  Radio,
+  Tag,
 } from "antd";
 import {
   CarOutlined,
@@ -23,15 +25,15 @@ import {
   CheckOutlined,
   CheckCircleOutlined,
   FileAddOutlined,
+  PlusOutlined,
+  CalendarOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import { useServicesByShop } from "@/hooks/useServices";
-import { useCreateVehicle } from "@/hooks/useVehicles";
-import { useCreateUser } from "@/hooks/useUsers";
-import { useCreateShopClient } from "@/hooks/useShopClients";
-import {
-  useCreateAppointment,
-  useUpdateAppointmentStatus,
-} from "@/hooks/useAppointments";
+import { useFipeBrandsByVehicleCategory, useFipeModelsByVehicleCategory } from "@/hooks/useFipe";
+import { useCreateWalkIn, useUpcomingAppointmentsByPlate, useUpdateAppointmentStatus, useCancelAppointment } from "@/hooks/useAppointments";
+import { useUserVehicles } from "@/hooks/useVehicles";
 import {
   sanitizePlate,
   sanitizePhone,
@@ -40,10 +42,13 @@ import {
 } from "@/lib/security";
 import { maskPhone, unmask } from "@/lib/masks";
 import { validateUUID } from "@/utils/validators";
-import { addMinutes } from "date-fns";
+import { formatVehiclePlate } from "@/utils/vehiclePlate";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 import type { Vehicle } from "@/types/vehicle";
 import type { User } from "@/types/user";
+import type { Appointment } from "@/types/appointment";
 import type { Services } from "@/types/services";
 import { ChecklistModal } from "@/components/modals/ChecklistModal";
 
@@ -61,12 +66,19 @@ const VEHICLE_TYPE_OPTIONS = [
   { value: "OTHER", label: "Outro" },
 ];
 
+const VEHICLE_SIZE_OPTIONS = [
+  { value: "SMALL", label: "Pequeno" },
+  { value: "MEDIUM", label: "Médio" },
+  { value: "LARGE", label: "Grande" },
+];
+
 interface VehicleFormValues {
   plate: string;
   brand: string;
   model: string;
   color: string;
   type: string;
+  size: string;
 }
 
 interface ClientFormValues {
@@ -101,8 +113,30 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
   const [createdAppointmentId, setCreatedAppointmentId] = useState<string | null>(null);
   const [checklistModalOpen, setChecklistModalOpen] = useState(false);
 
+  const [pickedVehicleId, setPickedVehicleId] = useState<string | null>(null);
+  const [isNewVehicle, setIsNewVehicle] = useState(false);
+
   const [vehicleForm] = Form.useForm<VehicleFormValues>();
   const [clientForm] = Form.useForm<ClientFormValues>();
+
+  const [selectedBrandCode, setSelectedBrandCode] = useState<string | null>(null);
+
+  const watchedType = Form.useWatch("type", vehicleForm);
+  const watchedBrand = Form.useWatch("brand", vehicleForm);
+
+  const isKnownUser = !!existingUser?.id;
+
+  const { data: userVehicles = [], isLoading: vehiclesLoading } = useUserVehicles(
+    isKnownUser ? existingUser.id : null,
+    isKnownUser && !existingVehicle,
+  );
+
+  const { data: brands = [], isLoading: brandsLoading } = useFipeBrandsByVehicleCategory(watchedType as Vehicle["type"] | undefined);
+  const { data: models = [], isLoading: modelsLoading } = useFipeModelsByVehicleCategory(
+    watchedType as Vehicle["type"] | undefined,
+    selectedBrandCode,
+    open,
+  );
 
   const { data: servicesData, isLoading: isServicesLoading } =
     useServicesByShop(shopId);
@@ -111,13 +145,25 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
     return data.filter((s) => s.isActive !== false);
   }, [servicesData]);
 
-  const createVehicle = useCreateVehicle();
-  const createUser = useCreateUser();
-  const createShopClient = useCreateShopClient();
-  const createAppointment = useCreateAppointment();
-  const updateStatus = useUpdateAppointmentStatus();
+  const createWalkIn = useCreateWalkIn();
+  const cancelAppointment = useCancelAppointment();
+  const updateAppointmentStatus = useUpdateAppointmentStatus();
 
-  // Reset state when modal opens/closes
+  const resolvedVehicle = useMemo(() => {
+    if (existingVehicle) return existingVehicle;
+    if (pickedVehicleId) return userVehicles.find((v) => v.id === pickedVehicleId) ?? null;
+    return null;
+  }, [existingVehicle, pickedVehicleId, userVehicles]);
+
+  const resolvedPlate = resolvedVehicle?.plate || null;
+
+  const {
+    data: upcomingAppointments = [],
+    isLoading: upcomingLoading,
+  } = useUpcomingAppointmentsByPlate(resolvedPlate, shopId, !!resolvedPlate);
+
+  const showVehiclePicker = isKnownUser && !existingVehicle && userVehicles.length > 0;
+
   useEffect(() => {
     if (open) {
       setCurrentStep(0);
@@ -126,13 +172,16 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
       setSubmitting(false);
       setCreatedAppointmentId(null);
       setChecklistModalOpen(false);
+      setPickedVehicleId(null);
+      setIsNewVehicle(false);
 
       vehicleForm.setFieldsValue({
         plate: initialPlate,
-        brand: existingVehicle?.brand ?? "",
-        model: existingVehicle?.model ?? "",
+        brand: existingVehicle?.brand || undefined,
+        model: existingVehicle?.model || undefined,
         color: existingVehicle?.color ?? "",
         type: existingVehicle?.type ?? "CAR",
+        size: existingVehicle?.size ?? "MEDIUM",
       });
 
       clientForm.setFieldsValue({
@@ -140,11 +189,39 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
         phone: existingUser?.phone ? maskPhone(existingUser.phone) : "",
         email: existingUser?.email ?? "",
       });
+
+      setSelectedBrandCode(null);
     } else {
       vehicleForm.resetFields();
       clientForm.resetFields();
+      setSelectedBrandCode(null);
+      setPickedVehicleId(null);
+      setIsNewVehicle(false);
     }
   }, [open, initialPlate, existingVehicle, existingUser, vehicleForm, clientForm]);
+
+  useEffect(() => {
+    if (!open || !watchedBrand || brands.length === 0) return;
+    const matched = brands.find((b) => b.name.toLowerCase() === String(watchedBrand).toLowerCase());
+    if (matched) setSelectedBrandCode(matched.code);
+  }, [open, watchedBrand, brands]);
+
+  const brandOptions = useMemo(() => {
+    const options = brands.map((b) => ({ value: b.name, label: b.name, code: b.code }));
+    if (watchedBrand && !options.some((o) => o.value.toLowerCase() === watchedBrand.toLowerCase())) {
+      options.unshift({ value: watchedBrand, label: watchedBrand, code: "" });
+    }
+    return options;
+  }, [brands, watchedBrand]);
+
+  const modelOptions = useMemo(() => {
+    const options = models.map((m) => ({ value: m.name, label: m.name, code: m.code }));
+    const currentModel = vehicleForm.getFieldValue("model");
+    if (currentModel && !options.some((o) => o.value.toLowerCase() === currentModel.toLowerCase())) {
+      options.unshift({ value: currentModel, label: `${currentModel} (atual)`, code: "" });
+    }
+    return options;
+  }, [models, vehicleForm]);
 
   const selectedServicesInfo = useMemo(() => {
     const selected = activeServices.filter((s) =>
@@ -160,18 +237,24 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
 
   const handleNext = async () => {
     if (currentStep === 0) {
+      if (resolvedVehicle && !isNewVehicle) {
+        setCurrentStep(1);
+        return;
+      }
+      if (showVehiclePicker && !isNewVehicle && !pickedVehicleId) {
+        message.warning("Selecione um veículo ou clique em 'Novo veículo'.");
+        return;
+      }
       try {
         await vehicleForm.validateFields();
         setCurrentStep(1);
       } catch {
-        // validation errors shown automatically
       }
     } else if (currentStep === 1) {
       try {
         await clientForm.validateFields();
         setCurrentStep(2);
       } catch {
-        // validation errors shown automatically
       }
     }
   };
@@ -189,99 +272,63 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
     setSubmitting(true);
 
     try {
-      const vehicleValues = vehicleForm.getFieldsValue();
       const clientValues = clientForm.getFieldsValue();
 
-      const sanitizedPlate = sanitizePlate(vehicleValues.plate);
       const sanitizedName = sanitizeText(clientValues.firstName);
       const sanitizedPhone = sanitizePhone(unmask(clientValues.phone));
       const sanitizedEmail = sanitizeText(clientValues.email);
       const sanitizedNotes = sanitizeText(notes);
-      const sanitizedBrand = sanitizeText(vehicleValues.brand);
-      const sanitizedModel = sanitizeText(vehicleValues.model);
-      const sanitizedColor = sanitizeText(vehicleValues.color);
 
-      // Step 1: Ensure user exists
-      let userId = existingUser?.id;
-      if (!userId) {
-        const newUser = await createUser.mutateAsync({
-          firstName: sanitizedName,
-          // phone: sanitizedPhone, // Backend API does not accept phone on create user DTO currently
-          email: sanitizedEmail || undefined,
-          password: crypto.randomUUID(),
-          role: "USER",
-        });
-        userId = newUser.id;
+      let vehiclePayload: {
+        id?: string;
+        plate?: string;
+        brand: string;
+        model: string;
+        color?: string;
+        type: string;
+        size: string;
+      };
+
+      if (resolvedVehicle && !isNewVehicle) {
+        vehiclePayload = {
+          id: resolvedVehicle.id,
+          plate: resolvedVehicle.plate || undefined,
+          brand: resolvedVehicle.brand,
+          model: resolvedVehicle.model,
+          color: resolvedVehicle.color || undefined,
+          type: resolvedVehicle.type,
+          size: resolvedVehicle.size,
+        };
+      } else {
+        const vehicleValues = vehicleForm.getFieldsValue();
+        vehiclePayload = {
+          plate: sanitizePlate(vehicleValues.plate) || undefined,
+          brand: sanitizeText(vehicleValues.brand),
+          model: sanitizeText(vehicleValues.model),
+          color: sanitizeText(vehicleValues.color) || undefined,
+          type: vehicleValues.type,
+          size: vehicleValues.size,
+        };
       }
 
-      // Step 2: Ensure vehicle exists
-      let vehicleId = existingVehicle?.id;
-      if (!vehicleId) {
-        const newVehicle = await createVehicle.mutateAsync({
-          plate: sanitizedPlate,
-          brand: sanitizedBrand,
-          model: sanitizedModel,
-          color: sanitizedColor || undefined,
-          type: vehicleValues.type as Vehicle["type"],
-          userId,
-        });
-        vehicleId = newVehicle.id;
-      }
-
-      // Step 3: Create ShopClient (ignore errors if already exists)
-      try {
-        await createShopClient.mutateAsync({
-          shopId,
-          userId,
-          customName: sanitizedName,
-          customPhone: sanitizedPhone || undefined,
-        });
-      } catch {
-        // ShopClient may already exist - that's fine
-      }
-
-      // Step 4: Create Appointment
-      const now = new Date();
-      const endTime = addMinutes(now, selectedServicesInfo.totalDuration);
-
-      const servicePayload = selectedServicesInfo.selected.map((s) => ({
-        serviceId: s.id,
-        serviceName: s.name,
-        servicePrice: parseFloat(s.price),
-        duration: s.duration,
-      }));
-
-      const appointment = await createAppointment.mutateAsync({
-        scheduledAt: now.toISOString(),
-        endTime: endTime.toISOString(),
-        totalPrice: selectedServicesInfo.totalPrice,
-        totalDuration: selectedServicesInfo.totalDuration,
-        notes: sanitizedNotes || undefined,
-        userId,
+      const appointment = await createWalkIn.mutateAsync({
         shopId,
-        vehicleId,
-        serviceIds: servicePayload,
+        user: {
+          id: isKnownUser ? existingUser.id : undefined,
+          firstName: sanitizedName,
+          phone: sanitizedPhone,
+          email: sanitizedEmail || undefined,
+        },
+        vehicle: vehiclePayload,
+        serviceIds: selectedServiceIds,
+        notes: sanitizedNotes || undefined,
       });
 
-      const appointmentIdCandidates = [
-        appointment?.id,
-        (appointment as unknown as { appointmentId?: string })?.appointmentId,
-        (appointment as unknown as { data?: { id?: string } })?.data?.id,
-      ];
-      const createdId =
-        appointmentIdCandidates.find(
-          (id): id is string => typeof id === "string" && validateUUID(id.trim())
-        ) ?? null;
+      const createdId = appointment?.id;
 
-      if (!createdId) {
+      if (!createdId || !validateUUID(createdId)) {
         throw new Error("ID do agendamento nao retornado pelo backend.");
       }
-
-      // Step 5: Update status to IN_PROGRESS
-      await updateStatus.mutateAsync({
-        id: createdId,
-        status: "IN_PROGRESS",
-      });
 
       message.success("Sucesso! Agendamento criado.");
       setCreatedAppointmentId(createdId);
@@ -324,19 +371,128 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
       className="[&_.ant-modal-content]:!bg-white dark:[&_.ant-modal-content]:!bg-zinc-900 [&_.ant-modal-header]:!bg-transparent [&_.ant-modal-close]:!text-zinc-400 [&_.ant-modal-close:hover]:!text-zinc-600 dark:[&_.ant-modal-close:hover]:!text-zinc-200"
       styles={{ body: { padding: "24px" } }}
     >
-      <Steps
-        current={stepsCurrent}
-        items={stepItems}
-        className="mb-6"
-        size="small"
-      />
+      <div className="space-y-5">
+        <Steps
+          current={stepsCurrent}
+          items={stepItems}
+          size="small"
+        />
+      </div>
 
-      {/* Step 0: Vehicle Data */}
+      <div className="space-y-4 mt-5">
       <div style={{ display: currentStep === 0 ? "block" : "none" }}>
+
+        <div className="space-y-4">
+          {isKnownUser && (
+            <div className="mb-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                <UserOutlined />
+                <Text strong className="!text-emerald-700 dark:!text-emerald-300">
+                  {existingUser.firstName}
+                </Text>
+                {existingUser.phone && (
+                  <span className="ml-auto px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                    {maskPhone(existingUser.phone)}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {showVehiclePicker && !isNewVehicle && (
+          <>
+            {vehiclesLoading ? (
+              <div className="flex justify-center py-6">
+                <Spin tip="Carregando veículos..." />
+              </div>
+            ) : (
+              <>
+                <Title level={5} className="!text-zinc-700 dark:!text-zinc-200 !mb-3">
+                  Selecione o veículo
+                </Title>
+                <Radio.Group
+                  value={pickedVehicleId}
+                  onChange={(e) => setPickedVehicleId(e.target.value)}
+                  className="w-full"
+                >
+                  <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+                    {userVehicles.map((v) => (
+                      <label
+                        key={v.id}
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                          pickedVehicleId === v.id
+                            ? "border-emerald-400 dark:border-emerald-500/50 bg-emerald-50 dark:bg-emerald-500/10"
+                            : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                        }`}
+                      >
+                        <Radio value={v.id} />
+                        <CarOutlined className="text-lg text-zinc-400" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <Text strong className="text-zinc-800 dark:text-zinc-100">
+                              {v.brand} {v.model}
+                            </Text>
+                            {v.color && (
+                              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                                {v.color}
+                              </Text>
+                            )}
+                          </div>
+                          {v.plate && (
+                            <Text className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                              {formatVehiclePlate(v.plate)}
+                            </Text>
+                          )}
+                        </div>
+                        <Tag className="!text-xs">{v.type}</Tag>
+                      </label>
+                    ))}
+                  </div>
+                </Radio.Group>
+
+                <Button
+                  type="dashed"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    setIsNewVehicle(true);
+                    setPickedVehicleId(null);
+                    vehicleForm.setFieldsValue({
+                      plate: "",
+                      brand: undefined,
+                      model: undefined,
+                      color: "",
+                      type: "CAR",
+                      size: "MEDIUM",
+                    });
+                  }}
+                  className="w-full !mt-3 !rounded-lg"
+                >
+                  Novo veículo
+                </Button>
+              </>
+            )}
+          </>
+        )}
+
+        {(!showVehiclePicker || isNewVehicle) && (
+          <>
+            {isNewVehicle && (
+              <Button
+                type="link"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => {
+                  setIsNewVehicle(false);
+                }}
+                className="!px-0 !mb-2"
+              >
+                Voltar à lista de veículos
+              </Button>
+            )}
         <Form
           form={vehicleForm}
           layout="vertical"
-          requiredMark={false}
+          requiredMark="optional"
         >
           <Form.Item
             name="plate"
@@ -368,13 +524,53 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
             />
           </Form.Item>
 
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
+            <Form.Item name="type" label="Tipo de Veículo" rules={[{ required: true, message: "Tipo é obrigatório" }]}>
+              <Select
+                options={VEHICLE_TYPE_OPTIONS}
+                disabled={!!existingVehicle}
+                onChange={() => {
+                  setSelectedBrandCode(null);
+                  vehicleForm.setFieldValue("brand", undefined);
+                  vehicleForm.setFieldValue("model", undefined);
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item name="size" label="Porte" rules={[{ required: true, message: "Porte é obrigatório" }]}>
+              <Select
+                options={VEHICLE_SIZE_OPTIONS}
+                disabled={!!existingVehicle}
+              />
+            </Form.Item>
+
+            <Form.Item name="color" label="Cor">
+              <Input placeholder="Ex: Branco, Preto..." readOnly={!!existingVehicle} />
+            </Form.Item>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
             <Form.Item
               name="brand"
               label="Marca"
               rules={[{ required: true, message: "Marca é obrigatória" }]}
             >
-              <Input placeholder="Ex: Toyota, Honda..." />
+              <Select
+                showSearch
+                placeholder={brandsLoading ? "Carregando marcas..." : "Selecione a marca"}
+                options={brandOptions}
+                loading={brandsLoading}
+                disabled={!!existingVehicle}
+                filterOption={(input, option) =>
+                  String(option?.label || "").toLowerCase().includes(input.toLowerCase())
+                }
+                onChange={(_value, option) => {
+                  const opt = option as { code?: string };
+                  setSelectedBrandCode(opt?.code || null);
+                  vehicleForm.setFieldValue("model", undefined);
+                }}
+                notFoundContent={brandsLoading ? <Spin size="small" /> : "Nenhuma marca encontrada"}
+              />
             </Form.Item>
 
             <Form.Item
@@ -382,28 +578,123 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
               label="Modelo"
               rules={[{ required: true, message: "Modelo é obrigatório" }]}
             >
-              <Input placeholder="Ex: Corolla, Civic..." />
-            </Form.Item>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-            <Form.Item name="color" label="Cor">
-              <Input placeholder="Ex: Branco, Preto..." />
-            </Form.Item>
-
-            <Form.Item name="type" label="Tipo de Veículo">
-              <Select options={VEHICLE_TYPE_OPTIONS} />
+              <Select
+                showSearch
+                placeholder={!selectedBrandCode ? "Selecione a marca primeiro" : "Selecione o modelo"}
+                options={modelOptions}
+                loading={modelsLoading}
+                disabled={!!existingVehicle || !selectedBrandCode}
+                filterOption={(input, option) =>
+                  String(option?.label || "").toLowerCase().includes(input.toLowerCase())
+                }
+                notFoundContent={
+                  selectedBrandCode
+                    ? modelsLoading
+                      ? <Spin size="small" />
+                      : "Nenhum modelo encontrado"
+                    : "Selecione uma marca"
+                }
+              />
             </Form.Item>
           </div>
         </Form>
+          </>
+        )}
+
+        {resolvedVehicle && !isNewVehicle && upcomingAppointments.length > 0 && (
+          <div className="mt-4 rounded-lg border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarOutlined className="text-amber-600 dark:text-amber-400" />
+              <Text strong className="!text-amber-700 dark:!text-amber-300">
+                Agendamentos futuros ({upcomingAppointments.length})
+              </Text>
+            </div>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+              {upcomingAppointments.map((appt: Appointment) => (
+                <div
+                  key={appt.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <ClockCircleOutlined className="text-zinc-400 text-xs" />
+                      <Text strong className="text-sm text-zinc-800 dark:text-zinc-100">
+                        {format(parseISO(appt.scheduledAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      </Text>
+                      <Tag
+                        color={
+                          appt.status === "PENDING" ? "gold" :
+                          appt.status === "CONFIRMED" ? "blue" :
+                          "cyan"
+                        }
+                        className="!text-xs"
+                      >
+                        {appt.status === "PENDING" ? "Pendente" :
+                         appt.status === "CONFIRMED" ? "Confirmado" :
+                         "Aguardando"}
+                      </Tag>
+                    </div>
+                    {appt.services?.length > 0 && (
+                      <Text className="text-xs text-zinc-500 dark:text-zinc-400 block mt-1">
+                        {appt.services.map((s) => s.serviceName).join(", ")}
+                      </Text>
+                    )}
+                  </div>
+                  <Space size={4} className="flex-shrink-0 ml-3">
+                    <Button
+                      size="small"
+                      danger
+                      icon={<CloseCircleOutlined />}
+                      onClick={async () => {
+                        try {
+                          await cancelAppointment.mutateAsync({ id: appt.id });
+                          message.success("Agendamento cancelado.");
+                        } catch {
+                          message.error("Erro ao cancelar.");
+                        }
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="small"
+                      type="primary"
+                      icon={<CalendarOutlined />}
+                      className="!bg-amber-500 hover:!bg-amber-400 !border-0"
+                      onClick={async () => {
+                        try {
+                          await updateAppointmentStatus.mutateAsync({
+                            id: appt.id,
+                            status: "WAITING",
+                          });
+                          message.success("Agendamento movido para hoje.");
+                        } catch {
+                          message.error("Erro ao atualizar.");
+                        }
+                      }}
+                    >
+                      Trazer para Hoje
+                    </Button>
+                  </Space>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {resolvedVehicle && !isNewVehicle && upcomingLoading && (
+          <div className="flex justify-center py-4 mt-3">
+            <Spin size="small" tip="Verificando agendamentos..." />
+          </div>
+        )}
+
       </div>
 
-      {/* Step 1: Client Data */}
       <div style={{ display: currentStep === 1 ? "block" : "none" }}>
         <Form
           form={clientForm}
           layout="vertical"
-          requiredMark={false}
+          requiredMark="optional"
         >
           <Form.Item
             name="firstName"
@@ -420,13 +711,12 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
             <Form.Item
               name="phone"
-              label="Telefone (Opcional)"
-              rules={[{ required: false }]}
+              label="Telefone"
+              rules={[{ required: true, message: "Telefone é obrigatório" }]}
             >
               <Input
                 placeholder="(00) 00000-0000"
                 maxLength={15}
-                // Allow editing even if user exists (override)
                 onChange={(e) => {
                   const masked = maskPhone(e.target.value);
                   clientForm.setFieldValue("phone", masked);
@@ -451,7 +741,6 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
         </Form>
       </div>
 
-      {/* Step 2: Services */}
       <div style={{ display: currentStep === 2 ? "block" : "none" }}>
         {isServicesLoading ? (
           <div className="flex justify-center py-8">
@@ -520,7 +809,6 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
               />
             </div>
 
-            {/* Totals */}
             {selectedServiceIds.length > 0 && (
               <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
                 <div className="flex justify-between mb-2">
@@ -559,7 +847,6 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
         )}
       </div>
 
-      {/* Step 3: Success */}
       <div style={{ display: currentStep === 3 ? "block" : "none" }}>
         <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 p-5">
           <div className="flex items-center gap-3 mb-2">
@@ -573,8 +860,8 @@ export const WalkInWizardModal: React.FC<WalkInWizardModalProps> = ({
           </Text>
         </div>
       </div>
+      </div>
 
-      {/* Footer Buttons */}
       <div className="flex justify-between mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800">
         <Button
           disabled={currentStep === 0 || currentStep === 3 || submitting}

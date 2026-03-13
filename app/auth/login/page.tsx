@@ -19,7 +19,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const redirectTo = searchParams.get("redirect") || "/";
+  const rawRedirect = searchParams.get("redirect") || "/";
+  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/";
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -50,7 +51,6 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-black transition-colors duration-300">
-      {/* Left Side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-24 relative">
         <Link href="/" className="absolute top-8 left-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2">
             <ArrowLeftOutlined /> Voltar
@@ -173,7 +173,7 @@ function LoginForm() {
             Gerencie sua estética automotiva com excelência
           </h2>
           <p className="text-lg text-white/70 leading-relaxed">
-            Junte-se a milhares de estabelecimentos que transformaram sua gestão com o Lavacar.
+            Junte-se a milhares de estabelecimentos que transformaram sua gestão com o NexoCar.
           </p>
         </div>
       </div>

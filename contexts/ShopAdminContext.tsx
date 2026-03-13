@@ -5,13 +5,6 @@ import { useParams } from "next/navigation";
 import { useShopById } from "@/hooks/useShops";
 import { Shop } from "@/types/shop";
 
-/**
- * Contexto do Shop Administrativo
- * 
- * Fornece o shop atual para todas as telas administrativas.
- * O shopId vem da URL (/shop/[shopId]).
- */
-
 interface ShopAdminContextData {
   shop: Shop | null;
   shopId: string;

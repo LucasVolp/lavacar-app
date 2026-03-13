@@ -6,10 +6,6 @@ import { VehicleSize } from './enums';
 
 export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED' | 'NO_SHOW';
 
-/**
- * ShopClient override data for appointment context
- * Used when the shop has custom contact info for a client
- */
 export interface AppointmentShopClient {
     id: string;
     customName?: string;

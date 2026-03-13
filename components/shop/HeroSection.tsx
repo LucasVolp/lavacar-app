@@ -43,16 +43,13 @@ export function HeroSection({
 
   return (
     <section className="relative w-full bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-slate-50 pt-16 pb-24 px-4 sm:px-6 overflow-hidden border-b border-slate-200 dark:border-[#27272a] transition-colors duration-300">
-      {/* Background Decor - Subtle Gradients & Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
 
       <div className="max-w-7xl mx-auto relative z-10 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         
-        {/* Main Content Area (Left - Spans 7 cols) */}
         <div className="lg:col-span-7 flex flex-col pt-4">
-          
-          {/* Badges Row */}
+
           <div className="mb-6 flex flex-wrap items-center gap-3">
              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border shadow-sm backdrop-blur-sm transition-colors duration-300 ${isOpen ? 'bg-emerald-50/80 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' : 'bg-red-50/80 border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400'}`}>
                 <span className="relative flex h-2 w-2">
@@ -70,7 +67,6 @@ export function HeroSection({
              </div>
           </div>
 
-          {/* Title */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-[1.1] transition-colors duration-300">
             {shop.name}
             <span className="inline-block align-top ml-2 text-3xl sm:text-4xl text-blue-500">
@@ -78,7 +74,6 @@ export function HeroSection({
             </span>
           </h1>
 
-          {/* Location Full */}
           <div className="flex flex-col gap-2 mb-8 text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
                <EnvironmentOutlined className="text-indigo-500 text-lg flex-shrink-0" />
@@ -91,14 +86,12 @@ export function HeroSection({
             </div>
           </div>
 
-          {/* Description */}
           {shop.description && (
             <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mb-10 font-normal transition-colors duration-300 p-4 bg-white/50 dark:bg-white/5 border-l-4 border-indigo-500 rounded-r-xl">
               {shop.description}
             </p>
           )}
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-4">
              <button
                onClick={onBooking}
@@ -169,10 +162,8 @@ export function HeroSection({
           )}
         </div>
 
-        {/* Right Side - Stats Card (Desktop Only) */}
         <div className="hidden lg:flex lg:col-span-5 relative justify-end">
             <div className="relative w-full max-w-sm bg-white dark:bg-[#18181b] rounded-3xl p-8 border border-slate-100 dark:border-[#27272a] shadow-2xl shadow-slate-200/50 dark:shadow-black/50 overflow-hidden group hover:-translate-y-1 transition-transform duration-500">
-               {/* Card Decor */}
                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
                
                <div className="relative z-10">

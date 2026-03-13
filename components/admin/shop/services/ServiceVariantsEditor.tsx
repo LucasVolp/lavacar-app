@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Form, InputNumber, Select, Space, Typography } from "antd";
+import { Button, Form, FormInstance, InputNumber, Select, Space, Typography } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { VEHICLE_SIZE_OPTIONS, VehicleSizeValue } from "./serviceUi";
 
@@ -15,7 +15,8 @@ export interface ServiceVariantFormValue {
 
 interface ServiceVariantsEditorProps {
   disabled?: boolean;
-  form: ReturnType<typeof Form.useForm<any>>[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: FormInstance<any>;
 }
 
 export const ServiceVariantsEditor: React.FC<ServiceVariantsEditorProps> = ({ disabled, form }) => {

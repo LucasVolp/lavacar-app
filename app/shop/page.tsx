@@ -11,7 +11,6 @@ import {
 } from "@/components/shop";
 import { Shop, ShopStatus } from "@/types/shop";
 
-// Mock data para desenvolvimento
 const MOCK_SHOPS: Shop[] = [
   {
     id: "shop_1",
@@ -127,7 +126,6 @@ export default function ShopPage() {
 
   const filteredShops = useMemo(() => {
     return MOCK_SHOPS.filter((shop) => {
-      // Search filter
       if (query) {
         const searchLower = query.toLowerCase();
         const matchesSearch =
@@ -137,10 +135,8 @@ export default function ShopPage() {
         if (!matchesSearch) return false;
       }
 
-      // Status filter
       if (statusFilter && shop.status !== statusFilter) return false;
 
-      // State filter
       if (stateFilter && shop.state !== stateFilter) return false;
 
       return true;
@@ -149,7 +145,6 @@ export default function ShopPage() {
 
   const handleRefresh = () => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       message.success("Lista atualizada!");
@@ -187,7 +182,6 @@ export default function ShopPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Page Header */}
       <ShopPageHeader
         onCreate={handleCreate}
         onRefresh={handleRefresh}
@@ -195,7 +189,6 @@ export default function ShopPage() {
         totalCount={filteredShops.length}
       />
 
-      {/* Filters */}
       <ShopFilters
         onSearch={setQuery}
         onFilter={setStatusFilter}
@@ -204,7 +197,6 @@ export default function ShopPage() {
         isLoading={isLoading}
       />
 
-      {/* Shop List */}
       <ShopList
         shops={filteredShops}
         isLoading={isLoading}
@@ -213,7 +205,6 @@ export default function ShopPage() {
         onDelete={handleDelete}
       />
 
-      {/* Detail Modal */}
       <ShopDetailModal
         shop={selectedShop}
         open={!!selectedShop}

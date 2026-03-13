@@ -66,7 +66,6 @@ export function BookingSummary({
         Resumo do Agendamento
       </Title>
 
-      {/* Veículo */}
       <div className="mb-4">
         <div className="flex items-center gap-2 text-gray-500 mb-2">
           <CarOutlined />
@@ -89,7 +88,6 @@ export function BookingSummary({
 
       <Divider className="my-3" />
 
-      {/* Serviços */}
       <div className="mb-4">
         <div className="flex items-center gap-2 text-gray-500 mb-2">
           <CheckCircleOutlined />
@@ -119,7 +117,6 @@ export function BookingSummary({
 
       <Divider className="my-3" />
 
-      {/* Data e Horário */}
       <div className="mb-4">
         <div className="flex items-center gap-2 text-gray-500 mb-2">
           <CalendarOutlined />
@@ -140,7 +137,6 @@ export function BookingSummary({
 
       <Divider className="my-3" />
 
-      {/* Totais */}
       <div className="space-y-2 mb-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 text-gray-500">
@@ -160,7 +156,6 @@ export function BookingSummary({
         </div>
       </div>
 
-      {/* Botão de confirmação */}
       <Button
         type="primary"
         size="large"

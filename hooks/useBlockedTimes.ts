@@ -3,7 +3,6 @@ import { blockedTimeService } from "@/services/blockedTime";
 import { BlockedTime, CreateBlockedTimePayload, UpdateBlockedTimePayload } from "@/types/blockedTime";
 import { handleQueryForbidden } from "./handleQueryForbidden";
 
-// Query Keys
 export const blockedTimeKeys = {
   all: ["blockedTimes"] as const,
   lists: () => [...blockedTimeKeys.all, "list"] as const,
@@ -12,9 +11,6 @@ export const blockedTimeKeys = {
   detail: (id: string) => [...blockedTimeKeys.details(), id] as const,
 };
 
-/**
- * Hook para buscar todos os bloqueios
- */
 export function useBlockedTimes(enabled = true) {
   return useQuery({
     queryKey: blockedTimeKeys.lists(),
@@ -26,10 +22,9 @@ export function useBlockedTimes(enabled = true) {
         handleQueryForbidden(error);
         throw error;
       }
-      // Unwrapping data safely
       const raw = response as unknown;
-      const items = Array.isArray(raw) 
-        ? (raw as BlockedTime[]) 
+      const items = Array.isArray(raw)
+        ? (raw as BlockedTime[])
         : (raw as { data: BlockedTime[] }).data || [];
       return items;
     },
@@ -38,9 +33,6 @@ export function useBlockedTimes(enabled = true) {
   });
 }
 
-/**
- * Hook para buscar bloqueios filtrados por shop
- */
 export function useBlockedTimesByShop(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: blockedTimeKeys.byShop(shopId || ""),
@@ -52,10 +44,9 @@ export function useBlockedTimesByShop(shopId: string | null, enabled = true) {
         handleQueryForbidden(error);
         throw error;
       }
-      // Unwrapping data safely before filtering
       const raw = response as unknown;
-      const items = Array.isArray(raw) 
-        ? (raw as BlockedTime[]) 
+      const items = Array.isArray(raw)
+        ? (raw as BlockedTime[])
         : (raw as { data: BlockedTime[] }).data || [];
       return items.filter((b: BlockedTime) => b.shopId === shopId);
     },
@@ -64,9 +55,6 @@ export function useBlockedTimesByShop(shopId: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para buscar um bloqueio por ID
- */
 export function useBlockedTimeById(id: string | null, enabled = true) {
   return useQuery({
     queryKey: blockedTimeKeys.detail(id || ""),
@@ -78,7 +66,6 @@ export function useBlockedTimeById(id: string | null, enabled = true) {
         handleQueryForbidden(error);
         throw error;
       }
-      // Handle potential wrapper for single item
       const raw = response as unknown;
       return (raw as { data: BlockedTime }).data || (raw as BlockedTime);
     },
@@ -87,9 +74,6 @@ export function useBlockedTimeById(id: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para criar um bloqueio
- */
 export function useCreateBlockedTime() {
   const queryClient = useQueryClient();
 
@@ -101,9 +85,6 @@ export function useCreateBlockedTime() {
   });
 }
 
-/**
- * Hook para atualizar um bloqueio
- */
 export function useUpdateBlockedTime() {
   const queryClient = useQueryClient();
 
@@ -116,9 +97,6 @@ export function useUpdateBlockedTime() {
   });
 }
 
-/**
- * Hook para deletar um bloqueio
- */
 export function useDeleteBlockedTime() {
   const queryClient = useQueryClient();
 
@@ -130,7 +108,4 @@ export function useDeleteBlockedTime() {
   });
 }
 
-/**
- * Alias para manter consistência com outros hooks de shop (useShopBlockedTimes)
- */
 export const useShopBlockedTimes = useBlockedTimesByShop;

@@ -42,7 +42,6 @@ export function ShopProvider({ children }: ShopProviderProps) {
       const error = err as Error;
       const errorMessage = error.message || "Erro ao carregar loja";
       setError(errorMessage);
-      console.error("Erro ao buscar loja por slug:", err);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +63,6 @@ export function ShopProvider({ children }: ShopProviderProps) {
       const error = err as Error;
       const errorMessage = error.message || "Erro ao carregar loja";
       setError(errorMessage);
-      console.error("Erro ao buscar loja por ID:", err);
     } finally {
       setIsLoading(false);
     }

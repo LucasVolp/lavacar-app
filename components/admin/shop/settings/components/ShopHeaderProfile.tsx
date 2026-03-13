@@ -34,9 +34,6 @@ interface ShopHeaderProfileProps {
   isSaving?: boolean;
 }
 
-/**
- * Format display masks for view mode
- */
 const formatDocument = (doc?: string | null): string => {
   if (!doc) return "—";
   return maskCpfCnpj(doc);
@@ -90,9 +87,6 @@ const parseSocialLinks = (socialLinks: Shop["socialLinks"]): ShopSocialLinks => 
   return socialLinks;
 };
 
-/**
- * Info item for view mode display
- */
 interface InfoItemProps {
   icon: React.ReactNode;
   label: string;
@@ -207,7 +201,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
         whatsapp: normalizeSocialLink("whatsapp", socialWhatsappRaw),
       };
 
-      // Remove masks before saving
       const payload: UpdateShopDto = {
         name: values.name,
         phone: values.phone?.replace(/\D/g, ""),
@@ -237,12 +230,10 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     }
   };
 
-  // Handle phone mask on change
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     form.setFieldValue("phone", maskPhone(e.target.value));
   };
 
-  // Handle document mask on change
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     form.setFieldValue("document", maskCpfCnpj(e.target.value));
   };
@@ -300,7 +291,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     }
   };
 
-  // Handle logo upload
   const handleLogoUpload: UploadProps["customRequest"] = async (options) => {
     const { file, onSuccess, onError } = options;
     const fileObj = file as File;
@@ -325,7 +315,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
     }
   };
 
-  // Handle banner upload
   const handleBannerUpload: UploadProps["customRequest"] = async (options) => {
     const { file, onSuccess, onError } = options;
     const fileObj = file as File;
@@ -352,7 +341,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
 
   const statusConfig = SHOP_STATUS_MAP[shop.status];
 
-  // Full address string
   const fullAddress = [
     shop.street,
     shop.number,
@@ -364,7 +352,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm transition-colors">
-      {/* Banner */}
       <div className="relative h-32 md:h-44 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
         {(isEditing ? bannerPreview : shop.bannerUrl) && (
           <Image
@@ -393,7 +380,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
           </Upload>
         )}
 
-        {/* Status Badge */}
         <div className="absolute top-4 right-4">
           <span
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm"
@@ -412,9 +398,7 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
         </div>
       </div>
 
-      {/* Profile Content */}
       <div className="relative px-6 pb-6">
-        {/* Logo Avatar */}
         <div className="flex items-end gap-4 -mt-10 mb-6">
           {isEditing ? (
             <Upload
@@ -467,7 +451,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
           </Button>
         </div>
 
-        {/* View Mode */}
         {!isEditing && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
             <InfoItem
@@ -551,7 +534,6 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
           </div>
         )}
 
-        {/* Edit Mode */}
         {isEditing && (
           <Form form={form} layout="vertical" className="animate-fade-in">
             <Tabs

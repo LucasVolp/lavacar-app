@@ -1,19 +1,31 @@
 "use client";
 
-import { Services } from "@/types/services";
+import { Services, ServiceVariant } from "@/types/services";
 import { ClockCircleOutlined, DollarOutlined, CheckCircleFilled, PictureOutlined } from "@ant-design/icons";
+
+function getEffectivePricing(service: Services, vehicleSize?: string): { price: string; duration: number } {
+  if (service.hasVariants && service.variants?.length && vehicleSize) {
+    const variant = service.variants.find((v: ServiceVariant) => v.size === vehicleSize);
+    if (variant) return { price: variant.price, duration: variant.duration };
+  }
+  return { price: service.price, duration: service.duration };
+}
 
 interface ServiceCardProps {
   service: Services;
   selected?: boolean;
   onSelect?: (service: Services) => void;
+  vehicleSize?: string;
 }
 
 export function ServiceCard({
   service,
   selected = false,
   onSelect,
+  vehicleSize,
 }: ServiceCardProps) {
+  const effective = getEffectivePricing(service, vehicleSize);
+
   const formatPrice = (price: string | number) => {
     const numPrice = typeof price === "string" ? parseFloat(price) : price;
     return numPrice.toLocaleString("pt-BR", {
@@ -43,9 +55,8 @@ export function ServiceCard({
         }
       `}
     >
-      {/* Photo header */}
       {service.photoUrl ? (
-        <div className="relative w-full h-36 overflow-hidden">
+        <div className="relative w-full h-28 sm:h-36 overflow-hidden">
           <img
             src={service.photoUrl}
             alt={service.name}
@@ -61,14 +72,13 @@ export function ServiceCard({
         </div>
       ) : null}
 
-      {/* Selection Indicator */}
       {selected && (
         <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-200 z-10">
           <CheckCircleFilled className="text-emerald-500 dark:text-emerald-400 text-xl shadow-lg rounded-full bg-white dark:bg-black/50" />
         </div>
       )}
 
-      <div className="flex flex-col gap-4 flex-1 p-6">
+      <div className="flex flex-col gap-3 sm:gap-4 flex-1 p-4 sm:p-6">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 leading-tight tracking-tight pr-8 service-title transition-colors duration-300">
             {service.name}
@@ -83,13 +93,19 @@ export function ServiceCard({
         <div className="flex items-center gap-4 mt-auto pt-4 border-t border-slate-100 dark:border-[#27272a] transition-colors duration-300">
            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
               <DollarOutlined />
-              <span>{formatPrice(service.price)}</span>
+              <span>{formatPrice(effective.price)}</span>
            </div>
            
            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm px-2">
               <ClockCircleOutlined />
-              <span>{formatDuration(service.duration)}</span>
+              <span>{formatDuration(effective.duration)}</span>
            </div>
+
+           {service.hasVariants && vehicleSize && (
+             <span className="text-[10px] font-semibold text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full ml-auto">
+               {vehicleSize === "SMALL" ? "P" : vehicleSize === "MEDIUM" ? "M" : vehicleSize === "LARGE" ? "G" : vehicleSize}
+             </span>
+           )}
         </div>
       </div>
     </div>

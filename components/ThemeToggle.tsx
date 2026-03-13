@@ -1,17 +1,16 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import { MoonFilled, SunFilled } from "@ant-design/icons";
 
-export function ThemeToggle({ className }: { className?: string }) {
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
+export function ThemeToggle({ className }: { className?: string }) {
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const { theme, setTheme } = useTheme();
 
   if (!mounted) {
     return <div className={`h-10 w-10 ${className}`} />;

@@ -29,7 +29,7 @@ interface IdentificationStepProps {
   onSelectVehicle: (id: string) => void;
   onAddVehicle: () => void;
   shopId: string;
-  onGuestUserCreated: (userId: string, vehicleId: string) => void;
+  onGuestUserCreated: (userId: string, vehicleId: string, vehicleInfo?: { id: string; brand: string; model: string; size: string; type: string; plate?: string; color?: string }) => void;
   onLogin: () => void;
 }
 
@@ -67,7 +67,6 @@ export function IdentificationStep({
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // FIPE integration
   const vehicleType = Form.useWatch("vehicleType", form) || "CAR";
   const selectedBrandName = Form.useWatch("brand", form);
 
@@ -96,14 +95,21 @@ export function IdentificationStep({
     onSelectVehicle("");
   };
 
-  // Existing user: just pass userId + vehicleId directly (no login required)
   const handleSelectExistingVehicle = (vehicleId: string) => {
     if (!publicUser) return;
+    const vehicle = publicUser.vehicles?.find((v) => v.id === vehicleId);
     onSelectVehicle(vehicleId);
-    onGuestUserCreated(publicUser.id, vehicleId);
+    onGuestUserCreated(publicUser.id, vehicleId, vehicle ? {
+      id: vehicle.id,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      size: vehicle.size,
+      type: vehicle.type,
+      plate: vehicle.plate,
+      color: vehicle.color,
+    } : undefined);
   };
 
-  // New user: create via guestLogin but do NOT store token/login
   const handleCreateGuest = async (values: {
     firstName: string;
     lastName?: string;
@@ -133,15 +139,22 @@ export function IdentificationStep({
         },
       };
 
-      // Create user + vehicle via guest endpoint (no token storage)
       await authService.guestLogin(payload);
 
-      // Fetch the created user to get the vehicle ID
       const createdUser = await usersService.findPublicUser(rawPhoneValue);
-      const vehicleId = createdUser?.vehicles?.[0]?.id;
+      const vehicle = createdUser?.vehicles?.[0];
+      const vehicleId = vehicle?.id;
 
       if (vehicleId && createdUser) {
-        onGuestUserCreated(createdUser.id, vehicleId);
+        onGuestUserCreated(createdUser.id, vehicleId, vehicle ? {
+          id: vehicle.id,
+          brand: vehicle.brand,
+          model: vehicle.model,
+          size: vehicle.size,
+          type: vehicle.type,
+          plate: vehicle.plate,
+          color: vehicle.color,
+        } : undefined);
       } else {
         message.error("Erro ao buscar dados do veículo. Tente novamente.");
       }
@@ -153,7 +166,6 @@ export function IdentificationStep({
     }
   };
 
-  // ─── Authenticated: Vehicle Selector ───
   if (isAuthenticated) {
     return (
       <div className="p-5 sm:p-6 md:p-8 animate-fade-in">
@@ -176,10 +188,8 @@ export function IdentificationStep({
     );
   }
 
-  // ─── Guest Flow ───
   return (
     <div className="p-5 sm:p-6 md:p-8 animate-fade-in">
-      {/* Header */}
       <div className="mb-6 sm:mb-8 text-center">
         <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 flex items-center justify-center">
           <PhoneOutlined className="text-2xl sm:text-3xl text-indigo-500 dark:text-indigo-400" />
@@ -193,7 +203,6 @@ export function IdentificationStep({
       </div>
 
       <div className="max-w-lg mx-auto space-y-6">
-        {/* Phone Input - Scroll Anchor */}
         <div ref={phoneInputRef} style={{ overflowAnchor: "auto" }}>
           <label className="block text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2.5 text-center sm:text-left">
             Número de WhatsApp
@@ -233,13 +242,10 @@ export function IdentificationStep({
           )}
         </div>
 
-        {/* Results area - prevent scroll anchoring on expanding content */}
         <div style={{ overflowAnchor: "none" }}>
-          {/* ─── User Found ─── */}
           {isUserFound && publicUser && (
             <div>
               <div className="bg-white dark:bg-[#18181b] rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[#27272a] overflow-hidden shadow-sm">
-                {/* Welcome Banner */}
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/5 dark:to-teal-500/5 border-b border-slate-100 dark:border-[#27272a] px-5 py-5 sm:px-8 sm:py-6">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
@@ -260,7 +266,6 @@ export function IdentificationStep({
                   </div>
                 </div>
 
-                {/* Vehicles */}
                 <div className="p-5 sm:p-6">
                   {publicUser.vehicles && publicUser.vehicles.length > 0 ? (
                     <div className="space-y-3">
@@ -346,11 +351,9 @@ export function IdentificationStep({
             </div>
           )}
 
-          {/* ─── User Not Found: Registration Form ─── */}
           {searchedPhone && !isUserFound && !isSearchingUser && !publicUser && (
             <div>
               <div className="bg-white dark:bg-[#18181b] rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[#27272a] overflow-hidden shadow-sm">
-                {/* Form Header */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/5 dark:to-indigo-500/5 border-b border-slate-100 dark:border-[#27272a] px-5 py-5 sm:px-8 sm:py-6">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -367,7 +370,6 @@ export function IdentificationStep({
                   </div>
                 </div>
 
-                {/* Form */}
                 <div className="p-5 sm:p-6">
                   <Form
                     form={form}
@@ -376,7 +378,6 @@ export function IdentificationStep({
                     requiredMark={false}
                     initialValues={{ vehicleType: "CAR", size: "MEDIUM" }}
                   >
-                    {/* Personal Info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       <Form.Item
                         label={
@@ -411,7 +412,6 @@ export function IdentificationStep({
                       </Form.Item>
                     </div>
 
-                    {/* Vehicle Divider */}
                     <div className="flex items-center gap-3 my-5 sm:my-6">
                       <div className="flex-1 h-px bg-slate-200 dark:bg-[#27272a]" />
                       <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
@@ -421,7 +421,6 @@ export function IdentificationStep({
                       <div className="flex-1 h-px bg-slate-200 dark:bg-[#27272a]" />
                     </div>
 
-                    {/* Vehicle Type & Size */}
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                       <Form.Item
                         label={
@@ -467,7 +466,6 @@ export function IdentificationStep({
                       </Form.Item>
                     </div>
 
-                    {/* Brand & Model */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
                       <Form.Item
                         label={
@@ -523,8 +521,7 @@ export function IdentificationStep({
                       </Form.Item>
                     </div>
 
-                    {/* Optional: Plate, Color, Year */}
-                    <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-3 sm:mt-4">
                       <Form.Item
                         label={
                           <span className="font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider">
@@ -574,7 +571,6 @@ export function IdentificationStep({
                       </Form.Item>
                     </div>
 
-                    {/* Submit */}
                     <Button
                       type="primary"
                       htmlType="submit"

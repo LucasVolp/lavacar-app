@@ -107,8 +107,6 @@ export function usePublicCuratedReviews(
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  // Fallback: se não houver "reviews destaque", usa as avaliações mais recentes
-  // para não esconder completamente a seção quando existir histórico.
   const fallbackReviews = evaluations
     .slice()
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

@@ -12,6 +12,7 @@ interface ServicesStepProps {
   totalPrice: number;
   onToggleService: (service: Services) => void;
   formatDuration: (minutes: number) => string;
+  vehicleSize?: string;
 }
 
 export function ServicesStep({
@@ -19,9 +20,10 @@ export function ServicesStep({
   services,
   selectedServices,
   onToggleService,
+  vehicleSize,
 }: ServicesStepProps) {
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
           Selecione os Serviços
@@ -50,6 +52,7 @@ export function ServicesStep({
                 service={service}
                 selected={isSelected}
                 onSelect={onToggleService}
+                vehicleSize={vehicleSize}
               />
             );
           })}

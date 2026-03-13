@@ -55,7 +55,6 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
   const date = dayjs(scheduledAt);
   const isPending = status === "PENDING";
 
-  // Check if today/tomorrow
   const dateLabel = date.isToday()
     ? "Hoje"
     : date.isTomorrow()
@@ -69,7 +68,6 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
       className="group flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-white dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer"
       onClick={() => onClick?.(id)}
     >
-      {/* Time Block - Compact */}
       <div className="flex flex-col items-center justify-center bg-white dark:bg-zinc-900 rounded-lg px-2.5 py-1.5 min-w-[52px] border border-zinc-200 dark:border-zinc-700">
         <Text className="text-[9px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wide leading-none">
           {dateLabel}
@@ -79,7 +77,6 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </Text>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <Text
@@ -99,7 +96,6 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </div>
       </div>
 
-      {/* Right: Price + Duration + Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <div className="hidden md:flex flex-col items-end text-right">
           <Text className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm">

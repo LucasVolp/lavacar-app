@@ -27,7 +27,6 @@ export default function ShopPageHeader({
     <div className="card bg-base-100 shadow-sm border border-base-200 mb-6">
       <div className="card-body p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          {/* Left side - Title and info */}
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
               <ShopOutlined className="text-white text-xl" />
@@ -49,7 +48,6 @@ export default function ShopPageHeader({
             </div>
           </div>
 
-          {/* Right side - Actions */}
           <Space size="middle">
             {onRefresh && (
               <Tooltip title="Atualizar lista">

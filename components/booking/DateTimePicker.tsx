@@ -58,36 +58,29 @@ export function DateTimePicker({
   const shopTimeZone = shop?.timeZone || DEFAULT_TIMEZONE;
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(nowInTimezone(shopTimeZone)));
 
-  // Recalcula o mês base quando o timezone da loja muda.
   useEffect(() => {
     setCurrentMonth(startOfMonth(nowInTimezone(shopTimeZone)));
   }, [shopTimeZone]);
 
-  // Verifica se um dia está aberto baseado nos schedules
   const isDayOpen = (date: Date) => {
     const weekday = WEEKDAY_MAP[getDay(date)];
     const schedule = shopSchedules.find((s) => s.weekday === weekday);
     return schedule && schedule.isOpen === "ACTIVE";
   };
 
-  // Verifica se a data está disponível para agendamento
   const isDateAvailable = (date: Date) => {
     const today = startOfDay(nowInTimezone(shopTimeZone));
     const maxDate = addDays(today, shop?.maxAdvanceDays || 30);
 
-    // Não pode agendar no passado
     if (isBefore(date, today)) return false;
 
-    // Não pode ultrapassar o máximo de dias à frente
     if (isAfter(date, maxDate)) return false;
 
-    // Verifica se o dia está aberto
     if (!isDayOpen(date)) return false;
 
     return true;
   };
 
-  // Gera os slots de horário para a data selecionada
   const timeSlots = useMemo(() => {
     if (!selectedDate || !shop || totalDuration <= 0) return [];
 
@@ -118,13 +111,11 @@ export function DateTimePicker({
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  // Calendar generation logic
   const daysInMonth = getDaysInMonth(currentMonth);
   const firstDayOfMonth = getDay(startOfMonth(currentMonth));
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
-  // Helper to create a date from day number in current month
   const getDateFromDay = (day: number): Date => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -144,7 +135,6 @@ export function DateTimePicker({
 
   return (
     <div className="grid lg:grid-cols-2 gap-8">
-      {/* Calendar Section */}
       <div className="bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 transition-colors duration-300 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 transition-colors duration-300 capitalize">
@@ -168,7 +158,6 @@ export function DateTimePicker({
           </div>
         </div>
 
-        {/* Weekday Headers */}
         <div className="grid grid-cols-7 mb-4 text-center">
           {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
             <div key={i} className="text-xs font-bold text-slate-400 dark:text-slate-500">
@@ -177,7 +166,6 @@ export function DateTimePicker({
           ))}
         </div>
 
-        {/* Days Grid */}
         <div className="grid grid-cols-7 gap-2">
           {blanks.map((i) => (
             <div key={`blank-${i}`} />
@@ -213,7 +201,6 @@ export function DateTimePicker({
         </div>
       </div>
 
-      {/* Time Slots Section */}
       <div className="space-y-4 bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 flex flex-col min-h-[400px] transition-colors duration-300 shadow-sm">
         <div className="mb-6">
           <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 mb-1 transition-colors duration-300">

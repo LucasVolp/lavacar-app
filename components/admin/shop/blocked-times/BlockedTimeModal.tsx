@@ -72,7 +72,6 @@ export const BlockedTimeModal: React.FC<BlockedTimeModalProps> = ({
         className="mt-6 flex flex-col gap-5"
         initialValues={{ type: "FULL_DAY" }}
       >
-        {/* Type Selector */}
         <Form.Item
           name="type"
           className="!mb-0"
@@ -182,7 +181,6 @@ export const BlockedTimeModal: React.FC<BlockedTimeModalProps> = ({
           </Form.Item>
         </div>
 
-        {/* Custom Alert */}
         <div className="flex gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20">
           <WarningOutlined className="text-amber-500 dark:text-amber-400 text-lg flex-shrink-0 mt-0.5" />
           <div>
@@ -195,7 +193,6 @@ export const BlockedTimeModal: React.FC<BlockedTimeModalProps> = ({
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className="flex justify-end gap-3 pt-6 border-t border-zinc-100 dark:border-zinc-800">
           <Button 
             onClick={onCancel} 

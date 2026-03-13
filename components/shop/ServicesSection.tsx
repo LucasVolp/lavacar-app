@@ -30,7 +30,6 @@ function formatDuration(minutes: number): string {
   return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
 }
 
-// Service Card Component
 function ServiceCard({
   service,
   isPopular,
@@ -51,7 +50,6 @@ function ServiceCard({
         }
       `}
     >
-      {/* Photo header */}
       {service.photoUrl ? (
         <div className="relative w-full h-40 overflow-hidden">
           <img
@@ -69,7 +67,6 @@ function ServiceCard({
         </div>
       )}
 
-      {/* Popular Badge */}
       {isPopular && (
         <div className="absolute top-0 right-0 z-10 transition-opacity">
           <div className="bg-indigo-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl shadow-lg flex items-center gap-1">
@@ -79,7 +76,6 @@ function ServiceCard({
       )}
 
       <div className="p-6">
-        {/* Header */}
         <div className="mb-4">
           <h4 className="text-slate-900 dark:text-slate-50 font-bold text-lg mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
             {service.name}
@@ -91,7 +87,6 @@ function ServiceCard({
           )}
         </div>
 
-        {/* Info Row */}
         <div className="flex items-center gap-4 mb-6">
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-500 text-xs font-medium uppercase tracking-wide">
             <ClockCircleOutlined />
@@ -101,7 +96,6 @@ function ServiceCard({
           </div>
         </div>
 
-        {/* Price & CTA */}
         <div className="flex items-end justify-between pt-4 border-t border-slate-100 dark:border-[#27272a] group-hover:border-slate-200 dark:group-hover:border-slate-700/50 transition-colors">
           <div>
             <span className="text-slate-500 dark:text-slate-500 text-xs block mb-1">
@@ -152,12 +146,10 @@ export function ServicesSection({
 
   return (
     <section className="py-24 bg-slate-50 dark:bg-[#09090b] border-y border-slate-200 dark:border-[#27272a] relative overflow-hidden transition-colors duration-300">
-      {/* Background decorations */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-500/20">
@@ -187,19 +179,17 @@ export function ServicesSection({
           </div>
         ) : (
           <>
-            {/* Services Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeServices.slice(0, 6).map((service, index) => (
                 <ServiceCard
                   key={service.id}
                   service={service}
-                  isPopular={index === 0} // Just heuristic
+                  isPopular={index === 0}
                   onBooking={onBooking}
                 />
               ))}
             </div>
 
-            {/* CTA */}
             {activeServices.length > 6 && (
               <div className="text-center mt-16">
                 <button

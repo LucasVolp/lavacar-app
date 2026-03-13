@@ -8,27 +8,16 @@ import type { MenuProps } from "antd";
 const { Title, Text } = Typography;
 
 interface AppSidebarProps {
-  /** Largura da sidebar quando expandida */
   width?: number;
-  /** Largura da sidebar quando colapsada */
   collapsedWidth?: number;
-  /** Logo/ícone do topo */
   logo: React.ReactNode;
-  /** Título principal */
   title: string;
-  /** Subtítulo (opcional) */
   subtitle?: string;
-  /** Items do menu */
   menuItems: MenuProps["items"];
-  /** Key selecionada no menu */
   selectedKey: string;
-  /** Callback ao clicar em item do menu */
   onMenuClick: (key: string) => void;
-  /** Conteúdo adicional no footer (opcional) */
   footerContent?: React.ReactNode;
-  /** Cor da borda */
   borderColor?: string;
-  /** Cor de fundo do logo */
   logoGradient?: string;
 }
 
@@ -78,7 +67,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
   return (
     <>
-      {/* Sidebar Fixa */}
       <aside
         className="fixed left-0 top-0 h-screen z-50 bg-white transition-all duration-200"
         style={{ 
@@ -86,8 +74,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           borderRight: `1px solid ${borderColor}`,
         }}
       >
-        {/* Header/Logo */}
-        <div 
+        <div
           className="px-4 py-5 border-b"
           style={{ minHeight: 72, borderColor }}
         >
@@ -116,8 +103,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           )}
         </div>
 
-        {/* Menu de Navegação */}
-        <div 
+        <div
           className="overflow-y-auto overflow-x-hidden"
           style={{ 
             height: footerContent 
@@ -136,8 +122,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           />
         </div>
 
-        {/* Footer */}
-        <div 
+        <div
           className="absolute bottom-0 left-0 right-0 border-t bg-white"
           style={{ borderColor }}
         >
@@ -160,8 +145,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         </div>
       </aside>
 
-      {/* Spacer para o conteúdo principal */}
-      <div 
+      <div
         className="transition-all duration-200"
         style={{ width: collapsed ? collapsedWidth : width }}
       />

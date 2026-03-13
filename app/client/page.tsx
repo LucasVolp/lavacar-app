@@ -38,7 +38,7 @@ export default function ClientDashboard() {
   const { data: appointmentsData, isLoading: appointmentsLoading } = useAppointments(
     { userId: user?.id, perPage: 100 },
     !!user?.id,
-    { refetchInterval: 60000 } // Poll every 60 seconds for real-time updates
+    { refetchInterval: 60000 }
   );
 
   const { data: evaluationsData, isLoading: evaluationsLoading } = useUserEvaluations(
@@ -54,7 +54,6 @@ export default function ClientDashboard() {
     return appointmentsData?.data ?? [];
   }, [appointmentsData]);
 
-  // Upcoming appointments (list)
   const upcomingAppointments = useMemo(() => {
     return allAppointments
       .filter((a) => ["PENDING", "CONFIRMED", "WAITING", "IN_PROGRESS"].includes(a.status))
@@ -62,7 +61,6 @@ export default function ClientDashboard() {
       .sort((a, b) => dayjs(a.scheduledAt).valueOf() - dayjs(b.scheduledAt).valueOf());
   }, [allAppointments]);
 
-  // Last shop for "Reagendar" button
   const lastShopInfo = useMemo(() => {
     const completedApps = allAppointments
       .filter((a) => a.status === "COMPLETED")
@@ -76,7 +74,6 @@ export default function ClientDashboard() {
     };
   }, [allAppointments]);
 
-  // Evaluations for widget
   const evaluationsList = useMemo(() => {
     const evals: EvaluationWithRelations[] = evaluationsData?.data ?? [];
     return evals.slice(0, 3).map((e) => ({
@@ -89,7 +86,6 @@ export default function ClientDashboard() {
     }));
   }, [evaluationsData]);
 
-  // Stats
   const stats = useMemo(() => {
     const totalVisits = allAppointments.filter((a) => a.status === "COMPLETED").length;
 
@@ -111,7 +107,6 @@ export default function ClientDashboard() {
     return { totalVisits, monthlySpending, avgRating };
   }, [allAppointments, evaluationsData]);
 
-  // Normalized vehicles
   const vehiclesNormalized = useMemo(() => {
     return vehicles.map((v) => ({
       id: v.id,
@@ -157,7 +152,6 @@ export default function ClientDashboard() {
     router.push(`/client/appointments/${id}`);
   };
 
-  // Loading states
   if (!user) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center">
@@ -178,12 +172,9 @@ export default function ClientDashboard() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 animate-fade-in pb-10">
-      {/* 1. Header */}
       <DashboardHeader userName={user.firstName} lastShopInfo={lastShopInfo} />
 
-      {/* 2. Main Grid: 3 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Col 1-2: Agendamentos */}
         <div className="lg:col-span-2">
           <UpcomingAppointmentsList
             appointments={upcomingAppointments}
@@ -196,7 +187,6 @@ export default function ClientDashboard() {
           />
         </div>
 
-        {/* Col 3: Stats */}
         <div>
           <QuickStatsWidget
             totalVisits={stats.totalVisits}
@@ -205,7 +195,6 @@ export default function ClientDashboard() {
           />
         </div>
 
-        {/* Col 1-2: Veículos */}
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-colors overflow-hidden h-full">
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
@@ -254,13 +243,11 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        {/* Col 3: Avaliações */}
         <div>
           <LatestReviewsWidget evaluations={evaluationsList} />
         </div>
       </div>
 
-      {/* Cancel Modal */}
       <Modal
         title="Cancelar agendamento"
         open={cancelModalOpen}

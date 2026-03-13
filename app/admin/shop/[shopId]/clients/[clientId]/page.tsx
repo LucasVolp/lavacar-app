@@ -50,7 +50,6 @@ export default function ClientDetailPage() {
   const [preferencesNotes, setPreferencesNotes] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
-  // Pagination state
   const [timelinePage, setTimelinePage] = useState(1);
   const [timelinePageSize, setTimelinePageSize] = useState(TIMELINE_PAGE_SIZE);
   const [galleryPage, setGalleryPage] = useState(1);
@@ -60,14 +59,12 @@ export default function ClientDetailPage() {
   const phone = client?.customPhone || client?.user?.phone || "";
   const email = client?.customEmail || client?.user?.email || "";
 
-  // Fetch paginated appointments for the timeline
   const { data: appointmentsData, isLoading: isLoadingAppointments } = useShopAppointments(
     shopId,
     { userId: userId || undefined, perPage: timelinePageSize, page: timelinePage, sortOrder: "desc" },
     !!shopId && !!userId
   );
 
-  // Also fetch all completed for LTV calculation (smaller payload)
   const { data: allAppointmentsData } = useShopAppointments(
     shopId,
     { userId: userId || undefined, perPage: 500, sortOrder: "desc" },
@@ -90,7 +87,6 @@ export default function ClientDetailPage() {
     setPreferencesNotes(client?.notes || "");
   }, [client?.notes]);
 
-  // Fetch checklists only for the current page of appointments
   const checklistQueries = useQueries({
     queries: appointments.map((appointment) => ({
       queryKey: ["checklist", "appointment", appointment.id],
@@ -163,7 +159,6 @@ export default function ClientDetailPage() {
   const daysSinceLastVisit = lastVisitDate ? dayjs().diff(lastVisitDate, "day") : 0;
   const isOverdue = !!lastVisitDate && daysSinceLastVisit > avgReturnDays;
 
-  // Build gallery from current page checklists
   const vistoriaGallery = useMemo(() => {
     return appointments.flatMap((appointment) => {
       const checklist = checklistByAppointmentId[appointment.id];

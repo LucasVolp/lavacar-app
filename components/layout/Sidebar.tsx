@@ -215,7 +215,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           : "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
       }}
     >
-      {/* Logo com design premium */}
       <div
         className="h-20 flex items-center justify-center gap-3 px-5"
         style={{ 
@@ -226,22 +225,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
         }}
       >
         <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform hover:scale-105 transition-transform cursor-pointer">
-          <span className="text-white font-bold text-xl">L</span>
+          <span className="text-white font-bold text-xl">N</span>
         </div>
         {!collapsed && (
           <div className="flex flex-col">
             <Text strong className="text-xl leading-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-              Lavacar
+              NexoCar
             </Text>
             <Text type="secondary" className="text-xs leading-tight">
-              Sistema Profissional
+              Sistema de Gestão de Agendamentos
             </Text>
           </div>
         )}
       </div>
 
-      {/* Menu com scroll personalizado */}
-      <div 
+      <div
         className="h-[calc(100vh-80px)] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-600"
         style={{
           scrollbarWidth: "thin",
@@ -259,7 +257,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           }}
         />
         
-        {/* Footer da Sidebar */}
         {!collapsed && (
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t" style={{ borderColor, background: "inherit" }}>
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">

@@ -12,7 +12,15 @@ export const organizationMemberService = {
       });
       return response.data?.data || [];
     } catch (error: unknown) {
-      console.error(`Erro ao buscar membros da organização ${organizationId}:`, error);
+      throw error;
+    }
+  },
+
+  findByShopId: async (shopId: string) => {
+    try {
+      const response: AxiosResponse<OrganizationMember[]> = await axiosInstance.get(`${base}/shop/${shopId}`);
+      return response.data || [];
+    } catch (error: unknown) {
       throw error;
     }
   },
@@ -22,7 +30,6 @@ export const organizationMemberService = {
       const response: AxiosResponse<OrganizationMember> = await axiosInstance.patch(`${base}/${id}`, payload);
       return response.data;
     } catch (error: unknown) {
-      console.error(`Erro ao atualizar membro ${id}:`, error);
       throw error;
     }
   },
@@ -32,7 +39,6 @@ export const organizationMemberService = {
       const response = await axiosInstance.delete(`${base}/${id}`);
       return response.data;
     } catch (error: unknown) {
-      console.error(`Erro ao remover membro ${id}:`, error);
       throw error;
     }
   },

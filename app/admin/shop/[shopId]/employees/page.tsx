@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import { Typography, Spin, Card, Input, Button } from "antd";
 import { TeamOutlined, SearchOutlined, UserAddOutlined } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
-import { useOrganizationMembers } from "@/hooks/useOrganizations";
-import { useUsers } from "@/hooks/useUsers";
+import { useOrganizationMembersByShop } from "@/hooks/useOrganizations";
 import { useAuth } from "@/contexts/AuthContext";
 import { MembersList, ExtendedMember } from "@/components/organization/members/MembersList";
 import { InviteEmployeeModal } from "@/components/admin/shop/employees";
@@ -18,30 +17,22 @@ export default function ShopEmployeesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
-  // Fetch members of the organization that owns this shop
-  const { data: members = [], isLoading: isLoadingMembers } = useOrganizationMembers(shop?.organizationId);
-  const { data: users = [], isLoading: isLoadingUsers } = useUsers();
+  const { data: members = [], isLoading: isLoadingMembers } = useOrganizationMembersByShop(shop?.id);
 
-  const isLoading = isLoadingShop || isLoadingMembers || isLoadingUsers;
+  const isLoading = isLoadingShop || isLoadingMembers;
 
   const extendedMembers = React.useMemo(() => {
     if (!Array.isArray(members)) return [];
 
-    // Map existing members
-    const mappedMembers = members.map(member => {
-      const user = users.find(u => u.id === member.userId);
-      return {
-        ...member,
-        user: user ? {
-          name: `${user.firstName} ${user.lastName || ''}`.trim(),
-          email: user.email,
-          avatarUrl: user.picture
-        } : undefined
-      };
-    }) as ExtendedMember[];
-
-    return mappedMembers;
-  }, [members, users]);
+    return members.map(member => ({
+      ...member,
+      user: member.user ? {
+        name: `${member.user.firstName} ${member.user.lastName || ''}`.trim(),
+        email: member.user.email,
+        avatarUrl: member.user.picture
+      } : undefined
+    })) as ExtendedMember[];
+  }, [members]);
 
   const filteredMembers = extendedMembers.filter(member => {
     const name = member.user?.name || "Membro";
@@ -60,7 +51,6 @@ export default function ShopEmployeesPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
            <div className="flex items-center gap-2 mb-1">
@@ -106,7 +96,11 @@ export default function ShopEmployeesPage() {
       </Card>
       </div>
 
-      <MembersList members={filteredMembers} currentUserId={currentUser?.id} />
+      <MembersList
+        members={filteredMembers}
+        currentUserId={currentUser?.id}
+        isCurrentUserOwner={currentUser?.id === shop?.ownerId}
+      />
 
       <InviteEmployeeModal
         open={isInviteModalOpen}

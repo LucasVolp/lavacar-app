@@ -4,7 +4,6 @@ export { default as ShopList } from "./ShopList";
 export { default as ShopPageHeader } from "./ShopPageHeader";
 export { default as ShopDetailModal } from "./ShopDetailModal";
 
-// Landing page components
 export { HeroSection } from "./HeroSection";
 export { ServicesSection } from "./ServicesSection";
 export { ReviewsSection } from "./ReviewsSection";

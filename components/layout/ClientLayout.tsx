@@ -164,7 +164,6 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
 
   return (
     <Layout className="min-h-screen" hasSider>
-      {/* Sidebar */}
       <Sider
         trigger={null}
         collapsible
@@ -183,7 +182,6 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
         }}
         theme={isDarkMode ? "dark" : "light"}
       >
-        {/* Logo */}
         <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-lg shadow-indigo-500/20">
             <UserOutlined className="text-xl" />
@@ -191,7 +189,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           {!collapsed && (
             <div className="flex flex-col overflow-hidden">
               <Text strong className="text-sm leading-tight truncate text-zinc-800 dark:text-zinc-100">
-                Lavacar
+                NexoCar
               </Text>
               <Text type="secondary" className="text-xs leading-tight text-zinc-500">
                 Área do Cliente
@@ -200,7 +198,6 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           )}
         </div>
 
-        {/* Menu */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ height: "calc(100vh - 64px)" }}>
           <Menu
             mode="inline"
@@ -214,9 +211,7 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
         </div>
       </Sider>
 
-      {/* Main Content Area */}
       <Layout style={{ transition: "margin-left 0.2s" }}>
-        {/* Header */}
         <AntHeader
           className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? "bg-zinc-950/80" : "bg-white/80"}`}
           style={{
@@ -280,17 +275,15 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
           </div>
         </AntHeader>
 
-        {/* Content */}
         <Content className="p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
           <div className="w-full max-w-[1600px] mx-auto animate-fade-in">
             {children}
           </div>
         </Content>
 
-        {/* Footer */}
         <AntFooter className="text-center" style={{ borderTop: `1px solid ${borderColor}` }}>
           <Text type="secondary" className="text-xs">
-            © {new Date().getFullYear()} Lavacar - Área do Cliente
+            © {new Date().getFullYear()} NexoCar - Área do Cliente
           </Text>
         </AntFooter>
       </Layout>

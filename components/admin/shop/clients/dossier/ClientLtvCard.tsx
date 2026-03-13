@@ -34,7 +34,6 @@ export const ClientLtvCard: React.FC<ClientLtvCardProps> = ({
 }) => {
   return (
     <Card className="!rounded-2xl !shadow-sm hover:!shadow-md transition-shadow !overflow-hidden !p-0">
-      {/* LTV Hero section */}
       <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-6 text-white rounded-2xl m-3 mb-0">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
@@ -52,7 +51,6 @@ export const ClientLtvCard: React.FC<ClientLtvCardProps> = ({
         </div>
       </div>
 
-      {/* Stats grid */}
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <Tooltip title="Ticket médio baseado nos atendimentos concluídos">
@@ -80,7 +78,6 @@ export const ClientLtvCard: React.FC<ClientLtvCardProps> = ({
           </Tooltip>
         </div>
 
-        {/* Overdue alert */}
         {isOverdue && (
           <div className="flex items-center gap-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 p-3">
             <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
@@ -106,7 +103,6 @@ export const ClientLtvCard: React.FC<ClientLtvCardProps> = ({
           </div>
         )}
 
-        {/* WhatsApp CTA */}
         <Button
           type="primary"
           icon={<WhatsAppOutlined />}

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { authService, AuthUser, LoginCredentials, RegisterPayload } from "@/services/auth";
+import { authService, AuthUser, LoginCredentials, RegisterPayload, CompleteRegistrationPayload } from "@/services/auth";
 import { message } from "antd";
 import Cookies from "js-cookie";
 
@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   loginWithToken: (token: string) => Promise<boolean>;
   register: (payload: RegisterPayload) => Promise<boolean>;
+  completeRegistration: (payload: CompleteRegistrationPayload) => Promise<boolean>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -28,7 +29,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = !!user;
 
-  // Carregar usuário do token ao iniciar
   useEffect(() => {
     const initializeAuth = async () => {
       const token = Cookies.get("access_token");
@@ -37,8 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
           const userData = await authService.me();
           setUser(userData);
-        } catch (error) {
-          console.error("Erro ao recuperar usuário:", error);
+        } catch {
           Cookies.remove("access_token");
         }
       }
@@ -61,8 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       message.success("Login realizado com sucesso!");
       return true;
     } catch (error: unknown) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).response?.data?.message || "Erro ao fazer login";
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Erro ao fazer login";
       message.error(errorMessage);
       return false;
     } finally {
@@ -77,8 +75,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
        const userData = await authService.me();
        setUser(userData);
        return true;
-     } catch (error) {
-       console.error("Failed to login with token", error);
+     } catch {
        Cookies.remove("access_token");
        return false;
      } finally {
@@ -98,8 +95,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
       message.success("Conta criada com sucesso!");
       return true;
     } catch (error: unknown) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const errorMessage = (error as any).response?.data?.message || "Erro ao criar conta";
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Erro ao criar conta";
+      message.error(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const completeRegistration = useCallback(async (payload: CompleteRegistrationPayload): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const response = await authService.completeRegistration(payload);
+
+      const token = response.accessToken || response.access_token || "";
+      Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
+      setUser(response.user);
+
+      message.success("Cadastro concluído com sucesso!");
+      return true;
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Erro ao completar cadastro";
       message.error(errorMessage);
       return false;
     } finally {
@@ -117,8 +133,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const userData = await authService.me();
       setUser(userData);
-    } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
+    } catch {
       logout();
     }
   }, [logout]);
@@ -132,6 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         login,
         loginWithToken,
         register,
+        completeRegistration,
         logout,
         refreshUser,
       }}

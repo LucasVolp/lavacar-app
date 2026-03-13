@@ -47,8 +47,8 @@ export const shopClientService = {
         { params: { shopId, userId } }
       );
       return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      if ((error as { response?: { status?: number } }).response?.status === 404) {
         return null;
       }
       throw error;

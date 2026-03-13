@@ -79,7 +79,6 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                 className="group p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 hover:border-cyan-200 dark:hover:border-cyan-800 transition-colors cursor-pointer"
                 onClick={() => onClick?.(item.id)}
               >
-                {/* Header row: service name + status + price */}
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span className="font-semibold text-sm text-zinc-800 dark:text-zinc-100 truncate">
@@ -93,7 +92,6 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                   </span>
                 </div>
 
-                {/* Info grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
                   <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                     <ShopOutlined className="text-cyan-500 shrink-0" />
@@ -127,7 +125,6 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                   </div>
                 </div>
 
-                {/* Actions row */}
                 <div
                   className="flex items-center gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-700"
                   onClick={(e) => e.stopPropagation()}

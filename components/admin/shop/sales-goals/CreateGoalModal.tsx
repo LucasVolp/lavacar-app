@@ -15,10 +15,6 @@ import { UseMutationResult } from "@tanstack/react-query";
 
 const { RangePicker } = DatePicker;
 
-/**
- * Disable past dates (yesterday and before)
- * Only allow today or future dates for goal creation
- */
 const disabledDate = (current: dayjs.Dayjs): boolean => {
   return current && current < dayjs().startOf('day');
 };
@@ -83,7 +79,6 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
   onCancel,
   editingGoal,
   shopId,
-  salesGoals,
   createGoal,
   updateGoal,
 }) => {
@@ -117,7 +112,6 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
 
   const handleFinish = async (values: SalesGoalFormValues) => {
     try {
-      // 1. Sanitization
       let sanitizedAmount = 0;
       if (typeof values.amount === 'string') {
         const cleaned = (values.amount as string).replace(/R\$\s?|(\.*)/g, "").replace(",", ".");
@@ -127,7 +121,6 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
       }
       if (isNaN(sanitizedAmount)) sanitizedAmount = 0;
 
-      // 2. Strict Date Logic
       let startDateStr = "";
       let endDateStr = "";
 
@@ -161,8 +154,7 @@ export const CreateGoalModal: React.FC<CreateGoalModalProps> = ({
         message.success("Meta criada com sucesso");
       }
       onCancel();
-    } catch (error) {
-      console.error('Submission Error:', error);
+    } catch {
       message.error("Erro ao salvar meta");
     }
   };

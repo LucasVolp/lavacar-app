@@ -23,7 +23,6 @@ export const EvaluationStats: React.FC<EvaluationStatsProps> = ({ stats, isLoadi
       styles={{ body: { padding: '24px' } }}
     >
       <div className="flex flex-col gap-6">
-        {/* Média Geral */}
         <div className="flex flex-col items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
            <div className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
              {stats.averageRating.toFixed(1)}
@@ -34,7 +33,6 @@ export const EvaluationStats: React.FC<EvaluationStatsProps> = ({ stats, isLoadi
            </Text>
         </div>
 
-        {/* Barras de Distribuição */}
         <div className="space-y-3">
           {[5, 4, 3, 2, 1].map((star) => {
             const count = stats.ratingDistribution[star] || 0;

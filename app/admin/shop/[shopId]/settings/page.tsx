@@ -15,10 +15,6 @@ import {
 } from "@/components/admin/shop/settings/components";
 import { SettingsConfigForm } from "@/components/admin/shop/settings";
 
-/**
- * Settings Command Center - Dashboard Administrativa da Loja
- * Visual style: Professional profile interface with quick management cards
- */
 export default function SettingsPage() {
   const { shop, shopId, isLoading } = useShopAdmin();
   const searchParams = useSearchParams();
@@ -27,12 +23,10 @@ export default function SettingsPage() {
   const [savingAdvanced, setSavingAdvanced] = useState(false);
   const [configForm] = Form.useForm();
 
-  // Fetch related data for management cards
   const { data: schedulesData } = useShopSchedules(shopId);
   const { data: blockedTimesData } = useShopBlockedTimes(shopId);
   const { data: membersData } = useOrganizationMembers(shop?.organizationId || "");
 
-  // Normalize data - services return arrays directly
   const schedules = schedulesData ?? [];
   const blockedTimes = blockedTimesData ?? [];
   const memberCount = membersData?.length ?? 0;

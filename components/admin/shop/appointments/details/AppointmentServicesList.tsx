@@ -12,7 +12,6 @@ interface AppointmentServicesListProps {
 export const AppointmentServicesList: React.FC<AppointmentServicesListProps> = ({ services }) => {
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden transition-colors">
-      {/* Header */}
       <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ToolOutlined className="text-blue-500" />
@@ -25,7 +24,6 @@ export const AppointmentServicesList: React.FC<AppointmentServicesListProps> = (
         </span>
       </div>
 
-      {/* List */}
       <ul className="divide-y divide-zinc-100 dark:divide-zinc-800" role="list" aria-label="Lista de serviços">
         {services.map((service) => (
           <li

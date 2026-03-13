@@ -134,7 +134,6 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                 className="group flex flex-col p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all cursor-pointer"
                 onClick={() => router.push(`/admin/shop/${shopId}/appointments/${appointment.id}`)}
               >
-                {/* Header: Horário + Status */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="flex flex-col items-center justify-center bg-white dark:bg-zinc-800 rounded-lg px-3 py-2 min-w-[60px] border border-zinc-200 dark:border-zinc-700 shadow-sm">
@@ -169,9 +168,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                   </div>
                 </div>
 
-                {/* Info: Cliente + Veículo */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-zinc-200 dark:border-zinc-700">
-                  {/* Cliente */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <button
                       type="button"
@@ -183,7 +180,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                     >
                       <Avatar
                         size={32}
-                        src={appointment.user?.picture || clientPictureByUserId[appointment.userId]}
+                        src={appointment.user?.picture || clientPictureByUserId[appointment.userId] || undefined}
                         icon={!appointment.user?.picture ? <UserOutlined className="text-indigo-600 dark:text-indigo-400 text-sm" /> : undefined}
                         className="bg-indigo-100 dark:bg-indigo-900/30 flex-shrink-0"
                       />
@@ -200,7 +197,6 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                     </button>
                   </div>
 
-                  {/* Veículo */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
                       <CarOutlined className="text-emerald-600 dark:text-emerald-400 text-sm" />

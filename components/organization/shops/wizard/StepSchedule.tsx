@@ -11,11 +11,11 @@ export interface ScheduleRow {
   weekday: Weekday;
   label: string;
   isOpen: boolean;
-  startTime: string; // HH:mm
-  endTime: string;   // HH:mm
+  startTime: string;
+  endTime: string;
   hasBreak: boolean;
-  breakStartTime: string; // HH:mm
-  breakEndTime: string;   // HH:mm
+  breakStartTime: string;
+  breakEndTime: string;
 }
 
 interface StepScheduleProps {
@@ -149,7 +149,6 @@ export const StepSchedule: React.FC<StepScheduleProps> = ({
                   }`}
                 >
                   <Row gutter={[16, 16]} align="middle">
-                    {/* Toggle & Day Name */}
                     <Col xs={24} sm={6}>
                       <div className="flex items-center gap-3">
                         <Switch
@@ -175,7 +174,6 @@ export const StepSchedule: React.FC<StepScheduleProps> = ({
                       </div>
                     </Col>
 
-                    {/* Opening Hours */}
                     <Col xs={24} sm={8}>
                       <div
                         className={`flex items-center gap-2 transition-opacity duration-300 ${
@@ -215,7 +213,6 @@ export const StepSchedule: React.FC<StepScheduleProps> = ({
                       </div>
                     </Col>
 
-                    {/* Break Time */}
                     <Col xs={24} sm={10}>
                       <div
                         className={`flex items-center gap-2 flex-wrap transition-opacity duration-300 ${
@@ -279,7 +276,6 @@ export const StepSchedule: React.FC<StepScheduleProps> = ({
         </Card>
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
         <Button size="large" onClick={onBack} className="text-zinc-600 dark:text-zinc-300">
           Voltar

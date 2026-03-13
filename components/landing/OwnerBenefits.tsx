@@ -14,13 +14,11 @@ import { formatVehiclePlate } from "@/utils/vehiclePlate";
 export const OwnerBenefits = () => {
   return (
     <section id="benefits" className="py-24 px-6 bg-base-200 border-y border-base-content/5 relative overflow-hidden transition-colors duration-300">
-      {/* Background decoration */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row gap-16 items-center">
           
-          {/* Content */}
           <div className="w-full md:w-1/2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
               <span className="text-blue-500 text-sm font-medium">Exclusivo para Donos</span>
@@ -57,11 +55,9 @@ export const OwnerBenefits = () => {
             </div>
           </div>
 
-          {/* Visual/Stats Representation - Carousel */}
           <div className="w-full md:w-1/2 relative">
             <AppCarousel />
             
-            {/* Background elements */}
             <div className="absolute -z-10 top-10 -right-10 w-full h-full bg-base-300/30 rounded-2xl transform rotate-6 border border-base-content/5" />
             <div className="absolute -z-20 top-20 -right-20 w-full h-full bg-base-200/20 rounded-2xl transform rotate-12 border border-base-content/5" />
           </div>
@@ -89,7 +85,6 @@ const AppCarousel = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   const slides = [
-    // Slide 1: Financeiro
     <div key="finance" className="h-full flex flex-col justify-between animate-fade-in">
       <div>
         <div className="flex items-center justify-between mb-8">
@@ -125,7 +120,6 @@ const AppCarousel = () => {
       </div>
     </div>,
 
-    // Slide 2: Agenda
     <div key="schedule" className="h-full flex flex-col animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -162,7 +156,6 @@ const AppCarousel = () => {
       </div>
     </div>,
 
-    // Slide 3: Avaliações e Clientes
     <div key="reviews" className="h-full flex flex-col justify-between animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -202,11 +195,11 @@ const AppCarousel = () => {
   ];
 
   useEffect(() => {
-    if (isHovered) return; // Pause on hover
+    if (isHovered) return;
 
     const interval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
-    }, 4000); // 4 seconds per slide
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [slides.length, isHovered]);
@@ -217,14 +210,12 @@ const AppCarousel = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Slide Content */}
       <div className="flex-1 overflow-hidden relative">
          <div key={activeSlide} className="animate-fade-in-up h-full">
             {slides[activeSlide]}
          </div>
       </div>
 
-      {/* Indicators */}
       <div className="flex justify-center gap-2 mt-6 pt-6 border-t border-base-content/5">
         {slides.map((_, idx) => (
           <button

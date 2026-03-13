@@ -28,7 +28,6 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ appointment, onReview 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex flex-col gap-3">
-        {/* Row 1: Services (bold) + Status badge ... Price (green) */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
@@ -42,7 +41,6 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ appointment, onReview 
           </span>
         </div>
 
-        {/* Row 2: Info grid — Date/Hora | Loja | Veículo */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
             <ClockCircleOutlined className="text-zinc-400 shrink-0" />
@@ -70,7 +68,6 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ appointment, onReview 
           )}
         </div>
 
-        {/* Action: Avaliar OR Avaliado badge */}
         {isCompleted && (
           <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
             {hasEvaluation ? (

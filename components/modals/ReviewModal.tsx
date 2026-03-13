@@ -150,7 +150,6 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           />
         </div>
 
-        {/* Photo URLs section */}
         <div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2">
             <PictureOutlined className="mr-1" />

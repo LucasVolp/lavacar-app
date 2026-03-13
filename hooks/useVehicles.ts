@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { vehicleService } from "@/services/vehicle";
 import { CreateVehiclePayload, UpdateVehiclePayload, Vehicle } from "@/types/vehicle";
 
-// Query Keys
 export const vehicleKeys = {
   all: ["vehicles"] as const,
   lists: () => [...vehicleKeys.all, "list"] as const,
@@ -13,9 +12,6 @@ export const vehicleKeys = {
   detail: (id: string) => [...vehicleKeys.details(), id] as const,
 };
 
-/**
- * Hook para buscar todos os veículos
- */
 export function useVehicles(enabled = true) {
   return useQuery({
     queryKey: vehicleKeys.lists(),
@@ -28,10 +24,6 @@ export function useVehicles(enabled = true) {
   });
 }
 
-/**
- * Hook para buscar veículos de um usuário específico
- * Usa o filtro userId do backend para buscar apenas os veículos do usuário.
- */
 export function useUserVehicles(userId: string | null, enabled = true) {
   return useQuery({
     queryKey: vehicleKeys.byUser(userId || ""),
@@ -44,9 +36,6 @@ export function useUserVehicles(userId: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para buscar um veículo específico
- */
 export function useVehicle(id: string | null, enabled = true) {
   return useQuery({
     queryKey: vehicleKeys.detail(id || ""),
@@ -55,9 +44,6 @@ export function useVehicle(id: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para criar um veículo
- */
 export function useCreateVehicle() {
   const queryClient = useQueryClient();
 
@@ -69,9 +55,6 @@ export function useCreateVehicle() {
   });
 }
 
-/**
- * Hook para atualizar um veículo
- */
 export function useUpdateVehicle() {
   const queryClient = useQueryClient();
 
@@ -84,9 +67,6 @@ export function useUpdateVehicle() {
   });
 }
 
-/**
- * Hook para deletar um veículo
- */
 export function useDeleteVehicle() {
   const queryClient = useQueryClient();
 

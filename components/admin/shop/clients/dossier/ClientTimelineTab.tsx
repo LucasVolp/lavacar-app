@@ -79,7 +79,6 @@ export const ClientTimelineTab: React.FC<ClientTimelineTabProps> = ({
               onClick={() => onAppointmentClick?.(appointment.id)}
             >
               <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                {/* Date indicator */}
                 <div className="sm:w-20 flex sm:flex-col items-center sm:items-center gap-2 sm:gap-0 sm:pt-1 shrink-0">
                   <div className="text-center">
                     <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">
@@ -91,7 +90,6 @@ export const ClientTimelineTab: React.FC<ClientTimelineTabProps> = ({
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge status={appointment.status} />
@@ -103,7 +101,6 @@ export const ClientTimelineTab: React.FC<ClientTimelineTabProps> = ({
                     )}
                   </div>
 
-                  {/* Services */}
                   <div className="flex items-start gap-2">
                     <ToolOutlined className="text-zinc-400 mt-0.5 shrink-0" />
                     <Text className="text-sm dark:text-zinc-300">
@@ -111,7 +108,6 @@ export const ClientTimelineTab: React.FC<ClientTimelineTabProps> = ({
                     </Text>
                   </div>
 
-                  {/* Info row */}
                   <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400">
                     <span className="flex items-center gap-1">
                       <DollarOutlined className="text-emerald-500" />
@@ -131,7 +127,6 @@ export const ClientTimelineTab: React.FC<ClientTimelineTabProps> = ({
                     </span>
                   </div>
 
-                  {/* Checklist Photos */}
                   {checklist?.photos?.length ? (
                     <div className="pt-2" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1.5 mb-2">

@@ -49,9 +49,6 @@ export default function ClientProfilePage() {
   const [passwordForm] = Form.useForm();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  // Logic to determine if current password is required
-  // If user has a password (email/pass) OR if they are OAuth but already set a password
-  // Default to true for safety if undefined
   const requiresCurrentPassword = user?.hasPassword !== false && !user?.provider;
 
   useEffect(() => {
@@ -93,7 +90,6 @@ export default function ClientProfilePage() {
       };
       
       if (requiresCurrentPassword && values.currentPassword) {
-        // Backend handles verification
       }
 
       await updateUser.mutateAsync({

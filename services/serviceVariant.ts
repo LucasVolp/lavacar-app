@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import axiosInstance from './axiosInstance';
 import { VehicleSize } from '@/types/enums';
 import { PaginatedResult } from '@/types/pagination';
@@ -33,13 +33,6 @@ export const serviceVariantService = {
       const response: AxiosResponse<ServiceVariant> = await axiosInstance.post(base, payload);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao criar variação de serviço (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error('Erro desconhecido ao criar variação de serviço:', error);
-      }
       throw error;
     }
   },
@@ -57,13 +50,6 @@ export const serviceVariantService = {
       const response: AxiosResponse<PaginatedResult<ServiceVariant>> = await axiosInstance.get(base, { params });
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao listar variações de serviço (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error('Erro desconhecido ao listar variações de serviço:', error);
-      }
       throw error;
     }
   },
@@ -73,13 +59,6 @@ export const serviceVariantService = {
       const response: AxiosResponse<ServiceVariant> = await axiosInstance.get(`${base}/${id}`);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar variação ${id} (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao buscar variação ${id}:`, error);
-      }
       throw error;
     }
   },
@@ -89,13 +68,6 @@ export const serviceVariantService = {
       const response: AxiosResponse<ServiceVariant> = await axiosInstance.patch(`${base}/${id}`, payload);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao atualizar variação ${id} (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao atualizar variação ${id}:`, error);
-      }
       throw error;
     }
   },
@@ -105,13 +77,6 @@ export const serviceVariantService = {
       const response = await axiosInstance.delete(`${base}/${id}`);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao remover variação ${id} (${status || 'desconhecido'}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao remover variação ${id}:`, error);
-      }
       throw error;
     }
   },

@@ -20,7 +20,6 @@ export const QuickStatsWidget: React.FC<QuickStatsWidgetProps> = ({
 }) => {
   return (
     <div className="bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-colors overflow-hidden h-full">
-      {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
           <StarOutlined className="text-amber-600 dark:text-amber-400 text-sm" />
@@ -31,7 +30,6 @@ export const QuickStatsWidget: React.FC<QuickStatsWidgetProps> = ({
       </div>
 
       <div className="p-4 flex flex-col gap-3">
-        {/* Total Visits */}
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -44,7 +42,6 @@ export const QuickStatsWidget: React.FC<QuickStatsWidgetProps> = ({
           </span>
         </div>
 
-        {/* Monthly Spending */}
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
@@ -57,7 +54,6 @@ export const QuickStatsWidget: React.FC<QuickStatsWidgetProps> = ({
           </span>
         </div>
 
-        {/* Avg Rating */}
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">

@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import axiosInstance from "./axiosInstance";
 import {
   Checklist,
@@ -49,19 +49,10 @@ export const createChecklist = async (
     const payload = isFormData(data) ? data : toFormData(data);
     assertValidAppointmentId(payload.get("appointmentId"));
 
-    // Content-Type é gerenciado automaticamente pelo interceptor do axiosInstance
-    // quando detecta FormData — não definir manualmente.
     const response: AxiosResponse<Checklist> = await axiosInstance.post(base, payload);
 
     return response.data;
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-      console.error(`Erro ao criar checklist (${status || "desconhecido"}):`, message);
-    } else {
-      console.error("Erro desconhecido ao criar checklist:", error);
-    }
     throw error;
   }
 };
@@ -78,23 +69,11 @@ export const getChecklistByAppointment = async (
     );
     return response.data;
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-
-      if (status === 404 && options?.silentNotFound) {
-        throw error;
+    if (options?.silentNotFound) {
+      const axiosErr = error as { response?: { status?: number } };
+      if (axiosErr.response?.status === 404) {
+        return null as unknown as Checklist;
       }
-
-      console.error(
-        `Erro ao buscar checklist do agendamento ${normalizedAppointmentId} (${status || "desconhecido"}):`,
-        message
-      );
-    } else {
-      console.error(
-        `Erro desconhecido ao buscar checklist do agendamento ${normalizedAppointmentId}:`,
-        error
-      );
     }
     throw error;
   }
@@ -116,13 +95,6 @@ export const checklistService = {
       const response: AxiosResponse<Checklist> = await axiosInstance.get(`${base}/${id}`);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar checklist ${id} (${status || "desconhecido"}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao buscar checklist ${id}:`, error);
-      }
       throw error;
     }
   },
@@ -137,13 +109,6 @@ export const checklistService = {
       );
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao atualizar checklist ${id} (${status || "desconhecido"}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao atualizar checklist ${id}:`, error);
-      }
       throw error;
     }
   },
@@ -153,13 +118,6 @@ export const checklistService = {
       const response = await axiosInstance.delete(`${base}/${id}`);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao deletar checklist ${id} (${status || "desconhecido"}):`, message);
-      } else {
-        console.error(`Erro desconhecido ao deletar checklist ${id}:`, error);
-      }
       throw error;
     }
   },

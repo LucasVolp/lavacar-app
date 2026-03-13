@@ -36,7 +36,7 @@ export const InsightsWeeklyDistribution: React.FC<InsightsWeeklyDistributionProp
                 xs={12}
                 sm={8}
                 md={6}
-                lg={{ flex: "14.28%" }} // 100% / 7 days
+                lg={{ flex: "14.28%" }}
                 key={item.day}
                 className="flex flex-col"
               >

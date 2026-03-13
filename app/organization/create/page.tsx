@@ -51,8 +51,6 @@ export default function CreateOrganizationPage() {
     );
   }
 
-  // If user has organization, we don't render the form (useEffect will redirect), 
-  // but just in case of race conditions or delay, we can return null or the spinner.
   if (organizations && organizations.length > 0) {
      return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
@@ -65,7 +63,6 @@ export default function CreateOrganizationPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
 

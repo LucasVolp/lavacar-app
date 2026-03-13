@@ -70,7 +70,6 @@ export default function OrganizationSettingsPage() {
 
         <DangerZone />
 
-        {/* Footer Actions */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-950/80 backdrop-blur border-t border-zinc-900 flex justify-end gap-3 z-40 md:pl-80">
            <div className="max-w-4xl w-full mx-auto flex justify-end gap-3">
               <Button size="large" className="text-zinc-400 hover:text-white border-zinc-700 bg-transparent">

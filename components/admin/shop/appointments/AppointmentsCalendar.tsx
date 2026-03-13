@@ -45,7 +45,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Sidebar pagination & filter state
   const [sidebarPage, setSidebarPage] = useState(1);
   const [sidebarStatus, setSidebarStatus] = useState<AppointmentStatus | null>(null);
 
@@ -82,7 +81,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
     return filteredSidebarAppointments.slice(start, start + SIDEBAR_PAGE_SIZE);
   }, [filteredSidebarAppointments, sidebarPage]);
 
-  // Reset sidebar pagination when date or filter changes
   const handleDateSelect = useCallback((day: Date) => {
     setSelectedDate(day);
     setSidebarPage(1);
@@ -93,7 +91,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
     setSidebarPage(1);
   }, []);
 
-  // Generate calendar grid days
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
@@ -114,9 +111,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
   return (
     <div className="flex flex-col xl:flex-row gap-8 min-h-[800px] h-auto bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-colors">
 
-      {/* LEFT: Custom Calendar Grid */}
       <div className="flex-1 flex flex-col h-full">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 capitalize m-0">
@@ -131,7 +126,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
           </div>
         </div>
 
-        {/* Weekday Headers */}
         <div className="grid grid-cols-7 mb-4">
           {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
             <div key={day} className="text-center text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
@@ -140,7 +134,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
           ))}
         </div>
 
-        {/* Calendar Grid */}
         <div className="flex-1 grid grid-cols-7 grid-rows-6 gap-2">
           {calendarDays.map((day) => {
             const dateKey = format(day, "yyyy-MM-dd");
@@ -164,7 +157,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                   ${!isCurrentMonth ? "bg-zinc-50/50 dark:bg-zinc-800/30" : ""}
                 `}
               >
-                {/* Day Number */}
                 <div className="flex justify-between items-start mb-1 px-1">
                     <span
                         className={`
@@ -180,7 +172,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                     </span>
                 </div>
 
-                {/* Detailed Event Chips */}
                 <div className="flex-1 flex flex-col gap-1 overflow-hidden">
                     {appointments.slice(0, 3).map((apt) => {
                          const isConfirmed = ['CONFIRMED', 'WAITING', 'IN_PROGRESS'].includes(apt.status);
@@ -220,9 +211,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
         </div>
       </div>
 
-      {/* RIGHT: Detailed Timeline Agenda */}
       <div className="w-full xl:w-[420px] bg-zinc-50/50 dark:bg-zinc-800/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 flex flex-col h-full overflow-hidden shadow-sm">
-        {/* Header */}
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
             <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-100 m-0 capitalize">
                 {format(selectedDate, "EEEE", { locale: ptBR })}
@@ -241,7 +230,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                 )}
             </div>
 
-            {/* Sidebar Status Filter */}
             <div className="mt-4">
                 <Select
                     value={sidebarStatus || "all"}
@@ -265,7 +253,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
             </div>
         </div>
 
-        {/* List */}
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             {sidebarAppointments.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 opacity-60">
@@ -277,7 +264,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                 </div>
             ) : (
                 <div className="space-y-0 relative">
-                    {/* Vertical Timeline Line */}
                     <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-zinc-200 dark:bg-zinc-700 z-0" />
 
                     {sidebarAppointments.map((apt) => {
@@ -295,7 +281,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                                     style={{ backgroundColor: status?.color || '#71717a' }}
                                 />
 
-                                {/* Card */}
                                 <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-zinc-100 dark:border-zinc-800 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer group-hover:-translate-y-1 duration-200">
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2">
@@ -313,7 +298,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                                         </Tooltip>
                                     </div>
 
-                                    {/* Service List */}
                                     <div className="mb-3">
                                         <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                                             {sanitizeText(apt.services[0]?.serviceName)}
@@ -325,7 +309,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                                         )}
                                     </div>
 
-                                    {/* Footer Info */}
                                     <div className="flex items-center justify-between pt-3 border-t border-zinc-50 dark:border-zinc-800 mt-2">
                                         <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                                             <UserOutlined />
@@ -345,7 +328,6 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
             )}
         </div>
 
-        {/* Pagination Footer */}
         {sidebarMeta && sidebarMeta.totalPages > 1 && (
             <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex justify-center">
                 <Pagination

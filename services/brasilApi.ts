@@ -54,7 +54,6 @@ function setSessionCache(key: string, value: BrasilApiFipeOption[]) {
       }),
     );
   } catch {
-    // Ignore quota/security errors.
   }
 }
 
@@ -69,7 +68,6 @@ function setLocalCache(key: string, value: BrasilApiFipeOption[]) {
       }),
     );
   } catch {
-    // Ignore quota/security errors.
   }
 }
 
@@ -217,7 +215,6 @@ function compactModelName(name: string): string {
     }
 
     if (reachedSpec) {
-      // After reaching specs, we only keep body style if present.
       if (BODY_STYLE_WORDS.has(token) && !family.includes(token)) {
         family.push(token);
       }
@@ -276,7 +273,6 @@ function normalizeFipeOptions(
     return normalized.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   }
 
-  // Deduplicacao rapida de variacoes de acabamento quase identicas
   const dedupMap = new Map<string, BrasilApiFipeOption>();
   for (const option of normalized) {
     const key = compactModelName(option.name);
@@ -291,7 +287,6 @@ function normalizeFipeOptions(
       continue;
     }
 
-    // Mantem sempre a forma compacta mais curta/estavel.
     if (option.name.length < existing.name.length) {
       dedupMap.set(key, {
         code: toStableCode(key),

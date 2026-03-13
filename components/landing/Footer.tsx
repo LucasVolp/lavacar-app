@@ -14,9 +14,9 @@ export const Footer = () => {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center">
-            <span className="text-white font-bold text-xs">L</span>
+            <span className="text-white font-bold text-xs">N</span>
           </div>
-          <span className="text-base-content/60 font-medium">Lavacar</span>
+          <span className="text-base-content/60 font-medium">NexoCar</span>
         </div>
 
         <div className="flex gap-8 text-sm text-base-content/50">
@@ -26,7 +26,7 @@ export const Footer = () => {
         </div>
 
         <Text className="text-base-content/50 text-sm">
-          © {currentYear} Lavacar. Todos os direitos reservados.
+          © {currentYear} NexoCar. Todos os direitos reservados.
         </Text>
       </div>
     </footer>

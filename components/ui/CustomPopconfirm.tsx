@@ -8,7 +8,7 @@ export const CustomPopconfirm: React.FC<PopconfirmProps> = (props) => {
     <Popconfirm
       {...props}
       overlayInnerStyle={{
-        backgroundColor: '#18181b', // zinc-900
+        backgroundColor: '#18181b',
       }}
       okButtonProps={{
         ...props.okButtonProps,
@@ -17,7 +17,6 @@ export const CustomPopconfirm: React.FC<PopconfirmProps> = (props) => {
       cancelButtonProps={{
         ...props.cancelButtonProps,
       }}
-      // Force text colors for dark background
       title={
         <span style={{ color: '#fafafa' }}>{props.title as React.ReactNode}</span>
       }

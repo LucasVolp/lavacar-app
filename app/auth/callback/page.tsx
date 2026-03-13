@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { loginWithToken } = useAuth(); // Usando a nova função
+  const { loginWithToken } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -28,7 +28,6 @@ function CallbackContent() {
           if (success) {
             message.success("Login com Google realizado!");
             
-            // Verificar redirecionamento salvo
             const redirectUrl = localStorage.getItem("auth_redirect");
             localStorage.removeItem("auth_redirect");
             
@@ -41,8 +40,7 @@ function CallbackContent() {
              message.error("Falha ao validar sessão");
              router.push("/auth/login");
           }
-        } catch (err) {
-            console.error(err);
+        } catch {
             router.push("/auth/login");
         }
       } else {

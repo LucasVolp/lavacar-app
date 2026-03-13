@@ -64,7 +64,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
     (a, b) => weekdayOrder.indexOf(a.weekday) - weekdayOrder.indexOf(b.weekday)
   );
 
-  // Check current day
   const today = new Date()
     .toLocaleDateString("en-US", { weekday: "long" })
     .toUpperCase();
@@ -72,7 +71,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
   return (
     <section className="py-24 bg-slate-50 dark:bg-[#09090b] transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6 border border-emerald-500/20">
             <EnvironmentFilled />
@@ -87,9 +85,7 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Contact Info */}
           <div className="bg-white dark:bg-[#18181b] rounded-3xl p-8 border border-slate-200 dark:border-[#27272a] shadow-xl dark:shadow-2xl overflow-hidden relative group transition-colors duration-300">
-             {/* Glow Effect */}
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-500" />
 
             <div className="flex items-center gap-3 mb-8 relative z-10">
@@ -100,7 +96,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
             </div>
 
             <div className="space-y-8 relative z-10">
-              {/* Address */}
               <div className="flex items-start gap-4">
                 <div className="mt-1 w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#27272a] flex items-center justify-center text-slate-500 dark:text-slate-400 flex-shrink-0 transition-colors duration-300">
                   <EnvironmentFilled />
@@ -120,7 +115,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
                 </div>
               </div>
 
-              {/* Phone */}
               <div className="flex items-start gap-4">
                 <div className="mt-1 w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#27272a] flex items-center justify-center text-slate-500 dark:text-slate-400 flex-shrink-0 transition-colors duration-300">
                   <PhoneFilled />
@@ -135,7 +129,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
                 </div>
               </div>
 
-              {/* Email */}
               {shop.email && (
                 <div className="flex items-start gap-4">
                   <div className="mt-1 w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#27272a] flex items-center justify-center text-slate-500 dark:text-slate-400 flex-shrink-0 transition-colors duration-300">
@@ -152,7 +145,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
                 </div>
               )}
 
-              {/* Maps */}
               <div className="pt-2">
                 <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-[#27272a] shadow-sm bg-white dark:bg-[#101012]">
                   <div className="px-4 py-3 border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between">
@@ -180,7 +172,6 @@ export function InfoSection({ shop, schedules, isLoading }: InfoSectionProps) {
             </div>
           </div>
 
-          {/* Schedule */}
            <div className="bg-white dark:bg-[#18181b] rounded-3xl p-8 border border-slate-200 dark:border-[#27272a] shadow-xl dark:shadow-2xl relative transition-colors duration-300">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-500 text-xl border border-indigo-500/20">

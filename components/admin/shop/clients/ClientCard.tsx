@@ -30,7 +30,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
   const user = client.user;
   if (!user) return null;
 
-  // Prioritize overrides
   const fullName = client.customName || `${user.firstName} ${user.lastName || ""}`.trim();
   const email = client.customEmail || user.email;
   const phone = client.customPhone || user.phone;
@@ -42,20 +41,16 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
     .join("")
     .toUpperCase();
   
-  // Estatísticas do cliente
   const vehicleCount = user.vehicles?.length || 0;
   const appointmentCount = user.appointments?.length || 0;
   const evaluationCount = user.evaluations?.length || 0;
   
-  // Média de avaliações
   const avgRating = evaluationCount > 0
     ? (user.evaluations!.reduce((acc, e) => acc + e.rating, 0) / evaluationCount).toFixed(1)
     : null;
 
-  // Último agendamento
   const lastAppointment = user.appointments?.[0];
 
-  // Gerar cor baseada no nome
   const getAvatarColor = (name: string) => {
     const colors = [
       "#f56a00", "#7265e6", "#ffbf00", "#00a2ae", 
@@ -79,7 +74,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
       styles={{ body: { padding: 0 } }}
       onClick={onClick}
     >
-      {/* Header com Avatar e Info */}
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -116,7 +110,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
           </div>
         </div>
 
-        {/* Contato */}
         {phone && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
@@ -135,7 +128,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
         )}
       </div>
 
-      {/* Estatísticas */}
       <div className="grid grid-cols-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
         <CustomTooltip title="Veículos cadastrados">
           <div className="py-4 px-3 text-center border-r border-zinc-100 dark:border-zinc-800 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors">
@@ -168,7 +160,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
         </CustomTooltip>
       </div>
 
-      {/* Último agendamento */}
       {lastAppointment && (
         <div className="px-5 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-t border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center justify-between">

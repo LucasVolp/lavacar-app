@@ -10,10 +10,6 @@ export interface Evaluation {
     updatedAt: string;
 }
 
-/**
- * Evaluation with nested appointment relations,
- * as returned by the backend findAll endpoint.
- */
 export interface EvaluationWithRelations extends Evaluation {
     user?: {
         id: string;

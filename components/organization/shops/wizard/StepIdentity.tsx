@@ -72,17 +72,13 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
   const [phoneAvailability, setPhoneAvailability] = useState<Availability>("idle");
   const [documentAvailability, setDocumentAvailability] = useState<Availability>("idle");
 
-  // Use React Query for existing shops (deduplication + caching)
   const { data: existingShops = [] } = useShops();
 
-  // Timezones (synchronous, no network call)
   const timezones = useMemo(() => timeApiService.listTimezones(), []);
 
-  // Load states via API on mount
   useEffect(() => {
     let active = true;
 
-    // Set detected timezone
     form.setFieldValue("timeZone", timeApiService.detectTimezone());
 
     brasilApiService.listStates()
@@ -92,15 +88,12 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
     return () => { active = false; };
   }, [form]);
 
-  // Cleanup object URLs
   useEffect(() => {
     return () => {
       if (logoPreview) URL.revokeObjectURL(logoPreview);
       if (bannerPreview) URL.revokeObjectURL(bannerPreview);
     };
   }, [logoPreview, bannerPreview]);
-
-  // --- Availability checks ---
 
   useEffect(() => {
     const slug = String(watchedSlug || "").trim().toLowerCase();
@@ -167,8 +160,6 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
 
     return () => clearTimeout(timer);
   }, [watchedDocument, existingShops, organizationId]);
-
-  // --- Handlers ---
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!slugTouched) {
@@ -357,7 +348,6 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
       className="space-y-6"
       requiredMark
     >
-      {/* Section: Dados Gerais */}
       <div className={SECTION_CONTAINER_CLASS}>
         <Card
           bordered={false}
@@ -442,7 +432,6 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
               </Col>
             </Row>
 
-            {/* Images */}
             <div className="space-y-4 pt-2">
               <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Imagens da Loja</h3>
               <Row gutter={[16, 16]}>
@@ -536,7 +525,6 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
         </Card>
       </div>
 
-      {/* Section: Endereço */}
       <div className={SECTION_CONTAINER_CLASS}>
         <Card
           bordered={false}
@@ -606,7 +594,6 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
         </Card>
       </div>
 
-      {/* Section: Configurações Avançadas (Collapsible) */}
       <div className={SECTION_CONTAINER_CLASS}>
         <div className="px-8 py-6">
           <Collapse
@@ -665,7 +652,6 @@ export const StepIdentity: React.FC<StepIdentityProps> = ({
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
         <Button size="large" onClick={onCancel} className="text-zinc-600 dark:text-zinc-300">
           Cancelar

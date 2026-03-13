@@ -92,7 +92,6 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
 
   useEffect(() => {
     if (open) {
-      // Sincroniza estado de edição baseado na prop quando drawer abre
       const timeoutId = setTimeout(() => {
         setIsEditing(initialEditing);
       }, 0);

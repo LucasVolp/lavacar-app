@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import axiosInstance from "./axiosInstance";
 
 export interface AuthUser {
@@ -28,8 +28,23 @@ export interface RegisterPayload {
   lastName?: string;
   email: string;
   password: string;
-  phone?: string;
+  phone: string;
   cpf?: string;
+}
+
+export interface RegisterOwnerPayload {
+  firstName: string;
+  lastName?: string;
+  email: string;
+  password: string;
+  phone: string;
+  cpf?: string;
+  shop: {
+    name: string;
+    description?: string;
+    phone: string;
+    email?: string;
+  };
 }
 
 export interface GuestLoginPayload {
@@ -47,19 +62,61 @@ export interface GuestLoginPayload {
   };
 }
 
+export interface CompleteRegistrationPayload {
+  phone: string;
+  email: string;
+  firstName: string;
+  lastName?: string;
+  picture?: string;
+}
+
 export interface AuthResponse {
   access_token?: string;
   accessToken?: string;
   user: AuthUser;
 }
 
+export interface TrackingAppointment {
+  id: string;
+  scheduledAt: string;
+  endTime: string;
+  status: string;
+  totalPrice: string;
+  totalDuration: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  vehicle: {
+    id: string;
+    brand: string;
+    model: string;
+    plate?: string;
+    color?: string;
+    type: string;
+  };
+  shop: {
+    id: string;
+    name: string;
+    slug: string;
+    phone: string;
+    logoUrl?: string;
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  };
+  services: {
+    id: string;
+    serviceName: string;
+    servicePrice: string;
+    duration: number;
+  }[];
+}
+
 const base = "/auth";
 
 export const authService = {
-  /**
-   * Login/Create Guest User
-   * POST /auth/guest
-   */
   guestLogin: async (payload: GuestLoginPayload): Promise<AuthResponse> => {
     try {
       const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
@@ -68,21 +125,10 @@ export const authService = {
       );
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro no login de guest (${status || "desconhecido"}):`, message);
-      } else {
-        console.error("Erro desconhecido no login de guest:", error);
-      }
       throw error;
     }
   },
 
-  /**
-   * Login do usuário
-   * POST /auth/login
-   */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
       const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
@@ -91,21 +137,10 @@ export const authService = {
       );
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao fazer login (${status || "desconhecido"}):`, message);
-      } else {
-        console.error("Erro desconhecido ao fazer login:", error);
-      }
       throw error;
     }
   },
 
-  /**
-   * Registro de novo usuário
-   * POST /auth/register
-   */
   register: async (payload: RegisterPayload): Promise<AuthResponse> => {
     try {
       const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
@@ -114,37 +149,54 @@ export const authService = {
       );
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao registrar usuário (${status || "desconhecido"}):`, message);
-      } else {
-        console.error("Erro desconhecido ao registrar usuário:", error);
-      }
       throw error;
     }
   },
 
-  /**
-   * Buscar dados do usuário logado
-   * GET /auth/me
-   */
+  registerOwner: async (payload: RegisterOwnerPayload): Promise<AuthResponse> => {
+    try {
+      const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
+        `${base}/register/owner`,
+        payload
+      );
+      return response.data;
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
+  completeRegistration: async (payload: CompleteRegistrationPayload): Promise<AuthResponse> => {
+    try {
+      const response: AxiosResponse<AuthResponse> = await axiosInstance.post(
+        `${base}/complete-registration`,
+        payload
+      );
+      return response.data;
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
+  validateTrackingToken: async (token: string): Promise<TrackingAppointment> => {
+    try {
+      const response: AxiosResponse<TrackingAppointment> = await axiosInstance.get(
+        `${base}/track/validate`,
+        { params: { token } }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
   me: async (): Promise<AuthUser> => {
     try {
       const response: AxiosResponse<{ user: AuthUser } | AuthUser> = await axiosInstance.get(`${base}/me`);
-      // Check if response is wrapped in { user: ... }
       if (response.data && 'user' in response.data) {
          return response.data.user;
       }
       return response.data as AuthUser;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const message = error.response?.data?.message || error.message;
-        console.error(`Erro ao buscar usuário logado (${status || "desconhecido"}):`, message);
-      } else {
-        console.error("Erro desconhecido ao buscar usuário logado:", error);
-      }
       throw error;
     }
   },

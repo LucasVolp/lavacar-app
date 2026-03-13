@@ -28,13 +28,11 @@ export default function BookingPage({ params }: BookingPageProps) {
   const { slug } = use(params);
   const router = useRouter();
 
-  // UI-only modal states
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const booking = useBookingFlow(slug);
 
-  // ─── Loading ───
   if (booking.shopLoading || booking.isRestoring) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
@@ -48,7 +46,6 @@ export default function BookingPage({ params }: BookingPageProps) {
     );
   }
 
-  // ─── Error ───
   if (booking.shopError || !booking.shop) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-4">
@@ -71,7 +68,6 @@ export default function BookingPage({ params }: BookingPageProps) {
     );
   }
 
-  // ─── Success ───
   if (booking.bookingComplete) {
     return (
       <BookingSuccess
@@ -89,6 +85,8 @@ export default function BookingPage({ params }: BookingPageProps) {
               : "/"
           )
         }
+        trackingUrl={booking.trackingUrl}
+        isGuest={!booking.isAuthenticated || booking.user?.isGuest}
       />
     );
   }
@@ -114,7 +112,6 @@ export default function BookingPage({ params }: BookingPageProps) {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
-        {/* Alerts Section (Timezone and Login) */}
         <div className="flex flex-col gap-4 mb-8">
           {booking.userTimezone && shop.timeZone && booking.userTimezone !== shop.timeZone && (
             <div className="animate-fade-in">
@@ -129,7 +126,6 @@ export default function BookingPage({ params }: BookingPageProps) {
             </div>
           )}
 
-          {/* Login Suggestion Alert */}
           {!booking.isAuthenticated && booking.currentStep === 0 && (
             <div className="animate-fade-in">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5">
@@ -158,17 +154,13 @@ export default function BookingPage({ params }: BookingPageProps) {
           )}
         </div>
 
-        {/* Steps Progress */}
         <div className="mb-6 sm:mb-8 md:mb-12 overflow-x-auto pb-2 hide-scrollbar">
           <BookingSteps currentStep={booking.currentStep} />
         </div>
 
-        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
-          {/* Content */}
           <div className="lg:col-span-8 flex flex-col">
             <div className="flex-1 bg-white dark:bg-[#18181b] rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[#27272a] shadow-xl overflow-hidden min-h-[400px] sm:min-h-[500px] mb-6 md:mb-0">
-              {/* Step 0: Identification */}
               {booking.currentStep === 0 && (
                 <IdentificationStep
                   isAuthenticated={booking.isAuthenticated}
@@ -183,7 +175,6 @@ export default function BookingPage({ params }: BookingPageProps) {
                 />
               )}
 
-              {/* Step 1: Services */}
               {booking.currentStep === 1 && (
                 <ServicesStep
                   isLoading={booking.servicesLoading}
@@ -193,10 +184,10 @@ export default function BookingPage({ params }: BookingPageProps) {
                   totalPrice={booking.totalPrice}
                   onToggleService={booking.handleServiceToggle}
                   formatDuration={booking.formatDuration}
+                  vehicleSize={booking.vehicleSize}
                 />
               )}
 
-              {/* Step 2: Date & Time */}
               {booking.currentStep === 2 && (
                 <DateTimeStep
                   schedules={booking.schedules}
@@ -211,12 +202,10 @@ export default function BookingPage({ params }: BookingPageProps) {
                 />
               )}
 
-              {/* Desktop Navigation */}
               <BookingNavigationDesktop {...navProps} />
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-4 hidden lg:block">
             <BookingReviewCard
               selectedServices={booking.selectedServices}
@@ -228,15 +217,14 @@ export default function BookingPage({ params }: BookingPageProps) {
               isLoading={booking.isBookingPending}
               disabled={booking.currentStep < 2}
               onConfirm={booking.handleConfirmBooking}
+              vehicleSize={booking.vehicleSize}
             />
           </div>
         </div>
       </main>
 
-      {/* Mobile Navigation */}
       <BookingNavigationMobile {...navProps} />
 
-      {/* Modals */}
       <AddVehicleModal
         open={showAddVehicleModal}
         onClose={() => setShowAddVehicleModal(false)}

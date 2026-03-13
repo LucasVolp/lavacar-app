@@ -17,7 +17,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minuto
+            staleTime: 60 * 1000,
             retry: 1,
           },
         },
@@ -40,9 +40,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Color palette definition
 const colors = {
-  primary: "#6366f1", // Indigo
+  primary: "#6366f1",
   secondary: "#5046e5",
   success: "#52c41a",
   warning: "#faad14",
@@ -65,17 +64,17 @@ const colors = {
   },
 
   dark: {
-    textBase: "#f8fafc", // slate-50
+    textBase: "#f8fafc",
     textHeading: "#ffffff",
-    textSecondary: "#94a3b8", // slate-400
-    textPlaceholder: "#64748b", // slate-500
-    bgBase: "#09090b", // zinc-950
-    bgContainer: "#18181b", // zinc-900
-    bgElevated: "#18181b", // zinc-900
-    bgLayout: "#09090b", // zinc-950
-    sider: "#09090b", // zinc-950
-    border: "#27272a", // zinc-800
-    borderSecondary: "#3f3f46", // zinc-700
+    textSecondary: "#94a3b8",
+    textPlaceholder: "#64748b",
+    bgBase: "#09090b",
+    bgContainer: "#18181b",
+    bgElevated: "#18181b",
+    bgLayout: "#09090b",
+    sider: "#09090b",
+    border: "#27272a",
+    borderSecondary: "#3f3f46",
     hoverBg: "#27272a",
     footerBg: "#09090b",
     headerBg: "#09090b",

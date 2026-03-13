@@ -18,6 +18,7 @@ export type ExtendedMember = Omit<OrganizationMember, "user"> & {
 interface MembersListProps {
   members: ExtendedMember[];
   currentUserId?: string;
+  isCurrentUserOwner?: boolean;
 }
 
 const ROLE_MAP: Record<string, string> = {
@@ -28,7 +29,7 @@ const ROLE_MAP: Record<string, string> = {
   USER: "Usuário",
 };
 
-export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId }) => {
+export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId, isCurrentUserOwner = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<ExtendedMember | null>(null);
   const [form] = Form.useForm();
@@ -53,8 +54,7 @@ export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId
       message.success("Permissões atualizadas com sucesso!");
       setIsModalOpen(false);
       setEditingMember(null);
-    } catch (error) {
-      console.error(error);
+    } catch {
       message.error("Erro ao atualizar permissões.");
     }
   };
@@ -63,8 +63,7 @@ export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId
     try {
       await deleteMember.mutateAsync(memberId);
       message.success("Membro removido com sucesso!");
-    } catch (error) {
-      console.error(error);
+    } catch {
       message.error("Erro ao remover membro.");
     }
   };
@@ -139,8 +138,9 @@ export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId
       title: "Ações",
       key: "actions",
       render: (_: unknown, record: ExtendedMember) => {
-        const isOwner = record.role === "OWNER";
+        const isMemberOwner = record.role === "OWNER";
         const isCurrentUser = record.userId === currentUserId;
+        const canManage = isCurrentUserOwner && !isCurrentUser;
 
         if (isCurrentUser) {
           return (
@@ -151,6 +151,8 @@ export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId
             </div>
           );
         }
+
+        if (!canManage) return null;
         
         return (
           <div className="flex gap-2">
@@ -162,7 +164,7 @@ export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId
                 onClick={() => handleEdit(record)}
               />
             </CustomTooltip>
-            {!isOwner && (
+            {!isMemberOwner && (
               <CustomPopconfirm
                 title="Remover membro"
                 description="Tem certeza que deseja remover este membro da organização?"
@@ -181,7 +183,7 @@ export const MembersList: React.FC<MembersListProps> = ({ members, currentUserId
                 </CustomTooltip>
               </CustomPopconfirm>
             )}
-            {isOwner && (
+            {isMemberOwner && (
               <CustomTooltip title="Não é possível remover o proprietário">
                 <Button 
                    type="text" 

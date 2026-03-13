@@ -41,7 +41,6 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         },
       }}
     >
-      {/* Action buttons - appear on hover */}
       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-1">
         {onView && (
           <Tooltip title="Visualizar">
@@ -79,7 +78,6 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         )}
       </div>
 
-      {/* Header with avatar and name */}
       <div className="flex items-start gap-4 mb-4">
         <Avatar
           size={56}
@@ -102,7 +100,6 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         </div>
       </div>
 
-      {/* Description */}
       {shop.description && (
         <Paragraph
           type="secondary"
@@ -113,9 +110,7 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         </Paragraph>
       )}
 
-      {/* Info items */}
       <Space orientation="vertical" size="small" className="w-full mb-4 flex-grow">
-        {/* Location */}
         <div className="flex items-center gap-2 text-sm">
           <EnvironmentOutlined className="text-primary flex-shrink-0" />
           <Text type="secondary" className="truncate">
@@ -123,7 +118,6 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
           </Text>
         </div>
 
-        {/* Address */}
         <div className="flex items-center gap-2 text-sm">
           <ShopOutlined className="text-base-content/40 flex-shrink-0" />
           <Text type="secondary" className="truncate" title={`${shop.street}, ${shop.number}`}>
@@ -132,13 +126,11 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
           </Text>
         </div>
 
-        {/* Phone */}
         <div className="flex items-center gap-2 text-sm">
           <PhoneOutlined className="text-success flex-shrink-0" />
           <Text className="text-base-content">{maskPhone(shop.phone)}</Text>
         </div>
 
-        {/* Email */}
         {shop.email && (
           <div className="flex items-center gap-2 text-sm">
             <MailOutlined className="text-info flex-shrink-0" />
@@ -149,10 +141,8 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         )}
       </Space>
 
-      {/* Divider */}
       <div className="border-t border-base-200 my-3" />
 
-      {/* Footer with configs */}
       <div className="flex items-center justify-between text-xs text-base-content/60">
         <Tooltip title="Intervalo entre slots">
           <div className="flex items-center gap-1">
@@ -168,7 +158,6 @@ export default function ShopCard({ shop, onView, onEdit, onDelete }: ShopCardPro
         </Tooltip>
       </div>
 
-      {/* View button */}
       {onView && (
         <Button
           type="primary"

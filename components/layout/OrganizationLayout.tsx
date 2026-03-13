@@ -61,7 +61,6 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
 
   const borderColor = isDarkMode ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)";
 
-  // Menu Configuration
   const menuItems: MenuProps["items"] = [
     {
       key: `/organization/${organizationId}`,
@@ -120,7 +119,6 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
   };
 
   const getSelectedKeys = () => {
-    // Basic matching, can be improved for nested routes
     if (pathname === `/organization/${organizationId}`) return [`/organization/${organizationId}`];
     return [pathname];
   };
@@ -134,11 +132,10 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
     { key: "logout", icon: <LogoutOutlined />, label: "Sair", danger: true, onClick: () => { logout(); router.push("/"); } },
   ];
 
-  if (!mounted) return null; // Prevent hydration mismatch
+  if (!mounted) return null;
 
   return (
     <Layout className="min-h-screen" hasSider>
-      {/* Sidebar */}
       <Sider
         trigger={null}
         collapsible
@@ -157,7 +154,6 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
         }}
         theme={isDarkMode ? "dark" : "light"}
       >
-        {/* Logo / Org Header */}
         <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
             <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold overflow-hidden relative">
               {organization?.logoUrl ? (
@@ -184,7 +180,6 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
             )}
         </div>
 
-        {/* Menu */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ height: "calc(100vh - 64px)" }}>
           <Menu
             mode="inline"
@@ -198,9 +193,7 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
         </div>
       </Sider>
 
-      {/* Main Content Area */}
       <Layout style={{ transition: "all 0.2s" }}>
-        {/* Header */}
         <AntHeader
           className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}
           style={{ 
@@ -270,17 +263,15 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
           </div>
         </AntHeader>
 
-        {/* Content */}
         <Content className="p-0 min-h-[calc(100vh-64px)] overflow-x-hidden">
           <div className="w-full h-full animate-fade-in">
              {children}
           </div>
         </Content>
 
-        {/* Footer */}
         <AntFooter className="text-center bg-transparent">
           <Text type="secondary" className="text-xs">
-            © {new Date().getFullYear()} Lavacar - Sistema de Gestão
+            © {new Date().getFullYear()} NexoCar - Sistema de Gestão de Agendamentos
           </Text>
         </AntFooter>
       </Layout>

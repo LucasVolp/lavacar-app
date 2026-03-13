@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { FipeBrand, FipeModel, VehicleType } from '../types/fipe';
 
-// Pointing to the main Backend API (NestJS)
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 const fipeApi = axios.create({
@@ -13,8 +12,7 @@ export const fipeService = {
     try {
       const response: AxiosResponse<FipeBrand[]> = await fipeApi.get(`/brands/${type}`);
       return response.data;
-    } catch (error) {
-           console.error('Erro ao buscar marcas FIPE (Backend):', error);
+    } catch {
       return [];
     }
   },
@@ -23,8 +21,7 @@ export const fipeService = {
     try {
       const response: AxiosResponse<FipeModel[]> = await fipeApi.get(`/models/${brandId}`);
       return response.data;
-    } catch (error) {
-      console.error('Erro ao buscar modelos FIPE (Backend):', error);
+    } catch {
       return [];
     }
   },

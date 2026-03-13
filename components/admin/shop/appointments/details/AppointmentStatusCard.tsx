@@ -33,7 +33,6 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
   const currentStatus = statusConfig[appointment.status] || statusConfig.PENDING;
   const isCanceled = ["CANCELED", "NO_SHOW"].includes(appointment.status);
 
-  // Logic for the single dynamic button
   const getNextAction = () => {
     switch (appointment.status) {
       case "PENDING":
@@ -60,7 +59,6 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
             <StatusBadge status={appointment.status} className="px-3 py-1.5 text-sm w-fit rounded-lg" />
           </div>
           
-          {/* Dynamic Action Button */}
           {!isCanceled && nextAction && (
             <Button 
               type={nextAction.type} 

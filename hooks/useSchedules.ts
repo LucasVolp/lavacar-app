@@ -3,7 +3,6 @@ import { scheduleService } from "@/services/schedule";
 import { CreateSchedulePayload, UpdateSchedulePayload } from "@/types/schedule";
 import { handleQueryForbidden } from "./handleQueryForbidden";
 
-// Query Keys
 export const scheduleKeys = {
   all: ["schedules"] as const,
   lists: () => [...scheduleKeys.all, "list"] as const,
@@ -12,9 +11,6 @@ export const scheduleKeys = {
   detail: (id: string) => [...scheduleKeys.details(), id] as const,
 };
 
-/**
- * Hook para buscar todos os horários de funcionamento
- */
 export function useSchedules(enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.lists(),
@@ -27,13 +23,10 @@ export function useSchedules(enabled = true) {
       }
     },
     enabled,
-    staleTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 10 * 60 * 1000,
   });
 }
 
-/**
- * Hook para buscar horários de funcionamento de uma loja
- */
 export function useShopSchedules(shopId: string | null, enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.byShop(shopId || ""),
@@ -59,9 +52,6 @@ export function usePublicShopSchedules(shopId: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para buscar um horário específico
- */
 export function useSchedule(id: string | null, enabled = true) {
   return useQuery({
     queryKey: scheduleKeys.detail(id || ""),
@@ -77,9 +67,6 @@ export function useSchedule(id: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para criar um horário
- */
 export function useCreateSchedule() {
   const queryClient = useQueryClient();
 
@@ -91,9 +78,6 @@ export function useCreateSchedule() {
   });
 }
 
-/**
- * Hook para atualizar um horário
- */
 export function useUpdateSchedule() {
   const queryClient = useQueryClient();
 
@@ -106,9 +90,6 @@ export function useUpdateSchedule() {
   });
 }
 
-/**
- * Hook para deletar um horário
- */
 export function useDeleteSchedule() {
   const queryClient = useQueryClient();
 

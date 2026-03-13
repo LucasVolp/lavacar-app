@@ -23,7 +23,7 @@ import {
 export default function AppointmentDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  useAuth();
   const appointmentId = params.id as string;
 
   const {

@@ -13,7 +13,6 @@ function ShopAdminGuard({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
-  // Fetch organization to verify hierarchy permissions
   const { data: organization, isLoading: orgLoading } = useOrganization(shop?.organizationId);
 
   const isLoading = authLoading || shopLoading || (!!shop && orgLoading);
@@ -27,7 +26,6 @@ function ShopAdminGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    // Redirect to login if not authenticated
     if (typeof window !== "undefined") {
        router.push(`/auth/login?redirect=${window.location.pathname}`);
     }
@@ -51,7 +49,6 @@ function ShopAdminGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Permission Logic
   const isDirectOwner = shop.ownerId === user?.id;
   const isOrgOwner = organization?.ownerId === user?.id;
   const isOrgMember = organization?.members?.some((m: { userId: string }) => m.userId === user?.id);

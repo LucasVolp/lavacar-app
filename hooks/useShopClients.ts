@@ -60,7 +60,7 @@ export function useCheckShopClient(shopId: string | null, userId: string | null,
     queryKey: shopClientKeys.check(shopId || "", userId || ""),
     queryFn: () => shopClientService.findByShopAndUser(shopId!, userId!),
     enabled: enabled && !!shopId && !!userId,
-    retry: false, // Don't retry if not found
+    retry: false,
   });
 }
 

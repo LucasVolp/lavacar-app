@@ -61,7 +61,6 @@ export default function ClientAppointmentsPage() {
     }));
   }, [appointmentsResult]);
 
-  // Separate upcoming and history
   const upcomingAppointments = useMemo(() => {
     return appointments
       .filter((a) => ["PENDING", "CONFIRMED", "IN_PROGRESS"].includes(a.status))
@@ -80,10 +79,8 @@ export default function ClientAppointmentsPage() {
       );
   }, [appointments]);
 
-  // Determine last shop for rebooking
   const lastShopInfo = useMemo(() => {
-    // Sort all appointments by date desc
-    const sorted = [...(appointmentsResult?.data ?? [])].sort((a, b) => 
+    const sorted = [...(appointmentsResult?.data ?? [])].sort((a, b) =>
       dayjs(b.scheduledAt).valueOf() - dayjs(a.scheduledAt).valueOf()
     );
     const lastCompleted = sorted.find(a => a.status === 'COMPLETED');

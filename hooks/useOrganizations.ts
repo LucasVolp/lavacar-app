@@ -3,20 +3,14 @@ import { organizationService } from "@/services/organizations";
 import { organizationMemberService } from "@/services/organization-members";
 import type { OrganizationInsightsPeriod } from "@/types/organization";
 
-/**
- * Hook para buscar todas as organizações
- */
 export function useOrganizations() {
   return useQuery({
     queryKey: ["organizations"],
     queryFn: organizationService.findAll,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
   });
 }
 
-/**
- * Hook para buscar organização por ID
- */
 export function useOrganization(id: string | undefined) {
   return useQuery({
     queryKey: ["organizations", id],
@@ -38,21 +32,15 @@ export function useOrganizationDashboardMetrics(
   });
 }
 
-/**
- * Hook para buscar organizações de um owner específico
- */
 export function useOrganizationByOwner(ownerId: string | undefined) {
   return useQuery({
     queryKey: ["organizations", "owner", ownerId],
     queryFn: () => organizationService.findByOwner(ownerId!),
     enabled: !!ownerId,
-    retry: 1, 
+    retry: 1,
   });
 }
 
-/**
- * Hook para buscar membros de uma organização
- */
 export function useOrganizationMembers(organizationId: string | undefined) {
   return useQuery({
     queryKey: ["organization-members", organizationId],
@@ -61,9 +49,14 @@ export function useOrganizationMembers(organizationId: string | undefined) {
   });
 }
 
-/**
- * Hook para atualizar um membro da organização
- */
+export function useOrganizationMembersByShop(shopId: string | undefined) {
+  return useQuery({
+    queryKey: ["organization-members", "shop", shopId],
+    queryFn: () => organizationMemberService.findByShopId(shopId!),
+    enabled: !!shopId,
+  });
+}
+
 export function useUpdateOrganizationMember() {
   const queryClient = useQueryClient();
 
@@ -71,16 +64,12 @@ export function useUpdateOrganizationMember() {
     mutationFn: ({ id, payload }: { id: string; payload: { role?: string; isActive?: boolean } }) =>
       organizationMemberService.update(id, payload),
     onSuccess: () => {
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
       queryClient.invalidateQueries({ queryKey: ["organization-members"] });
     },
   });
 }
 
-/**
- * Hook para remover um membro da organização
- */
 export function useDeleteOrganizationMember() {
   const queryClient = useQueryClient();
 
@@ -93,9 +82,6 @@ export function useDeleteOrganizationMember() {
   });
 }
 
-/**
- * Hook para criar uma organização
- */
 export function useCreateOrganization() {
   const queryClient = useQueryClient();
 

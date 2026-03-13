@@ -28,10 +28,6 @@ interface InfoItemProps {
   className?: string;
 }
 
-/**
- * InfoItem component with optional override indicator
- * Shows a subtle badge when displaying override data from ShopClient
- */
 const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, isOverride = false, className = "" }) => (
   <div className={`flex items-center gap-3 ${className}`}>
     <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400">
@@ -56,10 +52,6 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, isOverride = fa
   </div>
 );
 
-/**
- * Helper to get contact data with fallback to shopClient override
- * Priority: user data > shopClient custom data
- */
 function getContactWithFallback(
   userData: string | null | undefined,
   overrideData: string | null | undefined
@@ -78,7 +70,6 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
 }) => {
   const shopClient = appointment.shopClient;
 
-  // Client name with fallback
   const clientNameData = getContactWithFallback(
     appointment.user
       ? `${appointment.user.firstName} ${appointment.user.lastName || ''}`.trim()
@@ -89,21 +80,18 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
     ? sanitizeText(clientNameData.value)
     : "Cliente Visitante";
 
-  // Phone with fallback to shopClient.customPhone
   const phoneData = getContactWithFallback(
     appointment.user?.phone,
     shopClient?.customPhone
   );
   const clientPhone = phoneData.value ? maskPhone(phoneData.value) : null;
 
-  // Email with fallback to shopClient.customEmail
   const emailData = getContactWithFallback(
     appointment.user?.email,
     shopClient?.customEmail
   );
   const clientEmail = emailData.value ? sanitizeText(emailData.value) : null;
 
-  // Vehicle data
   const vehicleBrand = appointment.vehicle?.brand
     ? sanitizeText(appointment.vehicle.brand)
     : null;
@@ -122,7 +110,6 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
 
   return (
     <Row gutter={[24, 24]}>
-      {/* Card do Cliente */}
       <Col xs={24} md={12}>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-shadow duration-200">
           <div className="flex items-center gap-3 mb-6">
@@ -184,7 +171,6 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
         </div>
       </Col>
 
-      {/* Card do Veículo */}
       <Col xs={24} md={12}>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-shadow duration-200">
           <div className="flex items-center gap-3 mb-6">

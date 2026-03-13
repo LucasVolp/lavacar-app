@@ -116,7 +116,6 @@ export const NextAppointmentCard: React.FC<NextAppointmentCardProps> = ({
       onClick={() => onClick?.(appointment.id)}
     >
       <div className="grid grid-cols-1 md:grid-cols-12">
-        {/* Col 1-3: Countdown Visual */}
         <div className="md:col-span-3 bg-indigo-50 dark:bg-indigo-900/20 p-6 flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r border-indigo-100 dark:border-indigo-500/10">
           <span className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight leading-none">
             {countdown.value}
@@ -126,7 +125,6 @@ export const NextAppointmentCard: React.FC<NextAppointmentCardProps> = ({
           </span>
         </div>
 
-        {/* Col 4-9: Main Info */}
         <div className="md:col-span-6 p-6 flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-2">
             <StatusBadge status={appointment.status} />
@@ -154,7 +152,6 @@ export const NextAppointmentCard: React.FC<NextAppointmentCardProps> = ({
           </div>
         </div>
 
-        {/* Col 10-12: Actions */}
         <div className="md:col-span-3 p-6 flex flex-col justify-center gap-3 border-t md:border-t-0 md:border-l border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
           {isPending ? (
             <>

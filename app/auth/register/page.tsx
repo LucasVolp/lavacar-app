@@ -13,12 +13,13 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { maskPhone } from "@/lib/masks";
 
 interface RegisterFormValues {
   firstName: string;
   lastName?: string;
   email: string;
-  phone?: string;
+  phone: string;
   password: string;
   confirmPassword: string;
 }
@@ -30,7 +31,8 @@ function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const redirectTo = searchParams.get("redirect") || "/";
+  const rawRedirect = searchParams.get("redirect") || "/";
+  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/";
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -47,12 +49,18 @@ function RegisterForm() {
     }
 
     try {
+      const phoneDigits = values.phone.replace(/\D/g, "");
+      const phone =
+        phoneDigits.length >= 10 && phoneDigits.length <= 11
+          ? `+55${phoneDigits}`
+          : values.phone;
+
       const success = await register({
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
-        phone: values.phone,
+        phone,
       });
 
       if (success) {
@@ -74,7 +82,6 @@ function RegisterForm() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-black transition-colors duration-300">
-      {/* Left Side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-24 relative">
         <Link href="/" className="absolute top-8 left-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2">
             <ArrowLeftOutlined /> Voltar
@@ -148,11 +155,17 @@ function RegisterForm() {
 
             <Form.Item
               name="phone"
-              label={<span className="text-zinc-700 dark:text-zinc-300">Telefone (opcional)</span>}
+              label={<span className="text-zinc-700 dark:text-zinc-300">Telefone</span>}
+              rules={[{ required: true, message: "Informe seu telefone" }]}
             >
               <Input
                 prefix={<PhoneOutlined className="text-zinc-400" />}
                 placeholder="(00) 00000-0000"
+                maxLength={15}
+                onChange={(e) => {
+                  const masked = maskPhone(e.target.value);
+                  form.setFieldValue("phone", masked);
+                }}
                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800 focus:bg-white dark:focus:bg-zinc-800 text-zinc-900 dark:text-white"
               />
             </Form.Item>

@@ -33,7 +33,6 @@ export const CreateOrgForm: React.FC<CreateOrgFormProps> = ({ onFinish, isLoadin
         form.setFieldValue("name", company.nome_fantasia || company.razao_social || "");
       }
     } catch {
-      // silently fallback to manual fill
     } finally {
       setLoadingCnpj(false);
     }
@@ -57,7 +56,7 @@ export const CreateOrgForm: React.FC<CreateOrgFormProps> = ({ onFinish, isLoadin
         >
           <Input 
             prefix={<BankOutlined className="text-zinc-400 mr-2" />}
-            placeholder="Ex: Grupo Lavacar Premium" 
+            placeholder="Ex: Grupo NexoCar Premium" 
             className="h-12 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white rounded-xl hover:bg-white dark:hover:bg-zinc-800 focus:bg-white dark:focus:bg-zinc-800 transition-all"
           />
         </Form.Item>

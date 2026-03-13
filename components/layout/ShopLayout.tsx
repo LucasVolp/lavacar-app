@@ -67,7 +67,6 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   const borderColor = isDarkMode ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)";
 
-  // Menu Configuration
   const menuItems: MenuProps["items"] = [
     {
       key: `/admin/shop/${shopId}`,
@@ -167,18 +166,15 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
   };
 
   const getSelectedKeys = () => {
-    // Basic matching logic
     if (pathname === `/admin/shop/${shopId}`) return [`/admin/shop/${shopId}`];
-    
-    // Find matching key
-    const exactMatch = menuItems.flatMap(i => 
+
+    const exactMatch = menuItems.flatMap(i =>
         (i && 'children' in i && i.children) ? i.children : [i]
     ).find(item => item?.key === pathname);
     
     if (exactMatch) return [exactMatch.key as string];
 
-    // Fallback for sub-routes
-    return menuItems.flatMap(i => 
+    return menuItems.flatMap(i =>
         (i && 'children' in i && i.children) ? i.children : [i]
     ).filter(item => item?.key && pathname.startsWith(item.key as string))
      .map(item => item?.key as string);
@@ -219,7 +215,6 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   return (
     <Layout className="min-h-screen" hasSider>
-      {/* Sidebar */}
       <Sider
         trigger={null}
         collapsible
@@ -238,7 +233,6 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
         }}
         theme={isDarkMode ? "dark" : "light"}
       >
-        {/* Logo / Shop Header */}
         <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center flex-shrink-0 text-white font-bold shadow-lg shadow-indigo-500/20">
               <ShopOutlined className="text-xl" />
@@ -256,7 +250,6 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
             )}
         </div>
 
-        {/* Menu */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ height: 'calc(100vh - 128px)' }}>
           <Menu
             mode="inline"
@@ -269,7 +262,6 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           />
         </div>
 
-        {/* Footer - Back to Org */}
         {shop?.organizationId && (
             <div className="w-full p-2 border-t flex-shrink-0" style={{ borderColor, backgroundColor: isDarkMode ? '#18181b' : '#ffffff' }}>
                 <Tooltip title={collapsed ? "Voltar para Organização" : ""} placement="right">
@@ -287,9 +279,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
         )}
       </Sider>
 
-      {/* Main Content Area */}
       <Layout style={{ transition: "all 0.2s" }}>
-        {/* Header */}
         <AntHeader
           className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}
           style={{ 
@@ -305,8 +295,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
               onClick={() => setCollapsed(!collapsed)}
               className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
             />
-            
-            {/* Breadcrumb */}
+
              <Breadcrumb
                 className="hidden md:block"
                 items={[
@@ -354,17 +343,15 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           </div>
         </AntHeader>
 
-        {/* Content */}
         <Content className="p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
           <div className="w-full max-w-[1600px] mx-auto animate-fade-in">
              {children}
           </div>
         </Content>
 
-        {/* Footer */}
         <AntFooter className="text-center bg-transparent">
           <Text type="secondary" className="text-xs">
-            © {new Date().getFullYear()} Lavacar - Sistema de Gestão de Shops
+            © {new Date().getFullYear()} NexoCar - Sistema de Gestão de Agendamentos
           </Text>
         </AntFooter>
       </Layout>

@@ -12,7 +12,6 @@ export const PricingSection = () => {
 
   return (
     <section id="pricing" className="py-24 px-6 bg-base-100 relative overflow-hidden transition-colors duration-300">
-      {/* Background decorations */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -28,7 +27,6 @@ export const PricingSection = () => {
             Sem taxas escondidas.
           </p>
 
-          {/* Billing Switch */}
           <div className="flex items-center justify-center gap-4">
             <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-base-content' : 'text-base-content/50'}`}>
               Mensal
@@ -54,9 +52,7 @@ export const PricingSection = () => {
           </div>
         </div>
 
-        {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Basic Plan */}
           <PricingCard
             title="Básico"
             description="Para estéticas que estão começando."
@@ -73,7 +69,6 @@ export const PricingSection = () => {
             ]}
           />
 
-          {/* Pro Plan */}
           <PricingCard
             title="Pro"
             description="Para quem quer automação total."
@@ -140,7 +135,7 @@ const PricingCard = ({
         <p className="text-base-content/60 text-sm">{description}</p>
       </div>
 
-      <div className="mb-8 h-20"> {/* Fixed height to maintain alignment */}
+      <div className="mb-8 h-20">
         <div className="flex items-baseline gap-2">
           <span className="text-base-content/60 text-lg">R$</span>
           
@@ -153,7 +148,6 @@ const PricingCard = ({
           <span className="text-base-content/60 text-lg">/mês</span>
         </div>
         
-        {/* Comparison & Total lines */}
         <div className={`mt-2 text-sm transition-opacity duration-300 ${isYearly ? 'opacity-100' : 'opacity-0'}`}>
           <div className="flex flex-col">
             <span className="text-base-content/40 line-through">

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Typography, Card, Row, Col, Statistic, Button, Space, List, Avatar, Tag, Progress } from "antd";
 import {
   ShopOutlined,
@@ -18,7 +17,6 @@ import Link from "next/link";
 
 const { Title, Text, Paragraph } = Typography;
 
-// Mock data para o dashboard
 const stats = [
   {
     title: "Lojas Ativas",
@@ -106,6 +104,13 @@ const statusLabels: Record<string, string> = {
   CANCELED: "Cancelado",
 };
 
+const colorClasses: Record<string, { bg: string; text: string }> = {
+  primary: { bg: "bg-primary/10", text: "text-primary" },
+  success: { bg: "bg-success/10", text: "text-success" },
+  info: { bg: "bg-info/10", text: "text-info" },
+  warning: { bg: "bg-warning/10", text: "text-warning" },
+};
+
 const quickActions = [
   {
     title: "Ver Lojas",
@@ -140,13 +145,12 @@ const quickActions = [
 export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Welcome Section */}
       <div className="card bg-gradient-to-r from-primary to-secondary shadow-lg mb-6">
         <div className="card-body py-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <Title level={2} className="!text-white !mb-2">
-                Bem-vindo ao Lavacar! 👋
+                Bem-vindo ao NexoCar! 👋
               </Title>
               <Paragraph className="text-white/80 !mb-0 max-w-xl">
                 Gerencie seus estabelecimentos, agendamentos e clientes em um só lugar.
@@ -166,7 +170,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <Row gutter={[24, 24]} className="mb-6">
         {stats.map((stat, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>
@@ -201,7 +204,6 @@ export default function DashboardPage() {
       </Row>
 
       <Row gutter={[24, 24]}>
-        {/* Quick Actions */}
         <Col xs={24} lg={8}>
           <Card
             title={
@@ -216,7 +218,7 @@ export default function DashboardPage() {
               {quickActions.map((action, index) => (
                 <Link href={action.href} key={index} className="block">
                   <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer group">
-                    <div className={`w-10 h-10 bg-${action.color}/10 rounded-lg flex items-center justify-center text-${action.color}`}>
+                    <div className={`w-10 h-10 ${colorClasses[action.color].bg} rounded-lg flex items-center justify-center ${colorClasses[action.color].text}`}>
                       {action.icon}
                     </div>
                     <div className="flex-grow">
@@ -235,7 +237,6 @@ export default function DashboardPage() {
           </Card>
         </Col>
 
-        {/* Recent Appointments */}
         <Col xs={24} lg={16}>
           <Card
             title={
@@ -296,7 +297,6 @@ export default function DashboardPage() {
         </Col>
       </Row>
 
-      {/* Performance Overview */}
       <Row gutter={[24, 24]} className="mt-6">
         <Col xs={24} md={12}>
           <Card

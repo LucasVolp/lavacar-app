@@ -37,7 +37,6 @@ export const ClientQuickInfoCard: React.FC<ClientQuickInfoCardProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      {/* Contact info row */}
       <div className="space-y-4">
         <Card className="!rounded-2xl !shadow-sm hover:!shadow-md transition-shadow">
           <Title level={5} className="!mb-4 dark:!text-zinc-100 flex items-center gap-2">
@@ -75,7 +74,6 @@ export const ClientQuickInfoCard: React.FC<ClientQuickInfoCardProps> = ({
         </Card>
       </div>
       
-      {/* Vehicles */}
       <div className="space-y-4">
         <Card className="!rounded-2xl !shadow-sm hover:!shadow-md transition-shadow">
           <Title level={5} className="!mb-4 dark:!text-zinc-100 flex items-center gap-2">

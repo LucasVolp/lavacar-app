@@ -29,7 +29,6 @@ export const LatestReviewsWidget: React.FC<LatestReviewsWidgetProps> = ({
 
   return (
     <div className="bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-colors overflow-hidden h-full flex flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">

@@ -55,7 +55,6 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
   const handleSubmit = async (values: { name: string; email: string; role: string }) => {
     setIsSubmitting(true);
 
-    // Simular envio de convite (será integrado com backend depois)
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     setInvitedEmail(values.email);
@@ -90,7 +89,6 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
     >
       {!inviteSent ? (
         <div className="py-2">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg shadow-indigo-500/25">
               <UserAddOutlined className="text-3xl text-white" />
@@ -104,7 +102,6 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
             </p>
           </div>
 
-          {/* Form */}
           <Form
             form={form}
             layout="vertical"
@@ -194,7 +191,6 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
               </Radio.Group>
             </Form.Item>
 
-            {/* Info Box */}
             <InfoBox
               title="Como funciona o convite?"
               description="O funcionário receberá um email com um link para criar sua conta e ter acesso ao painel do estabelecimento."
@@ -203,7 +199,6 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
               className="mb-6"
             />
 
-            {/* Actions */}
             <div className="flex gap-3 pt-2">
               <Button
                 size="large"
@@ -226,7 +221,6 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
           </Form>
         </div>
       ) : (
-        /* Success State */
         <div className="py-8 text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full mb-6 shadow-lg shadow-emerald-500/30">
             <CheckCircleOutlined className="text-4xl text-white" />

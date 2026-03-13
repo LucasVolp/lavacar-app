@@ -19,9 +19,6 @@ import {
   BlockedTimeModal,
 } from "@/components/admin/shop/blocked-times";
 
-/**
- * Bloqueios de Horário do Shop - CRUD Completo
- */
 export default function BlockedTimesPage() {
   const parseDateOnly = (dateValue: string) => {
     const dateKey = dateValue.split("T")[0];
@@ -40,7 +37,6 @@ export default function BlockedTimesPage() {
 
   const blockType = Form.useWatch("type", form);
 
-  // Estatísticas com date-fns
   const today = startOfDay(new Date());
   const stats = {
     total: blockedTimes.length,
@@ -52,7 +48,6 @@ export default function BlockedTimesPage() {
     fullDay: blockedTimes.filter(b => b.type === "FULL_DAY").length,
   };
 
-  // Ordenar por data (futuros primeiro)
   const sortedBlockedTimes = [...blockedTimes].sort((a, b) => 
     parseDateOnly(b.date).getTime() - parseDateOnly(a.date).getTime()
   );
@@ -60,7 +55,6 @@ export default function BlockedTimesPage() {
   const handleOpenModal = (blockedTime?: BlockedTime) => {
     if (blockedTime) {
       setEditingBlockedTime(blockedTime);
-      // Ant Design Form fields expect dayjs objects for DatePicker/TimePicker
       form.setFieldsValue({
         type: blockedTime.type,
         date: dayjs(blockedTime.date.split("T")[0], "YYYY-MM-DD"),

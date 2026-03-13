@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { shopService } from "@/services/shop";
 import { CreateShopDto, UpdateShopDto } from "@/types/shop";
 
-// Query Keys
 export const shopKeys = {
   all: ["shops"] as const,
   lists: () => [...shopKeys.all, "list"] as const,
@@ -11,21 +10,15 @@ export const shopKeys = {
   detail: (id: string) => [...shopKeys.details(), id] as const,
 };
 
-/**
- * Hook para buscar todas as lojas
- */
 export function useShops(enabled = true) {
   return useQuery({
     queryKey: shopKeys.lists(),
     queryFn: () => shopService.findAll(),
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000,
   });
 }
 
-/**
- * Hook para buscar uma loja por slug
- */
 export function useShopBySlug(slug: string | null, enabled = true) {
   return useQuery({
     queryKey: shopKeys.bySlug(slug || ""),
@@ -35,9 +28,6 @@ export function useShopBySlug(slug: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para buscar uma loja por ID
- */
 export function useShopById(id: string | null, enabled = true) {
   return useQuery({
     queryKey: shopKeys.detail(id || ""),
@@ -47,9 +37,6 @@ export function useShopById(id: string | null, enabled = true) {
   });
 }
 
-/**
- * Hook para criar uma loja
- */
 export function useCreateShop() {
   const queryClient = useQueryClient();
 
@@ -61,9 +48,6 @@ export function useCreateShop() {
   });
 }
 
-/**
- * Hook para atualizar uma loja
- */
 export function useUpdateShop() {
   const queryClient = useQueryClient();
 
@@ -76,9 +60,6 @@ export function useUpdateShop() {
   });
 }
 
-/**
- * Hook para deletar uma loja
- */
 export function useDeleteShop() {
   const queryClient = useQueryClient();
 

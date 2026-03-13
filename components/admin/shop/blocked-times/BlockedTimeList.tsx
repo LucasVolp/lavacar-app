@@ -21,9 +21,6 @@ interface BlockedTimeListProps {
   onAdd: () => void;
 }
 
-/**
- * Status badge component for consistent theming
- */
 interface StatusBadgeProps {
   type: "today" | "past" | "future";
 }
@@ -53,9 +50,6 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ type }) => {
   );
 };
 
-/**
- * Type badge for block type visualization
- */
 interface TypeBadgeProps {
   type: "FULL_DAY" | "PARTIAL";
 }

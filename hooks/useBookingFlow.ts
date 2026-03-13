@@ -11,10 +11,29 @@ import { usePublicServicesByShop } from "@/hooks/useServices";
 import { useUserVehicles } from "@/hooks/useVehicles";
 import { usePublicShopSchedules } from "@/hooks/useSchedules";
 import { usePublicAvailability, useCreateAppointment } from "@/hooks/useAppointments";
-import { Services } from "@/types/services";
+import { Services, ServiceVariant } from "@/types/services";
+import { Vehicle } from "@/types/vehicle";
 import { timeApiService } from "@/services/timeApi";
 
 const STORAGE_KEY = "lavacar_booking_draft";
+
+function getEffectivePricing(service: Services, vehicleSize?: string): { price: string; duration: number } {
+  if (service.hasVariants && service.variants?.length && vehicleSize) {
+    const variant = service.variants.find((v: ServiceVariant) => v.size === vehicleSize);
+    if (variant) return { price: variant.price, duration: variant.duration };
+  }
+  return { price: service.price, duration: service.duration };
+}
+
+interface GuestVehicleInfo {
+  id: string;
+  brand: string;
+  model: string;
+  size: string;
+  type: string;
+  plate?: string;
+  color?: string;
+}
 
 interface BookingDraft {
   step: number;
@@ -30,7 +49,6 @@ export function useBookingFlow(slug: string) {
   const { user, isAuthenticated } = useAuth();
   const { setShopBySlug } = useShop();
 
-  // Core booking state
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<Services[]>([]);
@@ -40,8 +58,9 @@ export function useBookingFlow(slug: string) {
   const [isRestoring, setIsRestoring] = useState(true);
   const [userTimezone, setUserTimezone] = useState("");
   const [guestUserId, setGuestUserId] = useState<string | null>(null);
+  const [guestVehicleInfo, setGuestVehicleInfo] = useState<GuestVehicleInfo | null>(null);
+  const [trackingUrl, setTrackingUrl] = useState<string | null>(null);
 
-  // Queries
   const { data: shop, isLoading: shopLoading, error: shopError } = useShopBySlug(slug);
 
   const { data: servicesData, isLoading: servicesLoading } = usePublicServicesByShop(
@@ -76,8 +95,6 @@ export function useBookingFlow(slug: string) {
   const availableSlots = availabilityData?.availableSlots ?? [];
   const createAppointment = useCreateAppointment();
 
-  // ----- Side Effects -----
-
   useEffect(() => {
     if (slug) setShopBySlug(slug);
   }, [slug, setShopBySlug]);
@@ -86,7 +103,6 @@ export function useBookingFlow(slug: string) {
     setUserTimezone(timeApiService.detectTimezone());
   }, []);
 
-  // Restore draft from sessionStorage
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -102,13 +118,11 @@ export function useBookingFlow(slug: string) {
         }
       }
     } catch {
-      // silently ignore corrupt drafts
     } finally {
       setIsRestoring(false);
     }
   }, [slug]);
 
-  // Persist draft to sessionStorage
   useEffect(() => {
     if (isRestoring) return;
     if (bookingComplete) {
@@ -127,26 +141,28 @@ export function useBookingFlow(slug: string) {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [currentStep, selectedVehicleId, selectedServices, selectedDate, selectedTime, slug, bookingComplete, isRestoring, guestUserId]);
 
-  // ----- Computed -----
-
   const selectedVehicle = useMemo(() => {
-    if (isAuthenticated && selectedVehicleId && selectedVehicleId !== "new-vehicle-pending") {
-      return vehicles.find((v) => v.id === selectedVehicleId) || null;
+    if (selectedVehicleId && selectedVehicleId !== "new-vehicle-pending") {
+      const found = vehicles.find((v) => v.id === selectedVehicleId) || null;
+      if (found) return found;
+    }
+    if (guestVehicleInfo && selectedVehicleId === guestVehicleInfo.id) {
+      return guestVehicleInfo as unknown as Vehicle;
     }
     return null;
-  }, [vehicles, selectedVehicleId, isAuthenticated]);
+  }, [vehicles, selectedVehicleId, guestVehicleInfo]);
+
+  const vehicleSize = selectedVehicle?.size || guestVehicleInfo?.size || undefined;
 
   const totalDuration = useMemo(
-    () => selectedServices.reduce((sum, s) => sum + s.duration, 0),
-    [selectedServices]
+    () => selectedServices.reduce((sum, s) => sum + getEffectivePricing(s, vehicleSize).duration, 0),
+    [selectedServices, vehicleSize]
   );
 
   const totalPrice = useMemo(
-    () => selectedServices.reduce((sum, s) => sum + parseFloat(s.price), 0),
-    [selectedServices]
+    () => selectedServices.reduce((sum, s) => sum + parseFloat(getEffectivePricing(s, vehicleSize).price), 0),
+    [selectedServices, vehicleSize]
   );
-
-  // ----- Handlers -----
 
   const handleServiceToggle = useCallback((service: Services) => {
     setSelectedTime(null);
@@ -161,9 +177,10 @@ export function useBookingFlow(slug: string) {
     setSelectedTime(null);
   }, []);
 
-  const handleGuestUserCreated = useCallback((userId: string, vehicleId: string) => {
+  const handleGuestUserCreated = useCallback((userId: string, vehicleId: string, vehicleInfo?: GuestVehicleInfo) => {
     setGuestUserId(userId);
     setSelectedVehicleId(vehicleId);
+    if (vehicleInfo) setGuestVehicleInfo(vehicleInfo);
     message.success("Tudo certo! Vamos escolher os serviços.");
     setCurrentStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -195,7 +212,7 @@ export function useBookingFlow(slug: string) {
     const endTime = addMinutes(scheduledAt, totalDuration);
 
     try {
-      await createAppointment.mutateAsync({
+      const result = await createAppointment.mutateAsync({
         scheduledAt: scheduledAt.toISOString(),
         endTime: endTime.toISOString(),
         totalPrice,
@@ -203,13 +220,20 @@ export function useBookingFlow(slug: string) {
         userId: bookingUserId,
         shopId: shop.id,
         vehicleId: selectedVehicleId,
-        serviceIds: selectedServices.map((s) => ({
-          serviceId: s.id,
-          serviceName: s.name,
-          servicePrice: parseFloat(s.price),
-          duration: s.duration,
-        })),
+        serviceIds: selectedServices.map((s) => {
+          const effective = getEffectivePricing(s, vehicleSize);
+          return {
+            serviceId: s.id,
+            serviceName: s.name,
+            servicePrice: parseFloat(effective.price),
+            duration: effective.duration,
+          };
+        }),
       });
+
+      if (result?.trackingUrl) {
+        setTrackingUrl(result.trackingUrl);
+      }
 
       setBookingComplete(true);
       sessionStorage.removeItem(STORAGE_KEY);
@@ -218,7 +242,7 @@ export function useBookingFlow(slug: string) {
       const err = error as { response?: { data?: { message?: string } } };
       message.error(err.response?.data?.message || "Erro ao criar agendamento");
     }
-  }, [selectedVehicleId, user, guestUserId, shop, selectedDate, selectedTime, selectedServices, totalDuration, totalPrice, createAppointment]);
+  }, [selectedVehicleId, user, guestUserId, shop, selectedDate, selectedTime, selectedServices, totalDuration, totalPrice, createAppointment, vehicleSize]);
 
   const canProceedToStep = useCallback(
     (step: number) => {
@@ -256,6 +280,8 @@ export function useBookingFlow(slug: string) {
     setSelectedServices([]);
     setSelectedVehicleId(null);
     setGuestUserId(null);
+    setGuestVehicleInfo(null);
+    setTrackingUrl(null);
   }, []);
 
   const formatDuration = useCallback((minutes: number) => {
@@ -266,7 +292,6 @@ export function useBookingFlow(slug: string) {
   }, []);
 
   return {
-    // State
     currentStep,
     setCurrentStep,
     selectedVehicleId,
@@ -279,8 +304,8 @@ export function useBookingFlow(slug: string) {
     isRestoring,
     userTimezone,
     guestUserId,
+    trackingUrl,
 
-    // Query data
     shop,
     shopLoading,
     shopError,
@@ -293,14 +318,13 @@ export function useBookingFlow(slug: string) {
     availableSlots,
     availabilityLoading,
 
-    // Computed
     selectedVehicle,
     totalDuration,
     totalPrice,
     selectedServiceIds,
+    vehicleSize,
     isBookingPending: createAppointment.isPending,
 
-    // Handlers
     handleServiceToggle,
     handleDateChange,
     handleGuestUserCreated,
@@ -313,7 +337,6 @@ export function useBookingFlow(slug: string) {
     formatDuration,
     refetchVehicles,
 
-    // Auth
     user,
     isAuthenticated,
   };

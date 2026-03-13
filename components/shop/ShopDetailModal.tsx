@@ -75,7 +75,6 @@ export default function ShopDetailModal({
       }
     >
       <div className="py-4">
-        {/* Description */}
         {shop.description && (
           <>
             <Paragraph type="secondary" className="mb-4">
@@ -85,7 +84,6 @@ export default function ShopDetailModal({
           </>
         )}
 
-        {/* Contact Information */}
         <div className="mb-6">
           <Title level={5} className="flex items-center gap-2 !mb-4">
             <PhoneOutlined className="text-primary" />
@@ -111,7 +109,6 @@ export default function ShopDetailModal({
 
         <Divider />
 
-        {/* Address */}
         <div className="mb-6">
           <Title level={5} className="flex items-center gap-2 !mb-4">
             <EnvironmentOutlined className="text-primary" />
@@ -132,7 +129,6 @@ export default function ShopDetailModal({
 
         <Divider />
 
-        {/* Scheduling Settings */}
         <div>
           <Title level={5} className="flex items-center gap-2 !mb-4">
             <SettingOutlined className="text-primary" />

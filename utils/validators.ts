@@ -1,7 +1,7 @@
 export function validateCPF(cpf: string): boolean {
   const cleanCPF = cpf.replace(/\D/g, '');
   if (cleanCPF.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cleanCPF)) return false; // Check for repeated digits (e.g., 111.111.111-11)
+  if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
 
   let sum = 0;
   let remainder;
@@ -29,7 +29,7 @@ export function validateCPF(cpf: string): boolean {
 export function validateCNPJ(cnpj: string): boolean {
   const cleanCNPJ = cnpj.replace(/\D/g, '');
   if (cleanCNPJ.length !== 14) return false;
-  if (/^(\d)\1{13}$/.test(cleanCNPJ)) return false; // Check for repeated digits
+  if (/^(\d)\1{13}$/.test(cleanCNPJ)) return false;
 
   let size = cleanCNPJ.length - 2;
   let numbers = cleanCNPJ.substring(0, size);

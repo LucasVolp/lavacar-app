@@ -45,7 +45,6 @@ export function BookingHeader({ shop, onBack }: BookingHeaderProps) {
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-slate-200 dark:border-[#27272a]">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
-          {/* Left - Back button + Shop info */}
           <div className="flex items-center gap-2 sm:gap-3 md:gap-6 min-w-0 flex-1">
             <button
               onClick={onBack}
@@ -75,7 +74,6 @@ export function BookingHeader({ shop, onBack }: BookingHeaderProps) {
             </div>
           </div>
 
-          {/* Right - Compact on mobile */}
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-6 shrink-0 ml-2">
             <ThemeToggle />
 

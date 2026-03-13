@@ -30,24 +30,22 @@ export const Footer: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          {/* Left Section - Branding */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">L</span>
+              <span className="text-white font-bold text-sm">N</span>
             </div>
             <div className="flex flex-col">
               <Text strong className="text-sm">
-                Lavacar
+                NexoCar
               </Text>
               <Text type="secondary" className="text-xs">
-                Sistema de Agendamentos
+                Sistema de Gestão de Agendamentos
               </Text>
             </div>
           </div>
 
-          {/* Center Section - Links */}
           <Space separator={<Divider type="vertical" />} className="hidden md:flex">
-            <Link href="mailto:suporte@lavacar.com" className="text-xs hover:text-primary">
+            <Link href="mailto:suporte@nexocar.com" className="text-xs hover:text-primary">
               <MailOutlined className="mr-1" />
               Suporte
             </Link>
@@ -65,10 +63,9 @@ export const Footer: React.FC = () => {
             </Link>
           </Space>
 
-          {/* Right Section - Copyright */}
           <div className="flex items-center gap-1 text-center">
             <Text type="secondary" className="text-xs">
-              © {currentYear} Lavacar. Feito com
+              © {currentYear} NexoCar. Feito com
             </Text>
             <HeartFilled className="text-error text-xs animate-pulse" />
             <Text type="secondary" className="text-xs">

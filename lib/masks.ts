@@ -1,24 +1,13 @@
-/**
- * Input Masking Utilities
- * Provides formatting masks for Brazilian documents and phone numbers
- */
-
-/**
- * Formats a string as CPF (000.000.000-00) or CNPJ (00.000.000/0000-00)
- * Automatically detects the format based on the length
- */
 export function maskCpfCnpj(value: string): string {
   const digits = value.replace(/\D/g, "");
 
   if (digits.length <= 11) {
-    // CPF: 000.000.000-00
     return digits
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
   }
 
-  // CNPJ: 00.000.000/0000-00
   return digits
     .slice(0, 14)
     .replace(/^(\d{2})(\d)/, "$1.$2")
@@ -27,44 +16,29 @@ export function maskCpfCnpj(value: string): string {
     .replace(/(\d{4})(\d)/, "$1-$2");
 }
 
-/**
- * Formats a string as Brazilian phone number
- * Supports both landline (XX) XXXX-XXXX and mobile (XX) XXXXX-XXXX
- */
 export function maskPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 11);
 
   if (digits.length <= 10) {
-    // Landline: (XX) XXXX-XXXX
     return digits
       .replace(/(\d{2})(\d)/, "($1) $2")
       .replace(/(\d{4})(\d)/, "$1-$2");
   }
 
-  // Mobile: (XX) XXXXX-XXXX
   return digits
     .replace(/(\d{2})(\d)/, "($1) $2")
     .replace(/(\d{5})(\d)/, "$1-$2");
 }
 
-/**
- * Formats a string as Brazilian CEP (00000-000)
- */
 export function maskCep(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 8);
   return digits.replace(/(\d{5})(\d)/, "$1-$2");
 }
 
-/**
- * Removes all non-digit characters from a string
- */
 export function unmask(value: string): string {
   return value.replace(/\D/g, "");
 }
 
-/**
- * Validates CPF format (11 digits)
- */
 export function isValidCpf(cpf: string): boolean {
   const digits = cpf.replace(/\D/g, "");
   if (digits.length !== 11) return false;
@@ -87,9 +61,6 @@ export function isValidCpf(cpf: string): boolean {
   return remainder === parseInt(digits[10]);
 }
 
-/**
- * Validates CNPJ format (14 digits)
- */
 export function isValidCnpj(cnpj: string): boolean {
   const digits = cnpj.replace(/\D/g, "");
   if (digits.length !== 14) return false;
@@ -115,9 +86,6 @@ export function isValidCnpj(cnpj: string): boolean {
   return digit2 === parseInt(digits[13]);
 }
 
-/**
- * Validates CPF or CNPJ based on length
- */
 export function isValidCpfCnpj(value: string): boolean {
   const digits = value.replace(/\D/g, "");
   if (digits.length === 11) return isValidCpf(digits);

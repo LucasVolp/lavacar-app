@@ -30,7 +30,6 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
   const displayedAppointments = appointments.slice(0, maxItems);
   const hasMore = appointments.length > maxItems;
 
-  // Empty State
   if (appointments.length === 0) {
     return (
       <div className="bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm transition-colors h-full flex flex-col justify-center">
@@ -64,7 +63,6 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
 
   return (
     <div className="bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-colors overflow-hidden h-full flex flex-col">
-      {/* Header - Compact */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -96,7 +94,6 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
         )}
       </div>
 
-      {/* List - Compact */}
       <div className="flex-1 p-3 overflow-auto">
         <div className="flex flex-col gap-2">
           {displayedAppointments.map((appointment) => (
@@ -129,7 +126,6 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
         </div>
       </div>
 
-      {/* Footer */}
       {hasMore && (
         <div className="px-4 py-2 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
           <Link href="/client/appointments" className="block">

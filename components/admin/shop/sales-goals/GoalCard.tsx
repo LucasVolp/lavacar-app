@@ -26,11 +26,9 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
   const isActive = now.isAfter(start) && now.isBefore(end);
   const isPast = now.isAfter(end);
 
-  // Use real sales data from backend
   const targetAmount = parseFloat(String(goal.amount));
   const currentAmount = goal.currentSales ? Number(goal.currentSales) : 0;
   
-  // Calculate progress percentage
   const rawPercent = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
   const progressPercent = Math.min(Math.round(rawPercent), 100);
   const isCompleted = currentAmount >= targetAmount;
@@ -66,7 +64,6 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
 
   return (
     <div className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 ${isPast && !isCompleted ? 'opacity-70' : ''} ${isCompleted ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''}`}>
-      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2.5 rounded-xl ${
@@ -120,7 +117,6 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
         </div>
       </div>
 
-      {/* Goal Amount - Hero Typography */}
       <div className="mb-4">
         <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-1">
           Meta de Faturamento
@@ -130,7 +126,6 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
@@ -165,7 +160,6 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
         </div>
       </div>
 
-      {/* Period */}
       <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
           <CalendarOutlined />

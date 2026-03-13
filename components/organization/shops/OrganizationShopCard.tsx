@@ -2,11 +2,10 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, Badge, Button, Popconfirm, Tooltip } from "antd";
+import { Avatar, Badge, Button, Popconfirm } from "antd";
 import {
   ArrowRightOutlined,
   CalendarOutlined,
-  ClockCircleOutlined,
   DeleteOutlined,
   EnvironmentOutlined,
   SettingOutlined,

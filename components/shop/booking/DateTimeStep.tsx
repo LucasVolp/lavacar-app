@@ -29,9 +29,9 @@ export function DateTimeStep({
   isLoading,
 }: DateTimeStepProps) {
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">
           Data e Horário
         </h2>
         <p className="text-slate-500 dark:text-slate-400">

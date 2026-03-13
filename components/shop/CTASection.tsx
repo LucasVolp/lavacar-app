@@ -10,7 +10,6 @@ interface CTASectionProps {
 export function CTASection({ shopName, onBooking }: CTASectionProps) {
   return (
     <section className="relative py-32 overflow-hidden bg-slate-50 dark:bg-[#09090b] border-t border-slate-200 dark:border-[#27272a] transition-colors duration-300">
-      {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-500/10 rounded-full blur-[100px]" />
@@ -38,7 +37,6 @@ export function CTASection({ shopName, onBooking }: CTASectionProps) {
           <span>Agendar Serviço Agora</span>
         </button>
         
-        {/* Trust badges */}
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-12 text-slate-500 dark:text-slate-500 text-sm font-medium">
           <div className="flex items-center gap-2">
             <CheckCircleFilled className="text-emerald-500" />

@@ -16,7 +16,6 @@ export interface CreateChecklistDTO {
   photos?: File[];
 }
 
-// Backward compatibility with previous naming.
 export type CreateChecklistPayload = CreateChecklistDTO;
 
 export interface UpdateChecklistPayload {

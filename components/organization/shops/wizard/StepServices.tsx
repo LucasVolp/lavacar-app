@@ -152,7 +152,6 @@ export const StepServices: React.FC<StepServicesProps> = ({
           styles={{ header: { padding: "24px 32px 0", borderBottom: "none" }, body: { padding: 32 } }}
         >
           <div className="space-y-8">
-            {/* Suggestion Cards */}
             <div>
               <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-4">
                 <ThunderboltOutlined className="mr-1" />
@@ -201,7 +200,6 @@ export const StepServices: React.FC<StepServicesProps> = ({
               </div>
             </div>
 
-            {/* Manual add form */}
             <div className="p-6 md:p-7 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-gradient-to-br from-zinc-50 to-white dark:from-zinc-900 dark:to-zinc-800/40 shadow-sm">
               <div className="flex items-center justify-between mb-5">
                 <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-0">
@@ -275,7 +273,6 @@ export const StepServices: React.FC<StepServicesProps> = ({
               </Row>
             </div>
 
-            {/* Added services list with explicit editing */}
             {services.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-4">
@@ -384,7 +381,6 @@ export const StepServices: React.FC<StepServicesProps> = ({
         </Card>
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
         <div className="flex gap-2">
           <Button size="large" onClick={onBack} className="text-zinc-600 dark:text-zinc-300">

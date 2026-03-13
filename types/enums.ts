@@ -1,8 +1,3 @@
-/**
- * Local enum definitions mirroring the Prisma schema from lavacar-api.
- * These must be kept in sync with the backend enums.
- */
-
 export const Role = {
   USER: 'USER',
   OWNER: 'OWNER',

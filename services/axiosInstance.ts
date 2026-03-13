@@ -1,9 +1,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-// URL base da API - usa variável de ambiente ou fallback para localhost
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 
-                process.env.NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL || 
+const baseURL = process.env.NEXT_PUBLIC_API_URL ||
+                process.env.NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL ||
                 'http://localhost:3000';
 
 const axiosInstance = axios.create({
@@ -15,18 +14,14 @@ const axiosInstance = axios.create({
   },
 });
 
-// Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Tenta pegar o token dos cookies primeiro (segurança)
     const token = Cookies.get("access_token");
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Quando o payload é FormData, remover o Content-Type padrão
-    // para que o browser/Axios defina multipart/form-data com boundary correto.
     if (typeof FormData !== "undefined" && config.data instanceof FormData) {
       delete config.headers["Content-Type"];
     }
@@ -38,13 +33,11 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Handle errors here
     return Promise.reject(error);
   }
 );

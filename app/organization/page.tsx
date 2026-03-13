@@ -20,7 +20,6 @@ export default function OrganizationIndexPage() {
 
   const isLoading = authLoading || (isAuthenticated && orgLoading);
 
-  // Ensure organizations is an array
   const orgList = useMemo(() => Array.isArray(organizations) ? organizations : [], [organizations]);
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export default function OrganizationIndexPage() {
 
   useEffect(() => {
     if (!isLoading && orgList.length === 1) {
-      // Auto-redirect if only one organization
       router.push(`/organization/${orgList[0].id}`);
     }
   }, [isLoading, orgList, router]);
@@ -44,7 +42,6 @@ export default function OrganizationIndexPage() {
     );
   }
 
-  // If no organizations found
   if (orgList.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black p-4">
@@ -70,7 +67,6 @@ export default function OrganizationIndexPage() {
     );
   }
 
-  // If multiple organizations, list them
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black p-8">
       <div className="max-w-5xl mx-auto">

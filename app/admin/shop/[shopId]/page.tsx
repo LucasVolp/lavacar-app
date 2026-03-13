@@ -47,13 +47,11 @@ import type { User } from "@/types/user";
 export default function ShopDashboardPage() {
   const { shop, shopId, isLoading: isLoadingShop } = useShopAdmin();
 
-  // Wizard state
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardPlate, setWizardPlate] = useState("");
   const [wizardVehicle, setWizardVehicle] = useState<Vehicle | null>(null);
   const [wizardUser, setWizardUser] = useState<User | null>(null);
 
-  // Resolve modal state
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
 
   const {
@@ -61,8 +59,6 @@ export default function ShopDashboardPage() {
     isLoading: isLoadingAppointments,
   } = useShopAppointments(shopId, { perPage: 500 }, !!shopId);
 
-  // Fetch specifically pending/confirmed/waiting/in_progress appointments to ensure we catch overdue ones
-  // even if there are many completed appointments cluttering the main list
   const { data: activeStatusData } = useShopAppointments(
     shopId,
     { 
@@ -128,8 +124,7 @@ export default function ShopDashboardPage() {
         id,
         status: "COMPLETED",
       });
-    } catch (error) {
-      console.error("Failed to complete service", error);
+    } catch {
     }
   };
 
@@ -199,10 +194,8 @@ export default function ShopDashboardPage() {
     [appointments]
   );
 
-  // Agendamentos atrasados: status pendente/aguardando/confirmado com horário de término já passado
   const overdueAppointments = useMemo(() => {
     const now = new Date();
-    // Use activeStatusAppointments instead of appointments to ensure we have them all
     return activeStatusAppointments.filter((apt) => {
       const isPendingStatus = ["PENDING", "WAITING", "CONFIRMED"].includes(
         apt.status

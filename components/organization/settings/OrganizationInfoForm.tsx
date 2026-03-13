@@ -37,7 +37,6 @@ export const OrganizationInfoForm: React.FC<OrganizationInfoFormProps> = ({
 
   return (
     <>
-      {/* Basic Info Section */}
       <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-6 flex items-center gap-2">
           <BankOutlined /> Informações Básicas
@@ -80,7 +79,6 @@ export const OrganizationInfoForm: React.FC<OrganizationInfoFormProps> = ({
         </div>
       </section>
 
-      {/* Branding Section */}
       <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-6 flex items-center gap-2">
           <SafetyCertificateOutlined /> Marca e Aparência

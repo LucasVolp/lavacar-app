@@ -33,7 +33,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
         }`}
       >
         <Row gutter={[16, 16]} align="middle">
-          {/* Toggle & Day Name */}
           <Col xs={24} sm={6}>
             <div className="flex items-center gap-3">
               <Switch
@@ -59,7 +58,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
             </div>
           </Col>
 
-          {/* Opening Hours */}
           <Col xs={24} sm={8}>
             <div
               className={`flex items-center gap-2 transition-opacity duration-300 ${
@@ -91,7 +89,6 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
             </div>
           </Col>
 
-          {/* Break Time */}
           <Col xs={24} sm={10}>
             <div
               className={`flex items-center gap-2 flex-wrap transition-opacity duration-300 ${

@@ -27,8 +27,6 @@ export default function Layout({
   }
 
   if (!isAuthenticated) {
-    // If not authenticated, redirect to login
-    // We use setTimeout to avoid render interruption issues during redirect
     setTimeout(() => router.push(`/auth/login?redirect=/organization/${organizationId}`), 0);
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -50,9 +48,7 @@ export default function Layout({
     );
   }
 
-  // Check ownership (ownerId) or membership
   const isOwner = organization.ownerId === user?.id;
-  // Use 'any' for member temporarily if type definition is partial, but usually Organization includes members
   const isMember = organization.members?.some((m: { userId: string }) => m.userId === user?.id);
 
   if (!isOwner && !isMember) {

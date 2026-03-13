@@ -39,7 +39,6 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
   const createSchedule = useCreateSchedule();
   const createService = useCreateService();
 
-  // Validate persisted shopId on mount
   useEffect(() => {
     if (!initialShopId || initialStep < 1) return;
 
@@ -53,7 +52,7 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
         setShopId("");
         updateUrl(0, "");
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateUrl = useCallback((step: number, id: string) => {
@@ -64,7 +63,6 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
     router.replace(`?${query}`, { scroll: false });
   }, [router]);
 
-  // Step 1: Create shop
   const handleCreateShop = async (
     payload: CreateShopDto,
     logoFile: File | null,
@@ -112,7 +110,6 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
     }
   };
 
-  // Step 2: Create schedules
   const handleCreateSchedules = async (rows: ScheduleRow[]) => {
     setIsSubmitting(true);
     try {
@@ -144,7 +141,6 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
     }
   };
 
-  // Step 3: Create services
   const handleCreateServices = async (services: ServiceRow[]) => {
     if (services.length === 0) {
       setCurrentStep(3);
@@ -192,7 +188,6 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
 
   return (
     <div className="max-w-5xl mx-auto pb-24 space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div className="space-y-1">
           <Button
@@ -212,14 +207,12 @@ export const ShopWizard: React.FC<ShopWizardProps> = ({ organizationId, ownerId 
         </div>
       </div>
 
-      {/* Steps indicator */}
       <div className={SECTION_CONTAINER_CLASS}>
         <div className="p-6">
           <Steps current={currentStep} items={stepItems} />
         </div>
       </div>
 
-      {/* Step content */}
       {currentStep === 0 && (
         <StepIdentity
           organizationId={organizationId}

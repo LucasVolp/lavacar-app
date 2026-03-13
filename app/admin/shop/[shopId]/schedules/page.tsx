@@ -18,9 +18,6 @@ import { useEffect, useState } from "react";
 import { useUpdateShop } from "@/hooks/useShops";
 import { timeApiService } from "@/services/timeApi";
 
-/**
- * Horários de Funcionamento do Shop - Configuração completa
- */
 export default function SchedulesPage() {
   const { shopId, shop } = useShopAdmin();
   const { data: schedules = [], isLoading } = useShopSchedules(shopId);
@@ -55,7 +52,6 @@ export default function SchedulesPage() {
     setSelectedTimezone(shop?.timeZone || timeApiService.detectTimezone());
   }, [shop?.timeZone]);
 
-  // Carregar dados existentes
   useEffect(() => {
     if (schedules.length > 0) {
       const baseDate = new Date();
@@ -160,7 +156,6 @@ export default function SchedulesPage() {
     }
   };
 
-  // Resumo dos horários
   const openDays = WEEKDAYS.filter((day) => formData[day.key].isOpen);
   const closedDays = WEEKDAYS.filter((day) => !formData[day.key].isOpen);
 
@@ -201,7 +196,6 @@ export default function SchedulesPage() {
         </div>
       </div>
 
-      {/* Configuração por dia */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-300">
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
           Configuração Semanal

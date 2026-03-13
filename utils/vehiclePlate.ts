@@ -9,17 +9,14 @@ export function formatVehiclePlate(value: unknown): string {
 
   if (!plate) return "";
 
-  // Legacy pattern: ABC1234
   if (/^[A-Z]{3}\d{4}$/.test(plate)) {
     return `${plate.slice(0, 3)}-${plate.slice(3)}`;
   }
 
-  // Mercosur pattern: ABC1D23
   if (/^[A-Z]{3}\d[A-Z]\d{2}$/.test(plate)) {
     return plate;
   }
 
-  // Fallback for partial values
   if (plate.length > 3) {
     return `${plate.slice(0, 3)}-${plate.slice(3)}`;
   }

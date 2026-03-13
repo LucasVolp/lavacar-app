@@ -20,9 +20,6 @@ interface ManagementGridProps {
   employeeCount?: number;
 }
 
-/**
- * Get today's schedule summary
- */
 const getTodayScheduleSummary = (schedules: Schedule[]): string => {
   if (!schedules || schedules.length === 0) {
     return "Nenhum horário configurado";
@@ -49,9 +46,6 @@ const getTodayScheduleSummary = (schedules: Schedule[]): string => {
   return `Aberto das ${todaySchedule.startTime} às ${todaySchedule.endTime}`;
 };
 
-/**
- * Get blocked times summary
- */
 const getBlockedTimesSummary = (blockedTimes: BlockedTime[]): { count: number; summary: string } => {
   if (!blockedTimes || blockedTimes.length === 0) {
     return { count: 0, summary: "Nenhum bloqueio ativo" };
