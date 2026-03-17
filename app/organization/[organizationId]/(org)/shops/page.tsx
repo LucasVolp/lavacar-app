@@ -47,7 +47,7 @@ export default function OrganizationShopsPage() {
 
   if (!dashboardMetrics) return null;
 
-  const shops = dashboardMetrics.shops || [];
+  const shops = (dashboardMetrics.shops || []).map((shop) => ({ ...shop, organizationId }));
   const filteredShops = shops.filter(
     (shop) =>
       shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

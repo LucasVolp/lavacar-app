@@ -47,7 +47,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
   
   const { resolvedTheme, setTheme } = useTheme();
   const { logout, user } = useAuth();
-  const { shop, shopId, isLoading } = useShopAdmin();
+  const { shop, shopId, organizationId, isLoading } = useShopAdmin();
   
   const isDarkMode = resolvedTheme === "dark";
 
@@ -70,7 +70,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   const menuItems: MenuProps["items"] = [
     {
-      key: `/admin/shop/${shopId}`,
+      key: `/organization/${organizationId}/shop/${shopId}`,
       icon: <DashboardOutlined style={{ fontSize: "18px", color: "#8b5cf6" }} />,
       label: <span className="font-medium">Dashboard</span>,
     },
@@ -85,22 +85,22 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       ),
       children: [
         {
-          key: `/admin/shop/${shopId}/appointments`,
+          key: `/organization/${organizationId}/shop/${shopId}/appointments`,
           icon: <CalendarOutlined style={{ fontSize: "18px", color: "#3b82f6" }} />,
           label: <span className="font-medium">Agendamentos</span>,
         },
         {
-          key: `/admin/shop/${shopId}/clients`,
+          key: `/organization/${organizationId}/shop/${shopId}/clients`,
           icon: <ContactsOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
           label: <span className="font-medium">Clientes</span>,
         },
         {
-          key: `/admin/shop/${shopId}/services`,
+          key: `/organization/${organizationId}/shop/${shopId}/services`,
           icon: <ToolOutlined style={{ fontSize: "18px", color: "#10b981" }} />,
           label: <span className="font-medium">Serviços</span>,
         },
         {
-          key: `/admin/shop/${shopId}/employees`,
+          key: `/organization/${organizationId}/shop/${shopId}/employees`,
           icon: <TeamOutlined style={{ fontSize: "18px", color: "#f43f5e" }} />,
           label: <span className="font-medium">Funcionários</span>,
         },
@@ -117,12 +117,12 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       ),
       children: [
         {
-          key: `/admin/shop/${shopId}/schedules`,
+          key: `/organization/${organizationId}/shop/${shopId}/schedules`,
           icon: <ClockCircleOutlined style={{ fontSize: "18px", color: "#f59e0b" }} />,
           label: <span className="font-medium">Horários</span>,
         },
         {
-          key: `/admin/shop/${shopId}/blocked-times`,
+          key: `/organization/${organizationId}/shop/${shopId}/blocked-times`,
           icon: <StopOutlined style={{ fontSize: "18px", color: "#ef4444" }} />,
           label: <span className="font-medium">Bloqueios</span>,
         },
@@ -139,24 +139,24 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       ),
       children: [
         {
-            key: `/admin/shop/${shopId}/evaluations`,
+            key: `/organization/${organizationId}/shop/${shopId}/evaluations`,
             icon: <StarOutlined style={{ fontSize: "18px", color: "#eab308" }} />,
             label: <span className="font-medium">Avaliações</span>,
         },
         {
-            key: `/admin/shop/${shopId}/insights`,
+            key: `/organization/${organizationId}/shop/${shopId}/insights`,
             icon: <LineChartOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
             label: <span className="font-medium">Insights</span>,
         },
       ]
     },
     {
-      key: `/admin/shop/${shopId}/sales-goals`,
+      key: `/organization/${organizationId}/shop/${shopId}/sales-goals`,
       icon: <DollarOutlined  style={{fontSize: "18px", color: "#08e400"}}/>,
       label: <span className="font-medium">Metas de Vendas</span>,
     },
     {
-      key: `/admin/shop/${shopId}/settings`,
+      key: `/organization/${organizationId}/shop/${shopId}/settings`,
       icon: <SettingOutlined style={{ fontSize: "18px", color: "#64748b" }} />,
       label: <span className="font-medium">Configurações</span>,
     },
@@ -167,7 +167,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
   };
 
   const getSelectedKeys = () => {
-    if (pathname === `/admin/shop/${shopId}`) return [`/admin/shop/${shopId}`];
+    if (pathname === `/organization/${organizationId}/shop/${shopId}`) return [`/organization/${organizationId}/shop/${shopId}`];
 
     const exactMatch = menuItems.flatMap(i =>
         (i && 'children' in i && i.children) ? i.children : [i]

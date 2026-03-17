@@ -60,6 +60,7 @@ export type OrganizationInsightsPeriod = "7d" | "30d" | "90d" | "lifetime";
 
 export interface OrganizationShopOverview {
     id: string;
+    organizationId: string;
     name: string;
     slug: string;
     status: Shop["status"];

@@ -8,6 +8,7 @@ import {
   SettingOutlined
 } from "@ant-design/icons";
 import { ManagementCard } from "./ManagementCard";
+import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { Schedule } from "@/types/schedule";
 import { BlockedTime } from "@/types/blockedTime";
 import { format, isSameDay, isBefore, startOfDay } from "date-fns";
@@ -86,6 +87,7 @@ export const ManagementGrid: React.FC<ManagementGridProps> = ({
   blockedTimes = [],
   employeeCount = 0
 }) => {
+  const { organizationId } = useShopAdmin();
   const scheduleSummary = getTodayScheduleSummary(schedules);
   const { count: blockedCount, summary: blockedSummary } = getBlockedTimesSummary(blockedTimes);
 
@@ -103,7 +105,7 @@ export const ManagementGrid: React.FC<ManagementGridProps> = ({
           title="Horários de Funcionamento"
           summary={scheduleSummary}
           description={`${schedules.filter(s => s.isOpen === "ACTIVE").length} dias configurados`}
-          href={`/admin/shop/${shopId}/schedules`}
+          href={`/organization/${organizationId}/shop/${shopId}/schedules`}
           actionLabel="Gerenciar Horários"
           color="blue"
         />
@@ -113,7 +115,7 @@ export const ManagementGrid: React.FC<ManagementGridProps> = ({
           title="Bloqueios de Agenda"
           summary={blockedCount > 0 ? `${blockedCount} bloqueio(s) ativos` : "Sem bloqueios"}
           description={blockedSummary}
-          href={`/admin/shop/${shopId}/blocked-times`}
+          href={`/organization/${organizationId}/shop/${shopId}/blocked-times`}
           actionLabel="Gerenciar Bloqueios"
           color="red"
         />
@@ -123,7 +125,7 @@ export const ManagementGrid: React.FC<ManagementGridProps> = ({
           title="Equipe"
           summary={`${employeeCount} funcionário(s)`}
           description={employeeCount > 0 ? "Equipe ativa" : "Nenhum membro cadastrado"}
-          href={`/admin/shop/${shopId}/employees`}
+          href={`/organization/${organizationId}/shop/${shopId}/employees`}
           actionLabel="Ver Equipe"
           color="purple"
         />
@@ -133,7 +135,7 @@ export const ManagementGrid: React.FC<ManagementGridProps> = ({
           title="Configurações Avançadas"
           summary="Agenda & Sistema"
           description="Intervalos, antecedência, buffers"
-          href={`/admin/shop/${shopId}/settings/advanced`}
+          href={`/organization/${organizationId}/shop/${shopId}/settings/advanced`}
           actionLabel="Configurar"
           color="zinc"
         />

@@ -45,7 +45,7 @@ import type { Vehicle } from "@/types/vehicle";
 import type { User } from "@/types/user";
 
 export default function ShopDashboardPage() {
-  const { shop, shopId, isLoading: isLoadingShop } = useShopAdmin();
+  const { shop, shopId, organizationId, isLoading: isLoadingShop } = useShopAdmin();
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardPlate, setWizardPlate] = useState("");
@@ -229,7 +229,7 @@ export default function ShopDashboardPage() {
       color: "#06b6d4",
       value: clientsCount,
       label: "cadastrados",
-      path: `/admin/shop/${shopId}/clients`,
+      path: `/organization/${organizationId}/shop/${shopId}/clients`,
     },
     {
       title: "Serviços",
@@ -237,7 +237,7 @@ export default function ShopDashboardPage() {
       color: "#3b82f6",
       value: stats.activeServices,
       label: "ativos",
-      path: `/admin/shop/${shopId}/services`,
+      path: `/organization/${organizationId}/shop/${shopId}/services`,
     },
     {
       title: "Horários",
@@ -245,7 +245,7 @@ export default function ShopDashboardPage() {
       color: "#10b981",
       value: schedules.filter((s) => s.isOpen === "ACTIVE").length,
       label: "dias abertos",
-      path: `/admin/shop/${shopId}/schedules`,
+      path: `/organization/${organizationId}/shop/${shopId}/schedules`,
     },
     {
       title: "Bloqueios",
@@ -257,7 +257,7 @@ export default function ShopDashboardPage() {
       })
         .length,
       label: "futuros",
-      path: `/admin/shop/${shopId}/blocked-times`,
+      path: `/organization/${organizationId}/shop/${shopId}/blocked-times`,
     },
   ];
 

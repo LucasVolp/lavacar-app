@@ -53,7 +53,7 @@ export default function OrganizationDashboardPage() {
     );
   }
 
-  const shops = dashboardMetrics.shops || [];
+  const shops = (dashboardMetrics.shops || []).map((shop) => ({ ...shop, organizationId }));
 
   return (
     <div className="space-y-10 animate-fade-in">

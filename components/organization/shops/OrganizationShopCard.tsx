@@ -120,14 +120,14 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
         <div className={`mt-auto grid gap-2 ${canDelete ? "grid-cols-3" : "grid-cols-2"}`}>
           <Button
             icon={<SettingOutlined />}
-            onClick={() => router.push(`/admin/shop/${shop.id}/settings`)}
+            onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
           >
             Configurar
           </Button>
           <Button
             type="primary"
             icon={<ArrowRightOutlined />}
-            onClick={() => router.push(`/admin/shop/${shop.id}`)}
+            onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
           >
             Gerenciar
           </Button>

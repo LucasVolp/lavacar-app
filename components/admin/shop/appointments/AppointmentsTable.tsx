@@ -6,6 +6,7 @@ import { ClockCircleOutlined, EyeOutlined, MoreOutlined } from "@ant-design/icon
 import { Appointment, AppointmentService } from "@/types/appointment";
 import { format, isBefore, isSameDay, startOfDay, parseISO } from "date-fns";
 import { useRouter } from "next/navigation";
+import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { CustomTooltip } from "@/components/ui";
 import { sanitizeText, formatCurrency } from "@/lib/security";
 
@@ -44,6 +45,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
   onCancel
 }) => {
   const router = useRouter();
+  const { organizationId } = useShopAdmin();
   const today = startOfDay(new Date());
 
   const columns = [
@@ -162,7 +164,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                 type="text"
                 icon={<EyeOutlined />}
                 onClick={() =>
-                  router.push(`/admin/shop/${shopId}/appointments/${record.id}`)
+                  router.push(`/organization/${organizationId}/shop/${shopId}/appointments/${record.id}`)
                 }
                 className="text-blue-500 hover:text-blue-600"
               />

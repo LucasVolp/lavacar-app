@@ -41,7 +41,7 @@ export default function ClientDetailPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { shopId } = useShopAdmin();
+  const { shopId, organizationId } = useShopAdmin();
   const clientId = params.clientId as string;
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "timeline");
 
@@ -230,7 +230,7 @@ export default function ClientDetailPage() {
         phone={phone}
         memberSince={memberSince}
         totalAppointments={totalAppointments}
-        onBack={() => router.push(`/admin/shop/${shopId}/clients`)}
+        onBack={() => router.push(`/organization/${organizationId}/shop/${shopId}/clients`)}
         onEdit={() => setIsEditing(true)}
       />
 
@@ -290,7 +290,7 @@ export default function ClientDetailPage() {
                     setTimelinePageSize(size);
                   }}
                   onAppointmentClick={(appointmentId) =>
-                    router.push(`/admin/shop/${shopId}/appointments/${appointmentId}`)
+                    router.push(`/organization/${organizationId}/shop/${shopId}/appointments/${appointmentId}`)
                   }
                 />
               </Spin>

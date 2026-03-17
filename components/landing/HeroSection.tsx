@@ -26,7 +26,7 @@ export const HeroSection = () => {
       if (organizations && organizations.length > 0) {
         router.push(`/organization/${organizations[0].id}`);
       } else {
-        router.push("/organization");
+        router.push("/organization/create");
       }
     }
   };

@@ -32,7 +32,7 @@ import { AppointmentModals } from "@/components/admin/shop/appointments/details/
 export default function AppointmentDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { shopId } = useShopAdmin();
+  const { shopId, organizationId } = useShopAdmin();
   const appointmentId = params?.id as string;
 
   const { data: appointment, isLoading, error } = useAppointment(appointmentId);
@@ -116,7 +116,7 @@ export default function AppointmentDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <Empty description="Agendamento não encontrado" />
-        <Button onClick={() => router.push(`/admin/shop/${shopId}/appointments`)} className="mt-4">
+        <Button onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments`)} className="mt-4">
           Voltar para Agenda
         </Button>
       </div>
@@ -132,7 +132,7 @@ export default function AppointmentDetailPage() {
   return (
     <div className="max-w-7xl mx-auto pb-12 px-4 sm:px-6">
       <AppointmentDetailHeader 
-        onBack={() => router.push(`/admin/shop/${shopId}/appointments`)}
+        onBack={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments`)}
         onPrint={() => message.info("Funcionalidade de impressão em desenvolvimento")}
         onCancel={() => setCancelModalVisible(true)}
         isCanceled={isCanceled}

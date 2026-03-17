@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Appointment, AppointmentStatus } from "@/types/appointment";
 import { useRouter } from "next/navigation";
+import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import {
   format,
   addMonths,
@@ -42,6 +43,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
   shopId,
 }) => {
   const router = useRouter();
+  const { organizationId } = useShopAdmin();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -274,7 +276,7 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
                             <div
                                 key={apt.id}
                                 className="relative z-10 pl-10 pb-6 last:pb-0 group"
-                                onClick={() => router.push(`/admin/shop/${shopId}/appointments/${apt.id}`)}
+                                onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments/${apt.id}`)}
                             >
                                 <div
                                     className="absolute left-[13px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900 shadow-sm z-20"

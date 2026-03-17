@@ -8,6 +8,7 @@ import { Shop } from "@/types/shop";
 interface ShopAdminContextData {
   shop: Shop | null;
   shopId: string;
+  organizationId: string;
   isLoading: boolean;
   error: Error | null;
 }
@@ -17,12 +18,14 @@ const ShopAdminContext = createContext<ShopAdminContextData>({} as ShopAdminCont
 export function ShopAdminProvider({ children }: { children: ReactNode }) {
   const params = useParams();
   const shopId = params?.shopId as string;
+  const organizationId = params?.organizationId as string;
 
   const { data: shop, isLoading, error } = useShopById(shopId);
 
   const value: ShopAdminContextData = {
     shop: shop ?? null,
     shopId,
+    organizationId,
     isLoading,
     error: error as Error | null,
   };

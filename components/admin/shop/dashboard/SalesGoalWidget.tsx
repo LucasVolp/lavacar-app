@@ -4,6 +4,7 @@ import React from "react";
 import { Card, Progress, Button, Typography, Tooltip } from "antd";
 import { RiseOutlined, PlusOutlined, InfoCircleOutlined, TrophyOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { useShopSalesGoals } from "@/hooks/useSalesGoals";
+import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useRouter } from "next/navigation";
 import { isWithinInterval, parseISO } from "date-fns";
 
@@ -16,6 +17,7 @@ interface SalesGoalWidgetProps {
 
 export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, currentRevenue }) => {
   const router = useRouter();
+  const { organizationId } = useShopAdmin();
   const { data: salesGoalsData, isLoading } = useShopSalesGoals(shopId);
 
   const salesGoals = Array.isArray(salesGoalsData) ? salesGoalsData : [];
@@ -67,7 +69,7 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />}
-                onClick={() => router.push(`/admin/shop/${shopId}/sales-goals`)}
+                onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/sales-goals`)}
                 className="bg-indigo-600 hover:!bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-900/20"
               >
                 Definir Meta Agora
@@ -153,7 +155,7 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
           <Button 
             type="link" 
             size="small" 
-            onClick={() => router.push(`/admin/shop/${shopId}/sales-goals`)}
+            onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/sales-goals`)}
             className={`p-0 font-medium ${isCompleted ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'}`}
           >
             Gerenciar Metas

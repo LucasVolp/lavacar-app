@@ -14,6 +14,7 @@ import {
 import { Appointment } from "@/types/appointment";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useGetChecklist } from "@/hooks/useChecklist";
 import { ChecklistModal } from "@/components/modals/ChecklistModal";
 import { StatusBadge } from "@/components/ui";
@@ -78,6 +79,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
   clientPictureByUserId = {},
 }) => {
   const router = useRouter();
+  const { organizationId } = useShopAdmin();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
@@ -109,7 +111,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
         <Button
           type="text"
           className="text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 font-medium"
-          onClick={() => router.push(`/admin/shop/${shopId}/appointments`)}
+          onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments`)}
         >
           Ver Todos <RightOutlined />
         </Button>
@@ -132,7 +134,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
               <div
                 key={appointment.id}
                 className="group flex flex-col p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all cursor-pointer"
-                onClick={() => router.push(`/admin/shop/${shopId}/appointments/${appointment.id}`)}
+                onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments/${appointment.id}`)}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -174,7 +176,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        router.push(`/admin/shop/${shopId}/clients`);
+                        router.push(`/organization/${organizationId}/shop/${shopId}/clients`);
                       }}
                       className="flex items-center gap-2 min-w-0 flex-1 text-left p-0 bg-transparent border-0 cursor-pointer"
                     >

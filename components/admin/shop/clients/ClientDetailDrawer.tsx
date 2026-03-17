@@ -40,6 +40,7 @@ import { useDeleteShopClient, useUpdateShopClient } from "@/hooks/useShopClients
 import { CustomTooltip, StatusBadge } from "@/components/ui";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { useShopAdmin } from "@/contexts/ShopAdminContext";
 
 import { formatPhone } from "@/utils/formatters";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
@@ -71,6 +72,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
   initialEditing = false,
 }) => {
   const router = useRouter();
+  const { organizationId } = useShopAdmin();
   const [form] = Form.useForm<EditFormValues>();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -316,7 +318,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
         <Button
           type="primary"
           size="large"
-          onClick={() => router.push(`/admin/shop/${shopId}/clients/${client.id}`)}
+          onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/clients/${client.id}`)}
           className="w-full !bg-indigo-600 hover:!bg-indigo-700 !border-indigo-600 !font-semibold !rounded-xl !h-11 !shadow-sm transition-all mt-4"
         >
           Ver Perfil Completo & Histórico ↗
@@ -597,7 +599,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                         <div
                           key={apt.id}
                           className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 -m-2 rounded-lg transition-colors"
-                          onClick={() => router.push(`/admin/shop/${shopId}/appointments/${apt.id}`)}
+                          onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments/${apt.id}`)}
                         >
                           <div className="flex items-center justify-between">
                             <Text strong className="dark:text-white">
@@ -624,7 +626,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
                     type="link"
                     block
                     className="mt-2"
-                    onClick={() => router.push(`/admin/shop/${shopId}/clients/${client.id}?tab=timeline`)}
+                    onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/clients/${client.id}?tab=timeline`)}
                   >
                     Ver todos os {appointmentCount} agendamentos
                   </Button>
