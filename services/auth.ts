@@ -16,6 +16,29 @@ export interface AuthUser {
   hasPassword?: boolean;
   provider?: string;
   isGuest?: boolean;
+  organizations?: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
+  organizationMembers?: {
+    id: string;
+    organizationId: string;
+    role: string;
+    organization: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+    managedShops: {
+      shopId: string;
+      shop: {
+        id: string;
+        name: string;
+        slug: string;
+      };
+    }[];
+  }[];
 }
 
 export interface LoginCredentials {
@@ -68,6 +91,28 @@ export interface CompleteRegistrationPayload {
   firstName: string;
   lastName?: string;
   picture?: string;
+}
+
+export interface RequestPasswordResetPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
+export interface RequestEmailChangePayload {
+  newEmail: string;
+}
+
+export interface ConfirmEmailChangePayload {
+  token: string;
+}
+
+export interface ConfirmEmailChangeResponse {
+  success: true;
+  email: string;
 }
 
 export interface AuthResponse {
@@ -189,16 +234,51 @@ export const authService = {
     }
   },
 
-  me: async (): Promise<AuthUser> => {
+  me: async (): Promise<AuthResponse> => {
     try {
-      const response: AxiosResponse<{ user: AuthUser } | AuthUser> = await axiosInstance.get(`${base}/me`);
-      if (response.data && 'user' in response.data) {
-         return response.data.user;
-      }
-      return response.data as AuthUser;
+      const response: AxiosResponse<AuthResponse> = await axiosInstance.get(`${base}/me`);
+      return response.data;
     } catch (error: unknown) {
       throw error;
     }
+  },
+
+  requestPasswordReset: async (
+    payload: RequestPasswordResetPayload,
+  ): Promise<{ success: true }> => {
+    const response: AxiosResponse<{ success: true }> = await axiosInstance.post(
+      `${base}/password/request-reset`,
+      payload,
+    );
+    return response.data;
+  },
+
+  resetPassword: async (payload: ResetPasswordPayload): Promise<{ success: true }> => {
+    const response: AxiosResponse<{ success: true }> = await axiosInstance.post(
+      `${base}/password/reset`,
+      payload,
+    );
+    return response.data;
+  },
+
+  requestEmailChange: async (
+    payload: RequestEmailChangePayload,
+  ): Promise<{ success: true }> => {
+    const response: AxiosResponse<{ success: true }> = await axiosInstance.post(
+      `${base}/email/request-change`,
+      payload,
+    );
+    return response.data;
+  },
+
+  confirmEmailChange: async (
+    payload: ConfirmEmailChangePayload,
+  ): Promise<ConfirmEmailChangeResponse> => {
+    const response: AxiosResponse<ConfirmEmailChangeResponse> = await axiosInstance.post(
+      `${base}/email/confirm-change`,
+      payload,
+    );
+    return response.data;
   },
 };
 

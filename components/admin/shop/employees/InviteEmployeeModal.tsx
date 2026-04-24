@@ -19,14 +19,19 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { InfoBox } from "@/components/ui";
+import { useSendInvite } from "@/hooks/useOrganizationInvites";
+import { Role } from "@/types/enums";
 
 interface InviteEmployeeModalProps {
   open: boolean;
   onClose: () => void;
   shopName?: string;
+  shopId?: string;
+  organizationId?: string;
+  canInviteManager?: boolean;
 }
 
-const ROLE_OPTIONS = [
+const ALL_ROLE_OPTIONS = [
   {
     value: "EMPLOYEE",
     label: "Funcionário",
@@ -45,22 +50,36 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
   open,
   onClose,
   shopName,
+  shopId,
+  organizationId,
+  canInviteManager = true,
 }) => {
+  const roleOptions = canInviteManager ? ALL_ROLE_OPTIONS : ALL_ROLE_OPTIONS.filter(o => o.value === "EMPLOYEE");
   const [form] = Form.useForm();
   const selectedRole = Form.useWatch("role", form);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [invitedEmail, setInvitedEmail] = useState("");
+  const { mutateAsync: sendInvite, isPending: isSubmitting } = useSendInvite();
 
-  const handleSubmit = async (values: { name: string; email: string; role: string }) => {
-    setIsSubmitting(true);
+  const handleSubmit = async (values: { name: string; email: string; role: Role }) => {
+    if (!organizationId) return;
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    setInvitedEmail(values.email);
-    setInviteSent(true);
-    setIsSubmitting(false);
-    message.success("Convite enviado com sucesso!");
+    try {
+      await sendInvite({
+        organizationId,
+        shopId,
+        data: {
+          email: values.email,
+          role: values.role,
+        }
+      });
+      setInvitedEmail(values.email);
+      setInviteSent(true);
+      message.success("Convite enviado com sucesso!");
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err.response?.data?.message || "Erro ao enviar convite");
+    }
   };
 
   const handleClose = () => {
@@ -81,9 +100,9 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
       open={open}
       onCancel={handleClose}
       footer={null}
-      width={520}
+      width={600}
       centered
-      destroyOnClose
+      destroyOnHidden
       className="[&_.ant-modal-content]:dark:bg-zinc-900 [&_.ant-modal-header]:dark:bg-zinc-900 [&_.ant-modal-close]:dark:text-zinc-400"
       title={null}
     >
@@ -155,11 +174,11 @@ export const InviteEmployeeModal: React.FC<InviteEmployeeModalProps> = ({
               }
               rules={[{ required: true, message: "Selecione uma função" }]}
             >
-              <Radio.Group className="w-full flex flex-col gap-3">
-                {ROLE_OPTIONS.map((option) => (
-                  <Radio key={option.value} value={option.value} className="!flex !items-start !p-0 !m-0 w-full [&>.ant-radio]:hidden">
+              <Radio.Group style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                {roleOptions.map((option) => (
+                  <Radio key={option.value} value={option.value} className="!flex !items-start !p-0 !m-0 w-full h-full [&>.ant-radio]:hidden [&>span:nth-child(2)]:w-full [&>span:nth-child(2)]:h-full">
                     <div
-                      className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 w-full ${
+                      className={`h-full flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 w-full ${
                         selectedRole === option.value
                           ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-500"
                           : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-800/50"

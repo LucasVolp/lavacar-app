@@ -10,6 +10,7 @@ export function handleQueryForbidden(error: unknown) {
   }
 
   if (typeof window !== "undefined") {
-    window.location.href = "/auth/login?reason=forbidden";
+    const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.href = `/auth/login?reason=forbidden&redirect=${redirect}`;
   }
 }

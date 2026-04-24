@@ -16,8 +16,24 @@ export function maskCpfCnpj(value: string): string {
     .replace(/(\d{4})(\d)/, "$1-$2");
 }
 
+export function normalizePhoneDigits(value: string): string {
+  if (!value) return "";
+
+  let digits = value.replace(/\D/g, "");
+
+  // Accepts +55/E.164 inputs and keeps local BR pattern (DDD + number).
+  digits = digits.replace(/^0+/, "");
+  if (digits.startsWith("55") && digits.length > 11) {
+    digits = digits.slice(2);
+  }
+
+  return digits.slice(0, 11);
+}
+
 export function maskPhone(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
+  const digits = normalizePhoneDigits(value);
+
+  if (!digits) return "";
 
   if (digits.length <= 10) {
     return digits

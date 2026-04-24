@@ -82,6 +82,29 @@ export function useDeleteOrganizationMember() {
   });
 }
 
+export function useAssignMemberToShop() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ memberId, shopId }: { memberId: string; shopId: string }) =>
+      organizationMemberService.assignToShop(memberId, shopId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-members"] });
+    },
+  });
+}
+
+export function useRemoveMemberFromShop() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (shopManagerId: string) => organizationMemberService.removeFromShop(shopManagerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization-members"] });
+    },
+  });
+}
+
 export function useCreateOrganization() {
   const queryClient = useQueryClient();
 

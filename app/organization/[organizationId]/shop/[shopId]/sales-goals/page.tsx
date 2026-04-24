@@ -11,6 +11,8 @@ import {
 } from "@ant-design/icons";
 import { useShopSalesGoals, useCreateSalesGoal, useUpdateSalesGoal, useDeleteSalesGoal } from "@/hooks/useSalesGoals";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { EmployeeAccessDenied } from "@/components/layout/EmployeeAccessDenied";
 import dayjs from "dayjs";
 import { SalesGoal } from "@/types/salesGoal";
 import { formatCurrency } from "@/lib/security";
@@ -20,7 +22,17 @@ import { GoalCard } from "@/components/admin/shop/sales-goals/GoalCard";
 import { CreateGoalModal } from "@/components/admin/shop/sales-goals/CreateGoalModal";
 
 export default function SalesGoalsPage() {
-  const { shopId } = useShopAdmin();
+  const { shopId, organizationId, shop } = useShopAdmin();
+  const { user } = useAuth();
+
+  const isEmployee = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return false;
+    if (user.role === "ADMIN") return false;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return false;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role === "EMPLOYEE";
+  })();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingGoal, setEditingGoal] = useState<SalesGoal | null>(null);
 
@@ -65,6 +77,10 @@ export default function SalesGoalsPage() {
     setEditingGoal(null);
     setIsModalVisible(true);
   };
+
+  if (isEmployee) {
+    return <EmployeeAccessDenied shopId={shopId} organizationId={organizationId} />;
+  }
 
   if (isLoading) {
     return (

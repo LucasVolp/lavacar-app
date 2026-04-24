@@ -20,7 +20,7 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { StatusBadge } from "@/components/ui";
 import { formatVehiclePlate, normalizeVehiclePlate } from "@/utils/vehiclePlate";
-import { maskPhone } from "@/lib/masks";
+import { maskPhone, normalizePhoneDigits } from "@/lib/masks";
 
 import type { Appointment, AppointmentStatus } from "@/types/appointment";
 import type { Vehicle } from "@/types/vehicle";
@@ -89,7 +89,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
 
   const sanitizedPhone = useMemo(() => {
     if (searchMode !== "phone") return "";
-    return sanitizePhone(debouncedInput).replace(/\D/g, "");
+    return normalizePhoneDigits(sanitizePhone(debouncedInput));
   }, [searchMode, debouncedInput]);
 
   const shouldFetchUser = searchMode === "phone" && sanitizedPhone.length >= 10;
@@ -156,7 +156,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
       if (/[A-Za-z]/.test(raw)) {
         setRawInput(raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7));
       } else {
-        setRawInput(raw.replace(/\D/g, "").slice(0, 11));
+        setRawInput(normalizePhoneDigits(raw));
       }
     },
     [],
@@ -263,7 +263,7 @@ export const QuickEntryWidget: React.FC<QuickEntryWidgetProps> = ({
 
         const existingAppointment = todayAppointments.find(
           (appointment) =>
-            appointment.user?.phone === digits &&
+            normalizePhoneDigits(appointment.user?.phone || "") === digits &&
             ACTIONABLE_STATUSES.includes(appointment.status),
         );
 

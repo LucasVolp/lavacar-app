@@ -5,10 +5,20 @@ import { CreateShopDto, UpdateShopDto } from "@/types/shop";
 export const shopKeys = {
   all: ["shops"] as const,
   lists: () => [...shopKeys.all, "list"] as const,
+  byOrg: (orgId: string) => [...shopKeys.all, "org", orgId] as const,
   bySlug: (slug: string) => [...shopKeys.lists(), { slug }] as const,
   details: () => [...shopKeys.all, "detail"] as const,
   detail: (id: string) => [...shopKeys.details(), id] as const,
 };
+
+export function useOrganizationShops(organizationId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: shopKeys.byOrg(organizationId || ""),
+    queryFn: () => shopService.findByOrganizationId(organizationId!),
+    enabled: enabled && !!organizationId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
 
 export function useShops(enabled = true) {
   return useQuery({

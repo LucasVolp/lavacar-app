@@ -6,6 +6,14 @@ const brasilApi = axios.create({
   timeout: 10000,
 });
 
+// FIPE Paralelo — open-source FIPE mirror that does not rely on veiculos.fipe.org.br
+// (BrasilAPI's FIPE endpoints hit that endpoint server-side and get 403'd from cloud IPs)
+const fipeParalelo = axios.create({
+  baseURL: "https://parallelum.com.br/fipe/api/v1",
+  timeout: 10000,
+  headers: { Accept: "application/json" },
+});
+
 const FIPE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const memoryCache = new Map<string, { expiresAt: number; value: BrasilApiFipeOption[] }>();
 const inFlightRequests = new Map<string, Promise<BrasilApiFipeOption[]>>();
@@ -347,7 +355,7 @@ export const brasilApiService = {
     if (pending) return pending;
 
     const request = (async () => {
-      const response = await brasilApi.get<BrasilApiFipeRawOption[]>(`/api/fipe/marcas/v1/${type}`);
+      const response = await fipeParalelo.get<BrasilApiFipeRawOption[]>(`/${type}/marcas`);
       const normalized = normalizeFipeOptions(response.data, "brand");
       setCachedFipeOptions(cacheKey, normalized);
       return normalized;
@@ -369,10 +377,10 @@ export const brasilApiService = {
     if (pending) return pending;
 
     const request = (async () => {
-      const response = await brasilApi.get<BrasilApiFipeRawOption[]>(
-        `/api/fipe/veiculos/v1/${type}/${encodeURIComponent(normalizedBrandCode)}`
+      const response = await fipeParalelo.get<{ modelos: BrasilApiFipeRawOption[] }>(
+        `/${type}/marcas/${encodeURIComponent(normalizedBrandCode)}/modelos`
       );
-      const normalized = normalizeFipeOptions(response.data, "model");
+      const normalized = normalizeFipeOptions(response.data.modelos, "model");
       setCachedFipeOptions(cacheKey, normalized);
       return normalized;
     })().finally(() => inFlightRequests.delete(cacheKey));

@@ -1,3 +1,5 @@
+import { normalizePhoneDigits } from "@/lib/masks";
+
 export function formatDocument(value: string): string {
   const digits = value.replace(/\D/g, '');
 
@@ -19,7 +21,10 @@ export function formatDocument(value: string): string {
 
 export function formatPhone(value: string): string {
   if (!value) return "";
-  const numbers = value.replace(/\D/g, "");
+  const numbers = normalizePhoneDigits(value);
+
+  if (!numbers) return "";
+
   if (numbers.length <= 10) {
     return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").trim();
   } else {

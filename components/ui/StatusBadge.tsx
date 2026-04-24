@@ -68,6 +68,24 @@ const statusConfig: Record<
     label: "Inativo",
     icon: <CloseCircleOutlined />,
   },
+  ACCEPTED: {
+    className:
+      "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
+    label: "Aceito",
+    icon: <CheckCircleOutlined />,
+  },
+  REVOKED: {
+    className:
+      "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800",
+    label: "Revogado",
+    icon: <CloseCircleOutlined />,
+  },
+  EXPIRED: {
+    className:
+      "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800/60 dark:text-zinc-400 dark:border-zinc-700",
+    label: "Expirado",
+    icon: <ClockCircleOutlined />,
+  },
   BUDGET_ONLY: {
     className:
       "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",

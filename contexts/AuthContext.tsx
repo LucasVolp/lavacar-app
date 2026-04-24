@@ -23,6 +23,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const COOKIE_OPTIONS = { expires: 7, secure: true, sameSite: 'Strict' as const };
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,16 +34,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = Cookies.get("access_token");
-      
+
       if (token) {
         try {
-          const userData = await authService.me();
-          setUser(userData);
+          const response = await authService.me();
+          const newToken = response.accessToken ?? response.access_token ?? "";
+          if (newToken) {
+            Cookies.set("access_token", newToken, COOKIE_OPTIONS);
+          }
+          setUser(response.user);
         } catch {
           Cookies.remove("access_token");
         }
       }
-      
+
       setIsLoading(false);
     };
 
@@ -52,11 +58,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
       const response = await authService.login(credentials);
-      
-      const token = response.accessToken || response.access_token || "";
-      Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
+
+      const token = response.accessToken ?? response.access_token ?? "";
+      Cookies.set("access_token", token, COOKIE_OPTIONS);
       setUser(response.user);
-      
+
       message.success("Login realizado com sucesso!");
       return true;
     } catch (error: unknown) {
@@ -69,29 +75,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const loginWithToken = useCallback(async (token: string): Promise<boolean> => {
-     try {
-       setIsLoading(true);
-       Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
-       const userData = await authService.me();
-       setUser(userData);
-       return true;
-     } catch {
-       Cookies.remove("access_token");
-       return false;
-     } finally {
-       setIsLoading(false);
-     }
+    try {
+      setIsLoading(true);
+      Cookies.set("access_token", token, COOKIE_OPTIONS);
+      const response = await authService.me();
+      const newToken = response.accessToken ?? response.access_token ?? "";
+      if (newToken) {
+        Cookies.set("access_token", newToken, COOKIE_OPTIONS);
+      }
+      setUser(response.user);
+      return true;
+    } catch {
+      Cookies.remove("access_token");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<boolean> => {
     try {
       setIsLoading(true);
       const response = await authService.register(payload);
-      
-      const token = response.accessToken || response.access_token || "";
-      Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
+
+      const token = response.accessToken ?? response.access_token ?? "";
+      Cookies.set("access_token", token, COOKIE_OPTIONS);
       setUser(response.user);
-      
+
       message.success("Conta criada com sucesso!");
       return true;
     } catch (error: unknown) {
@@ -108,8 +118,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await authService.completeRegistration(payload);
 
-      const token = response.accessToken || response.access_token || "";
-      Cookies.set("access_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
+      const token = response.accessToken ?? response.access_token ?? "";
+      Cookies.set("access_token", token, COOKIE_OPTIONS);
       setUser(response.user);
 
       message.success("Cadastro concluído com sucesso!");
@@ -131,8 +141,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const userData = await authService.me();
-      setUser(userData);
+      const response = await authService.me();
+      const newToken = response.accessToken ?? response.access_token ?? "";
+      if (newToken) {
+        Cookies.set("access_token", newToken, COOKIE_OPTIONS);
+      }
+      setUser(response.user);
     } catch {
       logout();
     }
@@ -159,10 +173,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   }
-  
+
   return context;
 }

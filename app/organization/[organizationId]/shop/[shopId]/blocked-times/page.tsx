@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import { Spin, Form, message } from "antd";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
-import { 
-  useBlockedTimesByShop, 
-  useCreateBlockedTime, 
-  useUpdateBlockedTime, 
-  useDeleteBlockedTime 
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  useBlockedTimesByShop,
+  useCreateBlockedTime,
+  useUpdateBlockedTime,
+  useDeleteBlockedTime
 } from "@/hooks/useBlockedTimes";
+import { EmployeeAccessDenied } from "@/components/layout/EmployeeAccessDenied";
 import { BlockedTime, CreateBlockedTimePayload } from "@/types/blockedTime";
 import dayjs, { type Dayjs } from "dayjs";
 import { startOfDay, isAfter, isSameDay, isBefore } from "date-fns";
@@ -25,7 +27,17 @@ export default function BlockedTimesPage() {
     return new Date(`${dateKey}T12:00:00`);
   };
 
-  const { shopId } = useShopAdmin();
+  const { shopId, organizationId, shop } = useShopAdmin();
+  const { user } = useAuth();
+
+  const isEmployee = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return false;
+    if (user.role === "ADMIN") return false;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return false;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role === "EMPLOYEE";
+  })();
   const { data: blockedTimes = [], isLoading } = useBlockedTimesByShop(shopId);
   const createBlockedTime = useCreateBlockedTime();
   const updateBlockedTime = useUpdateBlockedTime();
@@ -133,6 +145,10 @@ export default function BlockedTimesPage() {
         <Spin size="large" tip="Carregando bloqueios..." />
       </div>
     );
+  }
+
+  if (isEmployee) {
+    return <EmployeeAccessDenied shopId={shopId} organizationId={organizationId} />;
   }
 
   return (

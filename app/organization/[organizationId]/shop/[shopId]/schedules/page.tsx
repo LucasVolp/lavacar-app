@@ -14,12 +14,24 @@ import {
 } from "@/components/admin/shop/schedules";
 import { useCreateSchedule, useShopSchedules, useUpdateSchedule } from "@/hooks";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useUpdateShop } from "@/hooks/useShops";
 import { timeApiService } from "@/services/timeApi";
+import { EmployeeAccessDenied } from "@/components/layout/EmployeeAccessDenied";
 
 export default function SchedulesPage() {
-  const { shopId, shop } = useShopAdmin();
+  const { shopId, organizationId, shop } = useShopAdmin();
+  const { user } = useAuth();
+
+  const isEmployee = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return false;
+    if (user.role === "ADMIN") return false;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return false;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role === "EMPLOYEE";
+  })();
   const { data: schedules = [], isLoading } = useShopSchedules(shopId);
   const createSchedule = useCreateSchedule();
   const updateSchedule = useUpdateSchedule();
@@ -165,6 +177,10 @@ export default function SchedulesPage() {
         <Spin size="large" tip="Carregando horários..." />
       </div>
     );
+  }
+
+  if (isEmployee) {
+    return <EmployeeAccessDenied shopId={shopId} organizationId={organizationId} />;
   }
 
   return (

@@ -13,9 +13,10 @@ const { Title, Text } = Typography;
 interface SalesGoalWidgetProps {
   shopId: string;
   currentRevenue: number;
+  canManage?: boolean;
 }
 
-export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, currentRevenue }) => {
+export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, currentRevenue, canManage = true }) => {
   const router = useRouter();
   const { organizationId } = useShopAdmin();
   const { data: salesGoalsData, isLoading } = useShopSalesGoals(shopId);
@@ -44,9 +45,11 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
   }
 
   if (!activeGoal) {
+    if (!canManage) return null;
+
     return (
       <div className="space-y-4">
-        <Card 
+        <Card
           className="w-full h-full rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden"
           styles={{ body: { padding: 0, height: '100%' } }}
         >
@@ -54,20 +57,20 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
             <div className="absolute top-0 right-0 p-4 opacity-5">
               <RiseOutlined style={{ fontSize: '120px' }} />
             </div>
-            
+
             <div className="flex items-center gap-2 mb-2">
               <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
                 <RiseOutlined className="text-xl" />
               </div>
               <Title level={4} className="!m-0 text-zinc-800 dark:text-zinc-100">Meta Mensal</Title>
             </div>
-            
+
             <div className="flex-1 flex flex-col justify-center items-center text-center z-10 my-4">
               <Text className="text-zinc-500 dark:text-zinc-400 mb-4 text-base block">
                 Você ainda não definiu uma meta de vendas para este mês.
               </Text>
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/sales-goals`)}
                 className="bg-indigo-600 hover:!bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-900/20"
@@ -75,7 +78,7 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
                 Definir Meta Agora
               </Button>
             </div>
-            
+
             <div className="text-xs text-zinc-400 dark:text-zinc-600 text-center">
               Definir metas ajuda a manter o foco e crescimento do seu negócio.
             </div>
@@ -152,14 +155,16 @@ export const SalesGoalWidget: React.FC<SalesGoalWidgetProps> = ({ shopId, curren
           <div className="text-zinc-500 dark:text-zinc-400 text-sm">
             {isCompleted ? 'Parabéns! Você atingiu sua meta.' : 'Acompanhe seu progresso diário'}
           </div>
-          <Button 
-            type="link" 
-            size="small" 
-            onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/sales-goals`)}
-            className={`p-0 font-medium ${isCompleted ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'}`}
-          >
-            Gerenciar Metas
-          </Button>
+          {canManage && (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/sales-goals`)}
+              className={`p-0 font-medium ${isCompleted ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'}`}
+            >
+              Gerenciar Metas
+            </Button>
+          )}
         </div>
       </Card>
     </div>

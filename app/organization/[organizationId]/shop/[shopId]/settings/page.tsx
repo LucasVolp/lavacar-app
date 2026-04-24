@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Spin, message, Form, Tabs } from "antd";
+import { Spin, message, Form, Tabs, Tooltip } from "antd";
+import { GlobalOutlined } from "@ant-design/icons";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateShop } from "@/hooks/useShops";
+import { EmployeeAccessDenied } from "@/components/layout/EmployeeAccessDenied";
 import { useShopSchedules } from "@/hooks/useSchedules";
 import { useShopBlockedTimes } from "@/hooks/useBlockedTimes";
 import { useOrganizationMembers } from "@/hooks/useOrganizations";
@@ -16,7 +20,17 @@ import {
 import { SettingsConfigForm } from "@/components/admin/shop/settings";
 
 export default function SettingsPage() {
-  const { shop, shopId, isLoading } = useShopAdmin();
+  const { shop, shopId, organizationId, isLoading } = useShopAdmin();
+  const { user } = useAuth();
+
+  const isEmployee = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return false;
+    if (user.role === "ADMIN") return false;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return false;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role === "EMPLOYEE";
+  })();
   const searchParams = useSearchParams();
   const updateShop = useUpdateShop();
   const [saving, setSaving] = useState(false);
@@ -79,6 +93,10 @@ export default function SettingsPage() {
     );
   }
 
+  if (isEmployee) {
+    return <EmployeeAccessDenied shopId={shopId} organizationId={organizationId} />;
+  }
+
   const items = [
     {
       key: "overview",
@@ -115,7 +133,25 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Configurações</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{shop.name}</p>
+        </div>
+        {shop.slug && (
+          <Tooltip title="Abrir vitrine digital em nova aba">
+            <Link
+              href={`/shop/${shop.slug}`}
+              target="_blank"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+            >
+              <GlobalOutlined />
+              Ver Vitrine
+            </Link>
+          </Tooltip>
+        )}
+      </div>
       <Tabs defaultActiveKey={activeTab} items={items} />
     </div>
   );

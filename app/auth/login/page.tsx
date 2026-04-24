@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { Form, Input, Button, Alert, Spin } from "antd";
 import { MailOutlined, LockOutlined, GoogleOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { NexoLogo } from "@/components/ui/NexoLogo";
+import { AuthUser } from "@/services/auth";
 
 interface LoginFormValues {
   email: string;
@@ -16,25 +17,62 @@ interface LoginFormValues {
 function LoginForm() {
   const [form] = Form.useForm<LoginFormValues>();
   const [error, setError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, logout, isLoading, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const reason = searchParams.get("reason");
   const rawRedirect = searchParams.get("redirect") || "/";
   const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/";
+  const isForbiddenReason = reason === "forbidden";
+
+  const performSmartRedirect = useCallback((userContext: AuthUser) => {
+    if (redirectTo && redirectTo !== "/") {
+      router.push(redirectTo);
+      return;
+    }
+
+    if (userContext.organizations && userContext.organizations.length > 0) {
+      router.push(`/organization/${userContext.organizations[0].id}`);
+      return;
+    }
+
+    if (userContext.organizationMembers && userContext.organizationMembers.length > 0) {
+      const membership = userContext.organizationMembers[0];
+      if (membership.managedShops && membership.managedShops.length > 0) {
+        router.push(`/organization/${membership.organizationId}/shop/${membership.managedShops[0].shopId}`);
+      } else {
+        router.push(`/organization/${membership.organizationId}`);
+      }
+      return;
+    }
+
+    if (userContext.role === "USER") {
+      router.push("/client");
+      return;
+    }
+
+    router.push("/");
+  }, [redirectTo, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push(redirectTo);
+    if (!isAuthenticated || !user) return;
+
+    if (isForbiddenReason) {
+      // Stale JWT — force re-login so the token is refreshed with the updated role
+      logout();
+      return;
     }
-  }, [isAuthenticated, router, redirectTo]);
+
+    performSmartRedirect(user);
+  }, [isAuthenticated, user, isForbiddenReason, logout, performSmartRedirect]);
 
   const handleSubmit = async (values: LoginFormValues) => {
     setError(null);
     try {
       const success = await login(values);
       if (success) {
-        router.push(redirectTo);
+        // O useEffect cuidará do redirecionamento assim que o user for setado no context
       }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -64,6 +102,15 @@ function LoginForm() {
               Digite seus dados para acessar sua conta.
             </p>
           </div>
+
+          {isForbiddenReason && (
+            <Alert
+              type="warning"
+              message="Suas permissões foram atualizadas. Faça login novamente para continuar."
+              showIcon
+              className="mb-6 rounded-xl"
+            />
+          )}
 
           {error && (
             <Alert
@@ -115,7 +162,10 @@ function LoginForm() {
             </Form.Item>
 
             <div className="flex justify-end mb-6">
-              <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
                 Esqueceu a senha?
               </Link>
             </div>

@@ -2,100 +2,112 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { CarOutlined, ShopOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import {
+  ArrowRightOutlined,
+  LineChartOutlined,
+  TeamOutlined,
+  ControlOutlined,
+} from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
-import { useOrganizationByOwner } from "@/hooks/useOrganizations";
 
 export const HeroSection = () => {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  const { data: organizations } = useOrganizationByOwner(user?.id);
 
-  const handleClientClick = () => {
+  const handlePrimaryCta = () => {
     if (!isAuthenticated) {
-      router.push("/auth/login?redirect=/client");
-    } else {
-      router.push("/client");
+      router.push("/auth/login?redirect=/organization/select");
+      return;
     }
+    const hasAnyOrg =
+      (user?.organizations?.length ?? 0) > 0 ||
+      (user?.organizationMembers?.length ?? 0) > 0;
+    router.push(hasAnyOrg ? "/organization/select" : "/billing/checkout");
   };
 
-  const handleOwnerClick = () => {
-    if (!isAuthenticated) {
-      router.push("/auth/login?redirect=/organization/create");
-    } else {
-      if (organizations && organizations.length > 0) {
-        router.push(`/organization/${organizations[0].id}`);
-      } else {
-        router.push("/organization/create");
-      }
-    }
+  const handleSecondaryCta = () => {
+    const el = document.getElementById("features");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col justify-center items-center px-6 pt-20 pb-16 bg-base-100 overflow-hidden transition-colors duration-300">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] opacity-30 pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[800px] h-[400px] bg-cyan-500/10 rounded-full blur-[100px] opacity-20 pointer-events-none" />
-
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-content/5 border border-base-content/10 mb-8 backdrop-blur-sm animate-fade-in-up">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-base-content/70 text-sm font-medium">
-            Disponível em Três Lagoas
-          </span>
+    <section className="relative min-h-[92vh] flex flex-col justify-center items-center px-6 pt-32 pb-24 bg-base-100">
+      <div className="relative z-10 max-w-5xl mx-auto w-full text-center">
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-base-200 border border-base-content/10">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-base-content/70 text-sm font-semibold tracking-wide">
+              Mais de 500 estéticas automotivas já usam NexoCar
+            </span>
+          </div>
         </div>
 
-        <h1 className="text-5xl sm:text-7xl font-bold tracking-tight text-base-content mb-6 leading-tight">
-          A Revolução Automotiva <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-            na Palma da Mão
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-base-content mb-8 leading-[1.05]">
+          Controle Total do <br />
+          <span className="text-blue-600 dark:text-blue-500">
+            Seu Lava-Rápido
           </span>
         </h1>
 
-        <p className="text-lg sm:text-xl text-base-content/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-          Agendamento simples para quem ama carros. <br className="hidden sm:block"/>
-          Gestão poderosa para quem ama lucrar.
+        <p className="text-lg sm:text-xl text-base-content/70 max-w-2xl mx-auto leading-[1.8] mb-12">
+          Veja em tempo real o que acontece na sua operação, controle sua equipe
+          e entenda seu lucro com clareza.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
-          <div onClick={handleClientClick} className="group cursor-pointer">
-            <div className="h-full p-6 sm:p-8 rounded-2xl bg-blue-600 hover:bg-blue-500 border border-blue-500 transition-all duration-300 flex flex-col items-center sm:items-start text-center sm:text-left gap-4 shadow-lg shadow-blue-900/20 group-hover:shadow-blue-500/20 group-hover:scale-[1.02]">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white text-2xl mb-2">
-                <CarOutlined />
-              </div>
-              <div>
-                <h3 className="text-white text-xl font-bold mb-1">
-                  Sou Cliente
-                </h3>
-                <p className="text-blue-100 text-sm">
-                  Cadastre seus veículos e acompanhe seus serviços em tempo real.
-                </p>
-              </div>
-              <div className="mt-auto pt-4 flex items-center gap-2 text-white font-medium group-hover:translate-x-1 transition-transform">
-                Acessar minha área <ArrowRightOutlined />
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+          <button
+            onClick={handlePrimaryCta}
+            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base shadow-lg shadow-blue-900/20 active:translate-y-0.5 transition-colors w-full sm:w-auto"
+          >
+            Assumir o comando
+            <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
+          </button>
+          <button
+            onClick={handleSecondaryCta}
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-base-200 hover:bg-base-300 border border-base-content/10 text-base-content font-semibold text-base transition-colors w-full sm:w-auto"
+          >
+            Ver funcionalidades
+          </button>
+        </div>
 
-          <div onClick={handleOwnerClick} className="group cursor-pointer">
-            <div className="h-full p-6 sm:p-8 rounded-2xl bg-base-200/50 hover:bg-base-200 border border-base-300 hover:border-base-content/20 transition-all duration-300 flex flex-col items-center sm:items-start text-center sm:text-left gap-4 backdrop-blur-sm group-hover:scale-[1.02]">
-              <div className="w-12 h-12 rounded-xl bg-base-300 flex items-center justify-center text-base-content text-2xl mb-2 border border-base-content/5">
-                <ShopOutlined />
-              </div>
-              <div>
-                <h3 className="text-base-content text-xl font-bold mb-1">
-                  Sou Dono de Estética
-                </h3>
-                <p className="text-base-content/60 text-sm">
-                  Gerencie agendamentos e faturamento do seu negócio.
-                </p>
-              </div>
-              <div className="mt-auto pt-4 flex items-center gap-2 text-base-content/80 font-medium group-hover:text-base-content group-hover:translate-x-1 transition-transform">
-                Acessar painel <ArrowRightOutlined />
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <PillarCard
+            icon={<TeamOutlined />}
+            label="Equipe organizada"
+            hint="Cadastre a equipe, defina funções e controle o acesso."
+          />
+          <PillarCard
+            icon={<ControlOutlined />}
+            label="Operação centralizada"
+            hint="Agenda, comanda e filiais em um único painel."
+          />
+          <PillarCard
+            icon={<LineChartOutlined />}
+            label="Receita com clareza"
+            hint="Acompanhe o quanto entrou em cada dia e filial."
+          />
         </div>
       </div>
     </section>
   );
 };
+
+const PillarCard = ({
+  icon,
+  label,
+  hint,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  hint: string;
+}) => (
+  <div className="p-6 rounded-xl bg-base-200 border border-base-content/10 text-left">
+    <div className="w-10 h-10 rounded-lg bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 dark:text-blue-500 text-lg mb-4">
+      {icon}
+    </div>
+    <div className="text-base font-bold text-base-content mb-1.5">{label}</div>
+    <div className="text-sm text-base-content/60 font-medium leading-[1.7]">
+      {hint}
+    </div>
+  </div>
+);

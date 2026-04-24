@@ -9,6 +9,7 @@ import {
   ContactsOutlined,
 } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useShopAppointments, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
 import { useServicesByShop } from "@/hooks/useServices";
 import { useShopSchedules } from "@/hooks/useSchedules";
@@ -46,6 +47,16 @@ import type { User } from "@/types/user";
 
 export default function ShopDashboardPage() {
   const { shop, shopId, organizationId, isLoading: isLoadingShop } = useShopAdmin();
+  const { user } = useAuth();
+
+  const canManage = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return true;
+    if (user.role === "ADMIN") return true;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return true;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role !== "EMPLOYEE";
+  })();
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardPlate, setWizardPlate] = useState("");
@@ -321,6 +332,7 @@ export default function ShopDashboardPage() {
             <SalesGoalWidget
               shopId={shopId}
               currentRevenue={stats.monthRevenue}
+              canManage={canManage}
             />
 
             <PerformanceCard

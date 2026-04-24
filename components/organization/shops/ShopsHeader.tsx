@@ -45,7 +45,7 @@ export const ShopsHeader: React.FC<ShopsHeaderProps> = ({
               Novo Shop
             </Button>
           </Link>
-        ) : (
+        ) : onCreateShop ? (
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -55,7 +55,7 @@ export const ShopsHeader: React.FC<ShopsHeaderProps> = ({
           >
             Novo Shop
           </Button>
-        )}
+        ) : null}
       </div>
     </div>
   );
