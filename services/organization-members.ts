@@ -3,6 +3,7 @@ import axiosInstance from './axiosInstance';
 import { OrganizationMember } from '../types/organization';
 
 const base = '/organization-members';
+const shopManagerBase = '/shop-managers';
 
 export const organizationMemberService = {
   findByOrganizationId: async (organizationId: string) => {
@@ -37,6 +38,25 @@ export const organizationMemberService = {
   delete: async (id: string) => {
     try {
       const response = await axiosInstance.delete(`${base}/${id}`);
+      return response.data;
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
+  assignToShop: async (memberId: string, shopId: string) => {
+    try {
+      const response: AxiosResponse<{ id: string; memberId: string; shopId: string }> =
+        await axiosInstance.post(shopManagerBase, { memberId, shopId });
+      return response.data;
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
+  removeFromShop: async (shopManagerId: string) => {
+    try {
+      const response = await axiosInstance.delete(`${shopManagerBase}/${shopManagerId}`);
       return response.data;
     } catch (error: unknown) {
       throw error;

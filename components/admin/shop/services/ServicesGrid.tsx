@@ -24,11 +24,11 @@ const { Text, Title } = Typography;
 
 interface ServicesGridProps {
   services: Services[];
-  onEdit: (service: Services) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (service: Services) => void;
+  onDelete?: (id: string) => void;
   onToggleActive: (service: Services) => void;
   isUpdating?: boolean;
-  onAddService: () => void;
+  onAddService?: () => void;
 }
 
 export const ServicesGrid: React.FC<ServicesGridProps> = ({
@@ -43,9 +43,11 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
   if (services.length === 0) {
     return (
       <Empty description="Nenhum serviço encontrado" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAddService}>
-          Criar Serviço
-        </Button>
+        {onAddService && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={onAddService}>
+            Criar Serviço
+          </Button>
+        )}
       </Empty>
     );
   }
@@ -91,9 +93,11 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
               )
             }
             actions={[
-              <CustomTooltip title="Editar" key="edit">
-                <EditOutlined onClick={() => onEdit(service)} />
-              </CustomTooltip>,
+              ...(onEdit ? [
+                <CustomTooltip title="Editar" key="edit">
+                  <EditOutlined onClick={() => onEdit(service)} />
+                </CustomTooltip>,
+              ] : []),
               <CustomTooltip title={service.isActive === false ? "Ativar" : "Desativar"} key="toggle">
                 {service.isActive === false ? (
                   <CheckCircleOutlined onClick={() => onToggleActive(service)} className="text-emerald-500" />
@@ -101,9 +105,11 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
                   <StopOutlined onClick={() => onToggleActive(service)} className="text-amber-500" />
                 )}
               </CustomTooltip>,
-              <CustomTooltip title="Excluir" key="delete">
-                <DeleteOutlined onClick={() => onDelete(service.id)} className="text-red-500" />
-              </CustomTooltip>,
+              ...(onDelete ? [
+                <CustomTooltip title="Excluir" key="delete">
+                  <DeleteOutlined onClick={() => onDelete(service.id)} className="text-red-500" />
+                </CustomTooltip>,
+              ] : []),
             ]}
           >
             <div className="space-y-3">

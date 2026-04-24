@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Spin, Button, Form, message, Typography, Pagination } from "antd";
 import { ToolOutlined, PlusOutlined, FolderOutlined } from "@ant-design/icons";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   serviceKeys,
@@ -35,8 +36,18 @@ import { ServiceVariantFormValue } from "@/components/admin/shop/services/Servic
 const { Text } = Typography;
 
 export default function ServicesPage() {
-  const { shopId } = useShopAdmin();
+  const { shopId, organizationId, shop } = useShopAdmin();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  const canManage = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return true;
+    if (user.role === "ADMIN") return true;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return true;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role !== "EMPLOYEE";
+  })();
 
   const [searchText, setSearchText] = useState("");
   const [viewType, setViewType] = useState<"table" | "grid">("grid");
@@ -443,24 +454,24 @@ export default function ServicesPage() {
                 onStatusFilterChange={handleStatusFilterChange}
                 viewType={viewType}
                 onViewTypeChange={setViewType}
-                onAddService={() => handleOpenModal()}
+                onAddService={canManage ? () => handleOpenModal() : undefined}
               />
 
               {viewType === "grid" ? (
                 <ServicesGrid
                   services={services}
-                  onEdit={handleOpenModal}
-                  onDelete={handleDelete}
+                  onEdit={canManage ? handleOpenModal : undefined}
+                  onDelete={canManage ? handleDelete : undefined}
                   onToggleActive={handleToggleActive}
                   isUpdating={updateService.isPending}
-                  onAddService={() => handleOpenModal()}
+                  onAddService={canManage ? () => handleOpenModal() : undefined}
                 />
               ) : (
                 <ServicesTable
                   services={services}
                   loading={isLoading}
-                  onEdit={handleOpenModal}
-                  onDelete={handleDelete}
+                  onEdit={canManage ? handleOpenModal : undefined}
+                  onDelete={canManage ? handleDelete : undefined}
                   onToggleActive={handleToggleActive}
                   updatingServiceId={updateService.isPending ? editingService?.id || null : null}
                 />
@@ -489,27 +500,29 @@ export default function ServicesPage() {
                     Organize seus serviços em grupos para facilitar a navegação e o agendamento.
                   </Text>
                 </div>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  size="large"
-                  onClick={() => handleOpenGroupModal()}
-                  className="shadow-lg shadow-indigo-500/20"
-                >
-                  Novo Grupo
-                </Button>
+                {canManage && (
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    size="large"
+                    onClick={() => handleOpenGroupModal()}
+                    className="shadow-lg shadow-indigo-500/20"
+                  >
+                    Novo Grupo
+                  </Button>
+                )}
               </div>
 
               <ServiceGroupsList
                 groups={serviceGroups}
                 services={services}
-                onEditGroup={handleOpenGroupModal}
-                onDeleteGroup={handleDeleteGroup}
-                onAddGroup={() => handleOpenGroupModal()}
-                onEditService={handleOpenModal}
-                onDeleteService={handleDelete}
+                onEditGroup={canManage ? handleOpenGroupModal : undefined}
+                onDeleteGroup={canManage ? handleDeleteGroup : undefined}
+                onAddGroup={canManage ? () => handleOpenGroupModal() : undefined}
+                onEditService={canManage ? handleOpenModal : undefined}
+                onDeleteService={canManage ? handleDelete : undefined}
                 onToggleServiceActive={handleToggleActive}
-                onAddServiceToGroup={handleAddServiceToGroup}
+                onAddServiceToGroup={canManage ? handleAddServiceToGroup : undefined}
                 isUpdating={updateService.isPending}
               />
             </div>

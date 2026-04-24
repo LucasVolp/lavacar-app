@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Row, Col, Typography, Space } from "antd";
-import { CalendarOutlined } from "@ant-design/icons";
+import { Row, Col, Typography, Space, Tooltip } from "antd";
+import { CalendarOutlined, GlobalOutlined } from "@ant-design/icons";
+import Link from "next/link";
 import dayjs from "dayjs";
 import 'dayjs/locale/pt-br';
 import { Shop } from "@/types/shop";
@@ -38,6 +39,18 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <span className="bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-500/30 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
                 Visão Geral
               </span>
+              {shop?.slug && (
+                <Tooltip title="Ver vitrine digital">
+                  <Link
+                    href={`/shop/${shop.slug}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 px-3 py-1 rounded-full text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <GlobalOutlined />
+                    Vitrine
+                  </Link>
+                </Tooltip>
+              )}
             </div>
             <Title level={2} className="!text-zinc-900 dark:!text-white !mb-1 !font-bold tracking-tight">
                Olá, {user?.firstName || "Usuário"}! Bem-vindo ao {shop?.name}

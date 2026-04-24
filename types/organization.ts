@@ -5,6 +5,11 @@ export interface ShopManager {
     shopId: string;
     memberId: string;
     createdAt: string;
+    shop?: {
+        id: string;
+        name: string;
+        slug: string;
+    };
 }
 
 export interface Organization {

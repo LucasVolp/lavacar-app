@@ -23,6 +23,18 @@ export const shopService = {
     }
   },
 
+  findByOrganizationId: async (organizationId: string) => {
+    try {
+      const response: AxiosResponse<{ data: Shop[] } | Shop[]> = await axiosInstance.get(base, {
+        params: { organizationId, perPage: 100 },
+      });
+      const payload = response.data;
+      return (Array.isArray(payload) ? payload : payload?.data) || [];
+    } catch (error: unknown) {
+      throw error;
+    }
+  },
+
   findOne: async (id: string) => {
     try {
       const response: AxiosResponse<Shop> = await axiosInstance.get(`${base}/${id}`);

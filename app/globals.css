@@ -86,9 +86,15 @@ body {
   background: transparent !important;
 }
 
+/* Ant Design Button - Font inheritance */
+.ant-btn {
+  font-family: var(--font-sans) !important;
+}
+
 /* Ant Menu customization for daisyUI compatibility */
 .ant-menu {
   background: transparent !important;
+  font-family: var(--font-sans) !important;
 }
 
 .ant-menu-item-selected {
@@ -97,6 +103,39 @@ body {
 
 .ant-menu-item:hover {
   background-color: oklch(var(--b3)) !important;
+}
+
+/* Ant Form text */
+.ant-form-item-label > label {
+  font-family: var(--font-sans) !important;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select,
+.ant-picker {
+  font-family: var(--font-sans) !important;
+}
+
+/* Additional Ant Design components */
+.ant-form {
+  font-family: var(--font-sans) !important;
+}
+
+.ant-form-item {
+  font-family: var(--font-sans) !important;
+}
+
+.ant-steps {
+  font-family: var(--font-sans) !important;
+}
+
+.ant-steps-item-title {
+  font-family: var(--font-sans) !important;
+}
+
+.ant-alert {
+  font-family: var(--font-sans) !important;
 }
 
 /* Card hover effects */
@@ -327,6 +366,12 @@ body {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+/* Ant Design button font-weight — Tailwind @layer utilities loses to unlayered Ant Design CSS-in-JS,
+   so we override here (unlayered CSS beats @layer regardless of load order) */
+.ant-btn {
+  font-weight: 600 !important;
+}
+
 /* Ant Design: Danger buttons (default variant) should be solid red, not transparent */
 .ant-btn-dangerous:not(.ant-btn-primary):not(.ant-btn-link):not(.ant-btn-text) {
   background-color: #ef4444 !important;
@@ -362,4 +407,77 @@ body {
 
 [data-theme="dark"] .ant-alert-warning .ant-alert-description {
   color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .ant-alert-info {
+  background-color: rgba(22, 119, 255, 0.1) !important;
+  border-color: rgba(22, 119, 255, 0.3) !important;
+}
+
+[data-theme="dark"] .ant-alert-info .ant-alert-icon {
+  color: #60a5fa !important;
+}
+
+[data-theme="dark"] .ant-alert-info .ant-alert-message {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ant-alert-info .ant-alert-description {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .ant-alert-error {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+[data-theme="dark"] .ant-alert-error .ant-alert-icon {
+  color: #f87171 !important;
+}
+
+[data-theme="dark"] .ant-alert-error .ant-alert-message {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ant-alert-error .ant-alert-description {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .ant-alert-success {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+[data-theme="dark"] .ant-alert-success .ant-alert-icon {
+  color: #4ade80 !important;
+}
+
+[data-theme="dark"] .ant-alert-success .ant-alert-message {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ant-alert-success .ant-alert-description {
+  color: #cbd5e1 !important;
+}
+
+/* Steps dark mode */
+[data-theme="dark"] .ant-steps .ant-steps-item-title {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ant-steps .ant-steps-item-description {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .ant-steps .ant-steps-item-tail::after {
+  background-color: #27272a !important;
+}
+
+[data-theme="dark"] .ant-steps .ant-steps-item-wait .ant-steps-item-icon {
+  background-color: #27272a !important;
+  border-color: #3f3f46 !important;
+}
+
+[data-theme="dark"] .ant-steps .ant-steps-item-wait .ant-steps-item-icon .ant-steps-icon {
+  color: #94a3b8 !important;
 }

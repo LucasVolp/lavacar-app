@@ -21,7 +21,8 @@ export default function OrganizationShopsPage() {
   const deleteShop = useDeleteShop();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const canDelete = !!(user && organization && user.id === organization.ownerId);
+  const canCreate = !!(user && organization && (user.id === organization.ownerId || user.role === "ADMIN"));
+  const canDelete = !!(user && organization && (user.id === organization.ownerId || user.role === "ADMIN"));
 
   const handleDeleteShop = async (shopId: string) => {
     try {
@@ -59,13 +60,13 @@ export default function OrganizationShopsPage() {
       <ShopsHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        createHref={`/organization/${organizationId}/shops/new`}
+        createHref={canCreate ? `/organization/${organizationId}/shops/new` : undefined}
       />
 
       <ShopsGrid
         shops={filteredShops}
         searchTerm={searchTerm}
-        createHref={`/organization/${organizationId}/shops/new`}
+        createHref={canCreate ? `/organization/${organizationId}/shops/new` : undefined}
         canDelete={canDelete}
         onDelete={handleDeleteShop}
       />

@@ -117,37 +117,82 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
           </div>
         </div>
 
-        <div className={`mt-auto grid gap-2 ${canDelete ? "grid-cols-3" : "grid-cols-2"}`}>
-          <Button
-            icon={<SettingOutlined />}
-            onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
-          >
-            Configurar
-          </Button>
-          <Button
-            type="primary"
-            icon={<ArrowRightOutlined />}
-            onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
-          >
-            Gerenciar
-          </Button>
-          {canDelete && onDelete && (
-            <Popconfirm
-              title="Excluir estabelecimento"
-              description="Tem certeza? Isso apagará todos os agendamentos e dados desta loja permanentemente."
-              onConfirm={() => onDelete(shop.id)}
-              okText="Excluir"
-              cancelText="Cancelar"
-              okButtonProps={{ danger: true }}
-            >
-              <Button
-                danger
-                icon={<DeleteOutlined />}
+        <div className="mt-auto flex flex-col gap-2 sm:grid sm:gap-2"
+          style={{ gridTemplateColumns: canDelete ? "repeat(auto-fit, minmax(0, 1fr))" : "repeat(auto-fit, minmax(0, 1fr))" }}>
+          {/* Button Stack Mobile - Hidden on SM and above */}
+          <div className="flex sm:hidden gap-1">
+            <Button
+              type="text"
+              size="small"
+              icon={<SettingOutlined />}
+              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
+              title="Configurar"
+              className="flex-1"
+            />
+            <Button
+              type="primary"
+              size="small"
+              icon={<ArrowRightOutlined />}
+              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
+              title="Gerenciar"
+              className="flex-1"
+            />
+            {canDelete && onDelete && (
+              <Popconfirm
+                title="Excluir estabelecimento"
+                description="Tem certeza em excluir permanentemente?"
+                onConfirm={() => onDelete(shop.id)}
+                okText="Sim"
+                cancelText="Não"
+                okButtonProps={{ danger: true, size: "small" }}
               >
-                Excluir
-              </Button>
-            </Popconfirm>
-          )}
+                <Button
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  title="Excluir"
+                  className="flex-1"
+                />
+              </Popconfirm>
+            )}
+          </div>
+
+          {/* Button Grid Desktop - Hidden below SM */}
+          <div className="hidden sm:grid gap-2" style={{ gridTemplateColumns: canDelete ? "repeat(3, 1fr)" : "repeat(2, 1fr)" }}>
+            <Button
+              icon={<SettingOutlined />}
+              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
+              className="truncate"
+            >
+              <span className="truncate">Configurar</span>
+            </Button>
+            <Button
+              type="primary"
+              icon={<ArrowRightOutlined />}
+              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
+              className="truncate"
+            >
+              <span className="truncate">Gerenciar</span>
+            </Button>
+            {canDelete && onDelete && (
+              <Popconfirm
+                title="Excluir estabelecimento"
+                description="Tem certeza? Isso apagará todos os agendamentos e dados desta loja permanentemente."
+                onConfirm={() => onDelete(shop.id)}
+                okText="Excluir"
+                cancelText="Cancelar"
+                okButtonProps={{ danger: true }}
+              >
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  className="truncate"
+                >
+                  <span className="truncate">Excluir</span>
+                </Button>
+              </Popconfirm>
+            )}
+          </div>
         </div>
       </div>
     </div>

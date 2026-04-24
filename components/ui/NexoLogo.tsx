@@ -18,13 +18,7 @@ export const NexoLogo: React.FC<NexoLogoProps> = ({ size = 40, className }) => {
       alt={BRAND_CONFIG.COMPANY_NAME}
       width={size}
       height={size}
-      className={`object-contain ${className || ""}`}
-      style={{
-        display: "block",
-        backgroundColor: "transparent",
-        mixBlendMode: "lighten",
-        filter: "contrast(1.1) brightness(1.05)",
-      }}
+      className={`object-contain block ${className || ""}`}
     />
   );
 };

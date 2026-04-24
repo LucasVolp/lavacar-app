@@ -31,8 +31,8 @@ const { Text } = Typography;
 interface ServiceListProps {
   services: Services[];
   onToggleActive: (service: Services) => void;
-  onEdit: (service: Services) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (service: Services) => void;
+  onDelete?: (id: string) => void;
   isUpdating: boolean;
 }
 
@@ -58,23 +58,27 @@ const ServiceListInGroup: React.FC<ServiceListProps> = ({
               loading={isUpdating}
             />
           </CustomTooltip>,
-          <CustomTooltip key="edit" title="Editar">
-            <Button 
-              type="text" 
-              size="small"
-              icon={<EditOutlined />} 
-              onClick={() => onEdit(service)}
-            />
-          </CustomTooltip>,
-          <CustomPopconfirm
-            key="delete"
-            title="Excluir serviço?"
-            onConfirm={() => onDelete(service.id)}
-            okText="Sim"
-            cancelText="Não"
-          >
-            <Button type="text" size="small" icon={<DeleteOutlined />} danger />
-          </CustomPopconfirm>,
+          ...(onEdit ? [
+            <CustomTooltip key="edit" title="Editar">
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => onEdit(service)}
+              />
+            </CustomTooltip>,
+          ] : []),
+          ...(onDelete ? [
+            <CustomPopconfirm
+              key="delete"
+              title="Excluir serviço?"
+              onConfirm={() => onDelete(service.id)}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button type="text" size="small" icon={<DeleteOutlined />} danger />
+            </CustomPopconfirm>,
+          ] : []),
         ]}
       >
         <List.Item.Meta
@@ -107,13 +111,13 @@ const ServiceListInGroup: React.FC<ServiceListProps> = ({
 interface ServiceGroupsListProps {
   groups: ServiceGroup[];
   services: Services[];
-  onEditGroup: (group: ServiceGroup) => void;
-  onDeleteGroup: (id: string) => void;
-  onAddGroup: () => void;
-  onEditService: (service: Services) => void;
-  onDeleteService: (id: string) => void;
+  onEditGroup?: (group: ServiceGroup) => void;
+  onDeleteGroup?: (id: string) => void;
+  onAddGroup?: () => void;
+  onEditService?: (service: Services) => void;
+  onDeleteService?: (id: string) => void;
   onToggleServiceActive: (service: Services) => void;
-  onAddServiceToGroup: (groupId: string) => void;
+  onAddServiceToGroup?: (groupId: string) => void;
   isUpdating: boolean;
 }
 
@@ -142,9 +146,11 @@ export const ServiceGroupsList: React.FC<ServiceGroupsListProps> = ({
           description="Nenhum grupo cadastrado"
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         >
-          <Button type="primary" onClick={onAddGroup}>
-            Criar primeiro grupo
-          </Button>
+          {onAddGroup && (
+            <Button type="primary" onClick={onAddGroup}>
+              Criar primeiro grupo
+            </Button>
+          )}
         </Empty>
       </Card>
     );
@@ -174,28 +180,32 @@ export const ServiceGroupsList: React.FC<ServiceGroupsListProps> = ({
                 )}
               </Space>
               <Space onClick={(e) => e.stopPropagation()}>
-                <CustomTooltip title="Editar grupo">
-                  <Button 
-                    type="text" 
-                    size="small"
-                    icon={<EditOutlined />}
-                    onClick={() => onEditGroup(group)}
-                  />
-                </CustomTooltip>
-                <CustomPopconfirm
-                  title="Excluir grupo?"
-                  description="Os serviços serão desvinculados, mas não excluídos."
-                  onConfirm={() => onDeleteGroup(group.id)}
-                  okText="Sim"
-                  cancelText="Não"
-                >
-                  <Button 
-                    type="text" 
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    danger
-                  />
-                </CustomPopconfirm>
+                {onEditGroup && (
+                  <CustomTooltip title="Editar grupo">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<EditOutlined />}
+                      onClick={() => onEditGroup(group)}
+                    />
+                  </CustomTooltip>
+                )}
+                {onDeleteGroup && (
+                  <CustomPopconfirm
+                    title="Excluir grupo?"
+                    description="Os serviços serão desvinculados, mas não excluídos."
+                    onConfirm={() => onDeleteGroup(group.id)}
+                    okText="Sim"
+                    cancelText="Não"
+                  >
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      danger
+                    />
+                  </CustomPopconfirm>
+                )}
               </Space>
             </div>
           ),
@@ -214,14 +224,16 @@ export const ServiceGroupsList: React.FC<ServiceGroupsListProps> = ({
                 isUpdating={isUpdating}
               />
               <Divider className="my-3" />
-              <Button 
-                type="dashed" 
-                size="small"
-                icon={<PlusOutlined />}
-                onClick={() => onAddServiceToGroup(group.id)}
-              >
-                Adicionar serviço ao grupo
-              </Button>
+              {onAddServiceToGroup && (
+                <Button
+                  type="dashed"
+                  size="small"
+                  icon={<PlusOutlined />}
+                  onClick={() => onAddServiceToGroup(group.id)}
+                >
+                  Adicionar serviço ao grupo
+                </Button>
+              )}
             </div>
           ),
         })),

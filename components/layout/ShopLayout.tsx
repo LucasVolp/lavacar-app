@@ -48,6 +48,15 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
   const { resolvedTheme, setTheme } = useTheme();
   const { logout, user } = useAuth();
   const { shop, shopId, organizationId, isLoading } = useShopAdmin();
+
+  const isEmployee = (() => {
+    if (!user || !organizationId) return false;
+    if (user.id === shop?.ownerId) return false;
+    if (user.role === "ADMIN") return false;
+    if (user.organizations?.some((org: { id: string }) => org.id === organizationId)) return false;
+    const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
+    return membership?.role === "EMPLOYEE";
+  })();
   
   const isDarkMode = resolvedTheme === "dark";
 
@@ -68,6 +77,44 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   const borderColor = isDarkMode ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)";
 
+  const operationsChildren = [
+    {
+      key: `/organization/${organizationId}/shop/${shopId}/appointments`,
+      icon: <CalendarOutlined style={{ fontSize: "18px", color: "#3b82f6" }} />,
+      label: <span className="font-medium">Agendamentos</span>,
+    },
+    {
+      key: `/organization/${organizationId}/shop/${shopId}/clients`,
+      icon: <ContactsOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
+      label: <span className="font-medium">Clientes</span>,
+    },
+    {
+      key: `/organization/${organizationId}/shop/${shopId}/services`,
+      icon: <ToolOutlined style={{ fontSize: "18px", color: "#10b981" }} />,
+      label: <span className="font-medium">Serviços</span>,
+    },
+    ...(!isEmployee ? [{
+      key: `/organization/${organizationId}/shop/${shopId}/employees`,
+      icon: <TeamOutlined style={{ fontSize: "18px", color: "#f43f5e" }} />,
+      label: <span className="font-medium">Funcionários</span>,
+    }] : []),
+  ];
+
+  const configChildren = [
+    ...(!isEmployee ? [
+      {
+        key: `/organization/${organizationId}/shop/${shopId}/schedules`,
+        icon: <ClockCircleOutlined style={{ fontSize: "18px", color: "#f59e0b" }} />,
+        label: <span className="font-medium">Horários</span>,
+      },
+      {
+        key: `/organization/${organizationId}/shop/${shopId}/blocked-times`,
+        icon: <StopOutlined style={{ fontSize: "18px", color: "#ef4444" }} />,
+        label: <span className="font-medium">Bloqueios</span>,
+      },
+    ] : []),
+  ];
+
   const menuItems: MenuProps["items"] = [
     {
       key: `/organization/${organizationId}/shop/${shopId}`,
@@ -83,55 +130,25 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           Operações
         </span>
       ),
-      children: [
-        {
-          key: `/organization/${organizationId}/shop/${shopId}/appointments`,
-          icon: <CalendarOutlined style={{ fontSize: "18px", color: "#3b82f6" }} />,
-          label: <span className="font-medium">Agendamentos</span>,
-        },
-        {
-          key: `/organization/${organizationId}/shop/${shopId}/clients`,
-          icon: <ContactsOutlined style={{ fontSize: "18px", color: "#06b6d4" }} />,
-          label: <span className="font-medium">Clientes</span>,
-        },
-        {
-          key: `/organization/${organizationId}/shop/${shopId}/services`,
-          icon: <ToolOutlined style={{ fontSize: "18px", color: "#10b981" }} />,
-          label: <span className="font-medium">Serviços</span>,
-        },
-        {
-          key: `/organization/${organizationId}/shop/${shopId}/employees`,
-          icon: <TeamOutlined style={{ fontSize: "18px", color: "#f43f5e" }} />,
-          label: <span className="font-medium">Funcionários</span>,
-        },
-      ],
+      children: operationsChildren,
     },
-    { type: "divider", style: { margin: "12px 0" } },
-    {
-      key: "config-group",
-      type: "group",
-      label: collapsed ? null : (
-        <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
-          Configurações
-        </span>
-      ),
-      children: [
-        {
-          key: `/organization/${organizationId}/shop/${shopId}/schedules`,
-          icon: <ClockCircleOutlined style={{ fontSize: "18px", color: "#f59e0b" }} />,
-          label: <span className="font-medium">Horários</span>,
-        },
-        {
-          key: `/organization/${organizationId}/shop/${shopId}/blocked-times`,
-          icon: <StopOutlined style={{ fontSize: "18px", color: "#ef4444" }} />,
-          label: <span className="font-medium">Bloqueios</span>,
-        },
-      ],
-    },
-    { type: "divider", style: { margin: "12px 0" } },
+    ...(configChildren.length > 0 ? [
+      { type: "divider" as const, style: { margin: "12px 0" } },
+      {
+        key: "config-group",
+        type: "group" as const,
+        label: collapsed ? null : (
+          <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
+            Configurações
+          </span>
+        ),
+        children: configChildren,
+      },
+    ] : []),
+    { type: "divider" as const, style: { margin: "12px 0" } },
     {
       key: "analytics-group",
-      type: "group",
+      type: "group" as const,
       label: collapsed ? null : (
         <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
           Análise
@@ -150,16 +167,18 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
         },
       ]
     },
-    {
-      key: `/organization/${organizationId}/shop/${shopId}/sales-goals`,
-      icon: <DollarOutlined  style={{fontSize: "18px", color: "#08e400"}}/>,
-      label: <span className="font-medium">Metas de Vendas</span>,
-    },
-    {
-      key: `/organization/${organizationId}/shop/${shopId}/settings`,
-      icon: <SettingOutlined style={{ fontSize: "18px", color: "#64748b" }} />,
-      label: <span className="font-medium">Configurações</span>,
-    },
+    ...(!isEmployee ? [
+      {
+        key: `/organization/${organizationId}/shop/${shopId}/sales-goals`,
+        icon: <DollarOutlined style={{fontSize: "18px", color: "#08e400"}}/>,
+        label: <span className="font-medium">Metas de Vendas</span>,
+      },
+      {
+        key: `/organization/${organizationId}/shop/${shopId}/settings`,
+        icon: <SettingOutlined style={{ fontSize: "18px", color: "#64748b" }} />,
+        label: <span className="font-medium">Configurações</span>,
+      },
+    ] : []),
   ];
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {

@@ -20,8 +20,8 @@ const { Text } = Typography;
 interface ServicesTableProps {
   services: Services[];
   loading?: boolean;
-  onEdit: (service: Services) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (service: Services) => void;
+  onDelete?: (id: string) => void;
   onToggleActive: (service: Services) => void;
   updatingServiceId?: string | null;
 }
@@ -103,14 +103,16 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       width: 140,
       render: (_: unknown, record: Services) => (
         <Space>
-          <CustomTooltip title="Editar">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => onEdit(record)}
-              className="text-indigo-500"
-            />
-          </CustomTooltip>
+          {onEdit && (
+            <CustomTooltip title="Editar">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => onEdit(record)}
+                className="text-indigo-500"
+              />
+            </CustomTooltip>
+          )}
           <CustomTooltip title={record.isActive === false ? "Ativar" : "Desativar"}>
             <Button
               type="text"
@@ -120,9 +122,11 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
               className={record.isActive === false ? "text-emerald-500" : "text-amber-500"}
             />
           </CustomTooltip>
-          <CustomTooltip title="Excluir">
-            <Button type="text" danger icon={<DeleteOutlined />} onClick={() => onDelete(record.id)} />
-          </CustomTooltip>
+          {onDelete && (
+            <CustomTooltip title="Excluir">
+              <Button type="text" danger icon={<DeleteOutlined />} onClick={() => onDelete(record.id)} />
+            </CustomTooltip>
+          )}
         </Space>
       ),
     },

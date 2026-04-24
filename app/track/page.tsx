@@ -1,9 +1,11 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { Card, Modal, Input, message } from "antd";
+import { Button, Card, Modal, Input, message } from "antd";
+import { PrinterOutlined, FileTextOutlined } from "@ant-design/icons";
+import { useReactToPrint } from "react-to-print";
 import { authService, TrackingAppointment } from "@/services/auth";
 import { appointmentService } from "@/services/appointment";
 import {
@@ -13,8 +15,32 @@ import {
   TrackingLoading,
   TrackingError,
 } from "@/components/track";
+import { AppointmentReceipt, ReceiptData } from "@/components/shared/AppointmentReceipt";
 
 const { TextArea } = Input;
+
+function buildReceiptData(appointment: TrackingAppointment): ReceiptData {
+  return {
+    id: appointment.id,
+    scheduledAt: appointment.scheduledAt,
+    endTime: appointment.endTime,
+    totalPrice: appointment.totalPrice,
+    totalDuration: appointment.totalDuration,
+    notes: appointment.notes,
+    shop: {
+      name: appointment.shop.name,
+      logoUrl: appointment.shop.logoUrl,
+      phone: appointment.shop.phone,
+      street: appointment.shop.street,
+      number: appointment.shop.number,
+      neighborhood: appointment.shop.neighborhood,
+      city: appointment.shop.city,
+      state: appointment.shop.state,
+    },
+    vehicle: appointment.vehicle,
+    services: appointment.services,
+  };
+}
 
 export default function TrackPage() {
   return (
@@ -27,6 +53,7 @@ export default function TrackPage() {
 function TrackPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const action = searchParams.get("action");
   const hasToken = !!token;
 
   const [appointment, setAppointment] = useState<TrackingAppointment | null>(null);
@@ -38,6 +65,14 @@ function TrackPageContent() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const autoConfirmedRef = useRef(false);
+
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: `Comprovante-${appointment?.id?.slice(0, 8).toUpperCase() ?? ""}`,
+  });
 
   const fetchAppointment = useCallback(async (trackingToken: string) => {
     try {
@@ -55,6 +90,19 @@ function TrackPageContent() {
     if (!token) return;
     fetchAppointment(token);
   }, [token, fetchAppointment]);
+
+  useEffect(() => {
+    if (action !== "confirm" || !token || !appointment || autoConfirmedRef.current) return;
+    if (appointment.status !== "PENDING") return;
+    autoConfirmedRef.current = true;
+    appointmentService
+      .confirmByTracking(token)
+      .then(() => {
+        message.success("Agendamento confirmado!");
+        fetchAppointment(token);
+      })
+      .catch(() => message.error("Erro ao confirmar agendamento."));
+  }, [action, token, appointment, fetchAppointment]);
 
   const handleRefresh = useCallback(() => {
     if (!token) return;
@@ -98,25 +146,28 @@ function TrackPageContent() {
   if (loading) return <TrackingLoading />;
   if (error || !appointment) return <TrackingError message={error || undefined} />;
 
+  const isCompleted = ["COMPLETED"].includes(appointment.status);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] p-4 sm:p-6">
       <div className="w-full max-w-2xl mx-auto">
         {appointment.shop?.logoUrl && (
-          <div className="flex justify-center mb-4 sm:mb-6">
+          <div className="flex justify-center mb-6 sm:mb-8">
             <Image
               src={appointment.shop.logoUrl}
               alt={appointment.shop.name}
-              width={56}
-              height={56}
-              className="rounded-xl object-cover"
+              width={64}
+              height={64}
+              className="rounded-2xl object-cover shadow-md"
               priority
             />
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Status + Details */}
           <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-6">
               <TrackingStatusBanner
                 status={appointment.status}
                 onRefresh={handleRefresh}
@@ -129,12 +180,78 @@ function TrackPageContent() {
             <TrackingAppointmentDetails appointment={appointment} />
           </Card>
 
+          {/* Notes/Observations */}
+          {appointment.notes && (
+            <Card className="border-none shadow-lg rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center">
+                  <FileTextOutlined className="text-amber-600 dark:text-amber-400 text-sm" />
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider m-0">
+                  Observações
+                </p>
+              </div>
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap m-0">
+                {appointment.notes}
+              </p>
+            </Card>
+          )}
+
+          {/* Receipt / Print */}
+          {isCompleted && (
+            <Card className="border-none shadow-lg rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center">
+                    <PrinterOutlined className="text-emerald-600 dark:text-emerald-400 text-sm" />
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider m-0">
+                    Comprovante
+                  </p>
+                </div>
+                <Button
+                  icon={<PrinterOutlined />}
+                  onClick={() => handlePrint()}
+                  className="rounded-xl font-medium"
+                >
+                  Imprimir / Salvar PDF
+                </Button>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-2xl p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Recibo nº</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    #{appointment.id.slice(0, 8).toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Serviços</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {appointment.services.length}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-slate-200 dark:border-zinc-700 pt-2 mt-2">
+                  <span className="font-bold text-slate-800 dark:text-slate-200">Total</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                    R$ {parseFloat(appointment.totalPrice).toFixed(2).replace(".", ",")}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {appointment.shop && <TrackingShopInfo shop={appointment.shop} />}
         </div>
 
-        <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-6 px-4">
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-8 px-4">
           Este link é pessoal e válido por 30 dias.
         </p>
+      </div>
+
+      {/* Hidden printable receipt */}
+      <div style={{ display: "none" }}>
+        <AppointmentReceipt ref={receiptRef} data={buildReceiptData(appointment)} />
       </div>
 
       <Modal

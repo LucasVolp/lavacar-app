@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   Button,
@@ -14,6 +14,7 @@ import {
   Image
 } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
+import { useReactToPrint } from "react-to-print";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
 import { useAppointment, useUpdateAppointmentStatus } from "@/hooks/useAppointments";
 import { useGetChecklist } from "@/hooks/useChecklist";
@@ -21,6 +22,7 @@ import dayjs from "dayjs";
 import { formatCurrency, sanitizeText } from "@/lib/security";
 import { ChecklistModal } from "@/components/modals/ChecklistModal";
 import { formatVehiclePlate } from "@/utils/vehiclePlate";
+import { AppointmentReceipt, ReceiptData } from "@/components/shared/AppointmentReceipt";
 
 import { AppointmentDetailHeader } from "@/components/admin/shop/appointments/details/AppointmentDetailHeader";
 import { AppointmentStatusCard } from "@/components/admin/shop/appointments/details/AppointmentStatusCard";
@@ -38,6 +40,13 @@ export default function AppointmentDetailPage() {
   const { data: appointment, isLoading, error } = useAppointment(appointmentId);
   const { data: checklist, isLoading: isChecklistLoading } = useGetChecklist(appointmentId);
   const updateStatus = useUpdateAppointmentStatus();
+
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: `Recibo-${appointmentId?.slice(0, 8).toUpperCase() ?? ""}`,
+  });
 
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [checklistModalOpen, setChecklistModalOpen] = useState(false);
@@ -133,7 +142,7 @@ export default function AppointmentDetailPage() {
     <div className="max-w-7xl mx-auto pb-12 px-4 sm:px-6">
       <AppointmentDetailHeader 
         onBack={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments`)}
-        onPrint={() => message.info("Funcionalidade de impressão em desenvolvimento")}
+        onPrint={() => handlePrint()}
         onCancel={() => setCancelModalVisible(true)}
         isCanceled={isCanceled}
       />
@@ -264,12 +273,46 @@ export default function AppointmentDetailPage() {
                 </div>
               </div>
             }
-            onPrint={() => message.info("Funcionalidade de impressão em desenvolvimento")}
+            onPrint={() => handlePrint()}
             />
         </Col>
       </Row>
 
-      <AppointmentModals 
+      <div style={{ display: "none" }}>
+        <AppointmentReceipt
+          ref={receiptRef}
+          data={{
+            id: appointment.id,
+            scheduledAt: appointment.scheduledAt,
+            endTime: appointment.endTime,
+            totalPrice: appointment.totalPrice,
+            totalDuration: appointment.totalDuration,
+            notes: appointment.notes,
+            shop: {
+              name: appointment.shop?.name ?? "",
+              logoUrl: appointment.shop?.logoUrl ?? undefined,
+              phone: appointment.shop?.phone,
+              street: appointment.shop?.street,
+              number: appointment.shop?.number,
+              neighborhood: appointment.shop?.neighborhood,
+              city: appointment.shop?.city,
+              state: appointment.shop?.state,
+            },
+            vehicle: appointment.vehicle
+              ? {
+                  brand: appointment.vehicle.brand,
+                  model: appointment.vehicle.model,
+                  plate: appointment.vehicle.plate ?? undefined,
+                  color: appointment.vehicle.color ?? undefined,
+                }
+              : undefined,
+            services: appointment.services,
+            clientName: clientName,
+          } satisfies ReceiptData}
+        />
+      </div>
+
+      <AppointmentModals
         cancelVisible={cancelModalVisible}
         confirmVisible={statusConfirmVisible}
         checklistWarningVisible={checklistWarningVisible}

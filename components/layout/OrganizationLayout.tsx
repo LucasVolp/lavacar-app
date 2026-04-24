@@ -41,7 +41,8 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
   const { resolvedTheme, setTheme } = useTheme();
   const { logout, user } = useAuth();
   const { data: organization, isLoading: isLoadingOrg } = useOrganization(organizationId);
-  
+
+  const isOwner = organization?.ownerId === user?.id || user?.role === "ADMIN";
   const isDarkMode = resolvedTheme === "dark";
 
   useEffect(() => {
@@ -106,12 +107,14 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
         },
       ],
     },
-    { type: "divider", style: { margin: "12px 0" } },
-    {
-      key: `/organization/${organizationId}/settings`,
-      icon: <SettingOutlined style={{ fontSize: "18px", color: "#8b5cf6" }} />,
-      label: <span className="font-medium">Configurações</span>,
-    },
+    ...(isOwner ? [
+      { type: "divider" as const, style: { margin: "12px 0" } },
+      {
+        key: `/organization/${organizationId}/settings`,
+        icon: <SettingOutlined style={{ fontSize: "18px", color: "#8b5cf6" }} />,
+        label: <span className="font-medium">Configurações</span>,
+      },
+    ] : []),
   ];
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {

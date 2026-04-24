@@ -13,7 +13,7 @@ interface ServicesFiltersProps {
   onStatusFilterChange: (status: "all" | "active" | "inactive") => void;
   viewType: "table" | "grid";
   onViewTypeChange: (type: "table" | "grid") => void;
-  onAddService: () => void;
+  onAddService?: () => void;
 }
 
 export const ServicesFilters: React.FC<ServicesFiltersProps> = ({
@@ -56,14 +56,16 @@ export const ServicesFilters: React.FC<ServicesFiltersProps> = ({
             { value: "table", icon: <UnorderedListOutlined /> },
           ]}
         />
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
-          onClick={onAddService}
-          className="bg-blue-600 hover:bg-blue-500 shadow-sm"
-        >
-          Novo Serviço
-        </Button>
+        {onAddService && (
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={onAddService}
+            className="bg-blue-600 hover:bg-blue-500 shadow-sm"
+          >
+            Novo Serviço
+          </Button>
+        )}
       </div>
     </div>
   );

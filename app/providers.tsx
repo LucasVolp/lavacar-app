@@ -201,6 +201,24 @@ export default function ThemeAwareConfigProvider({
             colorTextLightSolid: isDarkMode ? '#ffffff' : '#000000',
             fontSize: 12,
           },
+          Steps: {
+            colorText: isDarkMode ? colors.dark.textBase : colors.light.textBase,
+            colorTextDescription: isDarkMode ? colors.dark.textSecondary : colors.light.textSecondary,
+            colorSplit: isDarkMode ? colors.dark.border : colors.light.border,
+            navArrowColor: isDarkMode ? colors.dark.textSecondary : colors.light.textSecondary,
+          },
+          Alert: {
+            colorInfoBg: isDarkMode ? 'rgba(22, 119, 255, 0.1)' : '#e6f4ff',
+            colorInfoBorder: isDarkMode ? 'rgba(22, 119, 255, 0.3)' : '#91caff',
+            colorErrorBg: isDarkMode ? 'rgba(239, 68, 68, 0.1)' : '#fff2f0',
+            colorErrorBorder: isDarkMode ? 'rgba(239, 68, 68, 0.3)' : '#ffccc7',
+            colorWarningBg: isDarkMode ? 'rgba(120, 53, 15, 0.2)' : '#fffbe6',
+            colorWarningBorder: isDarkMode ? '#92400e' : '#ffe58f',
+            colorSuccessBg: isDarkMode ? 'rgba(34, 197, 94, 0.1)' : '#f6ffed',
+            colorSuccessBorder: isDarkMode ? 'rgba(34, 197, 94, 0.3)' : '#b7eb8f',
+            colorTextHeading: isDarkMode ? colors.dark.textBase : colors.light.textBase,
+            colorText: isDarkMode ? '#cbd5e1' : colors.light.textSecondary,
+          },
         },
       }}
     >

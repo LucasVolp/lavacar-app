@@ -9,8 +9,10 @@ import {
 } from "antd";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateUser } from "@/hooks/useUsers";
+import { authService } from "@/services/auth";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
+import { maskPhone, unmask } from "@/lib/masks";
 import {
   ClientProfileIdentityCard,
   ClientProfileInfoCard,
@@ -28,14 +30,9 @@ interface ProfileFormValues {
   email: string;
 }
 
-interface PasswordFormValues {
-  currentPassword?: string;
-  newPassword?: string;
-  confirmPassword?: string;
-}
-
 interface ApiError {
   response?: {
+    status?: number;
     data?: {
       message?: string;
     };
@@ -46,17 +43,22 @@ export default function ClientProfilePage() {
   const { user, refreshUser, isLoading: authLoading, logout } = useAuth();
   const updateUser = useUpdateUser();
   const [form] = Form.useForm();
-  const [passwordForm] = Form.useForm();
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const requiresCurrentPassword = user?.hasPassword !== false && !user?.provider;
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
+  const [hasSentPasswordReset, setHasSentPasswordReset] = useState(false);
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
+
+  const [isRequestingEmailChange, setIsRequestingEmailChange] = useState(false);
+  const [pendingEmailChange, setPendingEmailChange] = useState<string | null>(null);
+
+  const isGoogleLogin = user?.provider?.toLowerCase() === "google";
 
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
         firstName: user.firstName,
         lastName: user.lastName,
-        phone: user.phone,
+        phone: user.phone ? maskPhone(user.phone) : "",
         email: user.email,
       });
     }
@@ -64,13 +66,16 @@ export default function ClientProfilePage() {
 
   const handleSaveProfile = async (values: ProfileFormValues) => {
     if (!user) return;
+
+    const sanitizedPhone = values.phone ? unmask(values.phone) : undefined;
+
     try {
       await updateUser.mutateAsync({
         id: user.id,
         payload: {
           firstName: values.firstName,
           lastName: values.lastName,
-          phone: values.phone,
+          phone: sanitizedPhone,
         },
       });
       await refreshUser();
@@ -81,28 +86,44 @@ export default function ClientProfilePage() {
     }
   };
 
-  const handleChangePassword = async (values: PasswordFormValues) => {
-    if (!user) return;
-    setIsChangingPassword(true);
+  const handleRequestPasswordReset = async () => {
+    if (!user?.email) {
+      setPasswordResetError("Sua conta não tem e-mail cadastrado. Adicione um e-mail antes de alterar a senha.");
+      return;
+    }
+    setPasswordResetError(null);
+    setIsSendingPasswordReset(true);
     try {
-      const payload: { password?: string } = {
-        password: values.newPassword,
-      };
-      
-      if (requiresCurrentPassword && values.currentPassword) {
-      }
-
-      await updateUser.mutateAsync({
-        id: user.id,
-        payload,
-      });
-      message.success("Senha alterada com sucesso!");
-      passwordForm.resetFields();
+      await authService.requestPasswordReset({ email: user.email });
+      setHasSentPasswordReset(true);
+      message.success("Link de redefinição enviado para seu e-mail.");
     } catch (error: unknown) {
       const apiError = error as ApiError;
-      message.error(apiError.response?.data?.message || "Erro ao alterar senha");
+      setPasswordResetError(
+        apiError.response?.data?.message || "Não foi possível enviar o link. Tente novamente em instantes.",
+      );
     } finally {
-      setIsChangingPassword(false);
+      setIsSendingPasswordReset(false);
+    }
+  };
+
+  const handleRequestEmailChange = async (newEmail: string): Promise<boolean> => {
+    setIsRequestingEmailChange(true);
+    try {
+      await authService.requestEmailChange({ newEmail });
+      setPendingEmailChange(newEmail);
+      message.success(`Enviamos um link de confirmação para ${newEmail}.`);
+      return true;
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      const msg =
+        apiError.response?.status === 409
+          ? "Este e-mail já está em uso por outra conta."
+          : apiError.response?.data?.message || "Não foi possível solicitar a troca de e-mail.";
+      message.error(msg);
+      return false;
+    } finally {
+      setIsRequestingEmailChange(false);
     }
   };
 
@@ -148,15 +169,23 @@ export default function ClientProfilePage() {
           <ClientProfileInfoCard
             form={form}
             loading={updateUser.isPending}
+            currentEmail={user.email}
+            isRequestingEmailChange={isRequestingEmailChange}
+            pendingEmailChange={pendingEmailChange}
             onFinish={handleSaveProfile}
+            onRequestEmailChange={handleRequestEmailChange}
+            onDismissPendingEmailChange={() => setPendingEmailChange(null)}
           />
 
           <div id="password-section">
             <ClientProfilePasswordCard
-              form={passwordForm}
-              isChangingPassword={isChangingPassword}
-              requiresCurrentPassword={requiresCurrentPassword}
-              onFinish={handleChangePassword}
+              userEmail={user.email}
+              isGoogleLogin={isGoogleLogin}
+              isSending={isSendingPasswordReset}
+              hasRequested={hasSentPasswordReset}
+              errorMessage={passwordResetError}
+              onRequestReset={handleRequestPasswordReset}
+              onDismissError={() => setPasswordResetError(null)}
             />
           </div>
         </div>

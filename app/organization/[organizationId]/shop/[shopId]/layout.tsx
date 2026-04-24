@@ -3,19 +3,20 @@
 import React from "react";
 import { ShopAdminProvider, useShopAdmin } from "@/contexts/ShopAdminContext";
 import { ShopLayout } from "@/components/layout/ShopLayout";
+import { ShopAccessDenied } from "@/components/layout/ShopAccessDenied";
 import { useAuth } from "@/contexts/AuthContext";
-import { useOrganization } from "@/hooks/useOrganizations";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Spin, Result, Button } from "antd";
+import axios from "axios";
 
 function ShopAdminGuard({ children }: { children: React.ReactNode }) {
   const { shop, isLoading: shopLoading, error: shopError } = useShopAdmin();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const params = useParams();
+  const organizationId = params?.organizationId as string | undefined;
 
-  const { data: organization, isLoading: orgLoading } = useOrganization(shop?.organizationId);
-
-  const isLoading = authLoading || shopLoading || (!!shop && orgLoading);
+  const isLoading = authLoading || shopLoading;
 
   if (isLoading) {
     return (
@@ -37,11 +38,17 @@ function ShopAdminGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (shopError || !shop) {
+    const is403 = axios.isAxiosError(shopError) && shopError.response?.status === 403;
+
+    if (is403) {
+      return <ShopAccessDenied organizationId={organizationId} />;
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
-        <Result 
-          status="404" 
-          title="Loja não encontrada" 
+        <Result
+          status="404"
+          title="Loja não encontrada"
           subTitle="Não foi possível carregar os dados desta loja."
           extra={<Button type="primary" onClick={() => router.push("/")}>Voltar</Button>}
         />
@@ -49,9 +56,11 @@ function ShopAdminGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Check access using auth context data (already loaded from /me — no extra API call)
+  const orgId = shop.organizationId;
   const isDirectOwner = shop.ownerId === user?.id;
-  const isOrgOwner = organization?.ownerId === user?.id;
-  const isOrgMember = organization?.members?.some((m: { userId: string }) => m.userId === user?.id);
+  const isOrgOwner = user?.organizations?.some((org) => org.id === orgId);
+  const isOrgMember = user?.organizationMembers?.some((m) => m.organizationId === orgId);
 
   const hasAccess = isDirectOwner || isOrgOwner || isOrgMember;
 
