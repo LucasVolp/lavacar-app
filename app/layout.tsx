@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeAwareConfigProvider, { Providers } from "./providers";
 import ptBR from "antd/locale/pt_BR";
 import { BRAND_CONFIG } from "@/config/constants";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
             {children}
           </ThemeAwareConfigProvider>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
