@@ -20,7 +20,7 @@ function BillingReturnContent() {
     const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
     const attemptRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const pollRef = useRef<() => Promise<void>>();
+    const pollRef = useRef<(() => Promise<void>) | null>(null);
 
     const poll = useCallback(async () => {
         if (attemptRef.current >= MAX_ATTEMPTS) {
