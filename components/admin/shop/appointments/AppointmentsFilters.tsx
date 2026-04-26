@@ -42,14 +42,14 @@ export const AppointmentsFilters: React.FC<AppointmentsFiltersProps> = ({
               ]}
             />
 
-            <div className="flex flex-wrap gap-3 flex-1">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 flex-1">
               <RangePicker
                 value={dateRange as [Dayjs, Dayjs]}
                 onChange={(dates) => setDateRange(dates)}
                 format="DD/MM/YYYY"
                 placeholder={["Data início", "Data fim"]}
                 allowClear
-                className="min-w-[250px]"
+                className="w-full sm:min-w-[250px] sm:w-auto"
               />
 
               <Select
@@ -57,7 +57,7 @@ export const AppointmentsFilters: React.FC<AppointmentsFiltersProps> = ({
                 onChange={setStatusFilter}
                 placeholder="Filtrar por status"
                 allowClear
-                className="min-w-[180px]"
+                className="w-full sm:min-w-[180px] sm:w-auto"
                 options={Object.entries(statusConfig).map(([key, value]) => ({
                   value: key,
                   label: (

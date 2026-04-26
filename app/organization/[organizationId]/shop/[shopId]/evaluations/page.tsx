@@ -71,7 +71,7 @@ export default function ShopEvaluationsPage() {
                <div className="space-y-4 sticky top-24">
                    {stats && <EvaluationStats stats={stats} isLoading={isStatsLoading} />}
                </div>
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm sticky top-24 space-y-4">
+                <div className="bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm sticky top-24 space-y-4">
                        <Title level={5} className="!m-0 !text-zinc-800 dark:!text-zinc-200">Filtros</Title>
                        
                        <div className="space-y-3">

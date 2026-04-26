@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Form, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBillingStatus, useCreateSelfCheckout } from "@/hooks/useBilling";
 import { formatDocument } from "@/utils/formatters";
@@ -10,17 +11,19 @@ import { brasilApiService } from "@/services/brasilApi";
 import type { BillingType, BillingCycle, SelfCheckoutResponse } from "@/types/billing";
 import { PLAN_CONFIG } from "@/types/billing";
 
-import { CheckoutLayout } from "./_components/CheckoutLayout";
-import { CheckoutHeader } from "./_components/CheckoutHeader";
-import { ActiveStep } from "./_components/ActiveStep";
-import { PlanStep } from "./_components/PlanStep";
-import { PaymentFormStep } from "./_components/PaymentFormStep";
-import { AwaitingCCStep } from "./_components/AwaitingCCStep";
-import { PixStep } from "./_components/PixStep";
-import { PendingStep } from "./_components/PendingStep";
-import { OverdueStep } from "./_components/OverdueStep";
-import { CancelledStep } from "./_components/CancelledStep";
-import { FailedStep } from "./_components/FailedStep";
+import {
+    CheckoutLayout,
+    CheckoutHeader,
+    ActiveStep,
+    PlanStep,
+    PaymentFormStep,
+    AwaitingCCStep,
+    PixStep,
+    PendingStep,
+    OverdueStep,
+    CancelledStep,
+    FailedStep,
+} from "@/components/billing/checkout";
 
 type CheckoutStep =
     | "loading"
@@ -278,6 +281,11 @@ export default function CheckoutPage() {
         setStep("plan");
     };
 
+    const handleCancelIntent = () => {
+        setPollingActive(false);
+        setStep("payment");
+    };
+
     const handleResubscribe = () => {
         setCheckoutResult(null);
         setPollingActive(false);
@@ -297,91 +305,175 @@ export default function CheckoutPage() {
         ? (billingStatus?.organization?.name ?? "Sua organização")
         : (HEADINGS[step] ?? null);
 
-    const subtitle = SUBTITLES[step] ?? "Gerencie seu lavacar com o melhor sistema do mercado";
+    const subtitle = SUBTITLES[step] ?? "Gerencie sua estética automotiva com o melhor sistema do mercado";
 
     return (
         <CheckoutLayout>
             <CheckoutHeader isActive={step === "active"} heading={heading} subtitle={subtitle} />
 
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-3xl shadow-xl shadow-zinc-200/50 dark:shadow-black/20 border border-zinc-100 dark:border-zinc-800">
-                {step === "active" && (
-                    <ActiveStep
-                        subscription={billingStatus?.subscription}
-                        onNavigate={() => router.push(`/organization/${billingStatus?.organization?.id}`)}
-                    />
-                )}
+            <div className="rounded-3xl border border-zinc-100 bg-white p-6 font-sans antialiased shadow-2xl shadow-zinc-200/40 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/40 sm:p-8">
+                <AnimatePresence mode="wait">
+                    {step === "active" && (
+                        <motion.div
+                            key="active"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <ActiveStep
+                                subscription={billingStatus?.subscription}
+                                onNavigate={() => router.push(`/organization/${billingStatus?.organization?.id}`)}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === "plan" && (
-                    <PlanStep
-                        selectedCycle={selectedCycle}
-                        onCycleChange={setSelectedCycle}
-                        onContinue={() => setStep("payment")}
-                    />
-                )}
+                    {step === "plan" && (
+                        <motion.div
+                            key="plan"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <PlanStep
+                                selectedCycle={selectedCycle}
+                                onCycleChange={setSelectedCycle}
+                                onContinue={() => setStep("payment")}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === "payment" && (
-                    <PaymentFormStep
-                        form={form}
-                        selectedBillingType={selectedBillingType}
-                        selectedCycle={selectedCycle}
-                        loadingCnpj={loadingCnpj}
-                        onBillingTypeChange={setSelectedBillingType}
-                        onDocumentChange={handleDocumentChange}
-                        onDocumentBlur={handleDocumentBlur}
-                        onBack={() => setStep("plan")}
-                        onSubmit={handleSubmitCheckout}
-                    />
-                )}
+                    {step === "payment" && (
+                        <motion.div
+                            key="payment"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <PaymentFormStep
+                                form={form}
+                                selectedBillingType={selectedBillingType}
+                                selectedCycle={selectedCycle}
+                                loadingCnpj={loadingCnpj}
+                                onBillingTypeChange={setSelectedBillingType}
+                                onDocumentChange={handleDocumentChange}
+                                onDocumentBlur={handleDocumentBlur}
+                                onBack={() => setStep("plan")}
+                                onSubmit={handleSubmitCheckout}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === "processing" && (
-                    <div className="flex flex-col items-center gap-4 py-8">
-                        <Spin size="large" />
-                        <p className="text-base font-medium text-zinc-500 dark:text-zinc-400">
-                            Criando seu checkout...
-                        </p>
-                    </div>
-                )}
+                    {step === "processing" && (
+                        <motion.div
+                            key="processing"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <div className="flex flex-col items-center gap-4 py-8">
+                                <Spin size="large" />
+                                <p className="text-base font-medium tracking-tight text-zinc-500 dark:text-zinc-400">
+                                    Criando seu checkout...
+                                </p>
+                            </div>
+                        </motion.div>
+                    )}
 
-                {step === "awaiting_cc" && (
-                    <AwaitingCCStep
-                        checkoutUrl={checkoutResult?.checkoutUrl}
-                        onVerify={checkPaymentConfirmed}
-                    />
-                )}
+                    {step === "awaiting_cc" && (
+                        <motion.div
+                            key="awaiting_cc"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <AwaitingCCStep
+                                checkoutUrl={checkoutResult?.checkoutUrl}
+                                onVerify={checkPaymentConfirmed}
+                                onCancel={handleCancelIntent}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === "pix" && checkoutResult?.encodedImage && checkoutResult.payload && (
-                    <PixStep
-                        pixData={{
-                            encodedImage: checkoutResult.encodedImage,
-                            payload: checkoutResult.payload,
-                            expirationDate: checkoutResult.expirationDate ?? "",
-                        }}
-                        price={PLAN_CONFIG[selectedCycle].price}
-                        onVerify={checkPaymentConfirmed}
-                    />
-                )}
+                    {step === "pix" && checkoutResult?.encodedImage && checkoutResult.payload && (
+                        <motion.div
+                            key="pix"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <PixStep
+                                pixData={{
+                                    encodedImage: checkoutResult.encodedImage,
+                                    payload: checkoutResult.payload,
+                                    expirationDate: checkoutResult.expirationDate ?? "",
+                                }}
+                                price={PLAN_CONFIG[selectedCycle].price}
+                                onVerify={checkPaymentConfirmed}
+                                onCancel={handleCancelIntent}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === "pending" && (
-                    <PendingStep onPay={handlePayPending} />
-                )}
+                    {step === "pending" && (
+                        <motion.div
+                            key="pending"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <PendingStep onPay={handlePayPending} onCancel={handleCancelIntent} />
+                        </motion.div>
+                    )}
 
-                {step === "overdue" && (
-                    <OverdueStep
-                        checkoutUrl={billingStatus?.subscription?.checkoutUrl}
-                        pixData={billingStatus?.subscription?.pixData}
-                        price={billingStatus?.subscription?.price}
-                        onPayCard={handlePayExistingOverdue}
-                        onRefresh={refetchStatus}
-                    />
-                )}
+                    {step === "overdue" && (
+                        <motion.div
+                            key="overdue"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <OverdueStep
+                                checkoutUrl={billingStatus?.subscription?.checkoutUrl}
+                                pixData={billingStatus?.subscription?.pixData}
+                                price={billingStatus?.subscription?.price}
+                                onPayCard={handlePayExistingOverdue}
+                                onRefresh={refetchStatus}
+                            />
+                        </motion.div>
+                    )}
 
-                {step === "cancelled" && (
-                    <CancelledStep onResubscribe={handleResubscribe} />
-                )}
+                    {step === "cancelled" && (
+                        <motion.div
+                            key="cancelled"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <CancelledStep onResubscribe={handleResubscribe} />
+                        </motion.div>
+                    )}
 
-                {step === "failed" && (
-                    <FailedStep onRetry={handleRetryAfterFailure} />
-                )}
+                    {step === "failed" && (
+                        <motion.div
+                            key="failed"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <FailedStep onRetry={handleRetryAfterFailure} onCancel={handleCancelIntent} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {step !== "active" && (

@@ -155,7 +155,7 @@ export default function BlockedTimesPage() {
     <div className="space-y-8 animate-fade-in">
       <BlockedTimeHeader onAdd={() => handleOpenModal()} />
       
-      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Visão Geral</h2>
         <BlockedTimeStats stats={stats} />
       </div>

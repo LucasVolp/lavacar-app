@@ -93,6 +93,7 @@ export const InsightsTopServices: React.FC<InsightsTopServicesProps> = ({
             rowKey="name"
             pagination={false}
             size="small"
+            scroll={{ x: 400 }}
             className="dark:[&_.ant-table]:!bg-transparent dark:[&_.ant-table-thead_th]:!bg-zinc-800/50 dark:[&_.ant-table-thead_th]:!text-zinc-300 dark:[&_.ant-table-cell]:!border-zinc-800 dark:[&_.ant-table-tbody_tr:hover>td]:!bg-zinc-800/30"
           />
         )}

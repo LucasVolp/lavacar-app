@@ -120,7 +120,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
               type="primary"
               icon={<WhatsAppOutlined className="text-xl" />}
               onClick={handleWhatsApp}
-              className="bg-green-600 hover:!bg-green-500 border-green-600 flex items-center justify-center gap-2 h-10 px-4 rounded-lg shadow-sm"
+              className="bg-green-600 hover:!bg-green-500 border-green-600 flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-lg shadow-sm"
             >
               WhatsApp
             </Button>

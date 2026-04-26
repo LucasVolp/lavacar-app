@@ -85,6 +85,7 @@ const InvitesTab = ({ organizationId, shopId }: { organizationId: string, shopId
         rowKey="id"
         loading={isLoading}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: 500 }}
         className="[&_.ant-table]:!bg-transparent [&_.ant-table-cell]:!bg-transparent"
       />
     </div>
@@ -151,7 +152,7 @@ export default function ShopEmployeesPage() {
                   prefix={<SearchOutlined className="text-zinc-400" />}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="md:w-96"
+                  className="w-full md:max-w-sm"
                   size="large"
                   allowClear
                 />
@@ -205,7 +206,7 @@ export default function ShopEmployeesPage() {
             size="large"
             icon={<UserAddOutlined />}
             onClick={() => setIsInviteModalOpen(true)}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 border-none shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 h-11 px-6 font-medium rounded-xl"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 border-none shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 min-h-[44px] px-6 font-medium rounded-xl w-full md:w-auto"
           >
             Convidar Funcionário
           </Button>

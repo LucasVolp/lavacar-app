@@ -12,7 +12,7 @@ interface BlockedTimeHeaderProps {
 
 export const BlockedTimeHeader: React.FC<BlockedTimeHeaderProps> = ({ onAdd }) => {
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-colors duration-300">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-colors duration-300">
       <div>
         <Title level={3} className="!mb-1 flex items-center gap-2 !text-zinc-900 dark:!text-zinc-100">
           <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-full flex items-center justify-center">
@@ -26,7 +26,7 @@ export const BlockedTimeHeader: React.FC<BlockedTimeHeaderProps> = ({ onAdd }) =
       </div>
       <button
         onClick={onAdd}
-        className="flex items-center gap-2 h-12 px-6 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-base shadow-lg shadow-red-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-red-500/30"
+        className="flex items-center justify-center gap-2 min-h-[44px] px-6 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-base shadow-lg shadow-red-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-red-500/30 w-full sm:w-auto"
       >
         <PlusOutlined />
         Novo Bloqueio

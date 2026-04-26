@@ -49,8 +49,8 @@ export default function BookingPage({ params }: BookingPageProps) {
   if (booking.shopError || !booking.shop) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-4">
-        <div className="max-w-md w-full text-center bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-3xl p-12">
-          <div className="text-7xl mb-6">&#x1F697;</div>
+        <div className="max-w-md w-full text-center bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-3xl p-6 sm:p-12">
+          <div className="text-5xl sm:text-7xl mb-6">&#x1F697;</div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3">
             Loja não encontrada
           </h2>

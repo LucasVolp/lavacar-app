@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { Button } from "antd";
 import { InboxOutlined, PlusOutlined } from "@ant-design/icons";
@@ -26,7 +25,7 @@ export function OrganizationShopsCardsGrid({
 }: OrganizationShopsCardsGridProps) {
   if (shops.length === 0) {
     return (
-      <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 border-dashed rounded-3xl p-16 flex flex-col items-center justify-center text-center">
+      <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 border-dashed rounded-3xl p-8 sm:p-16 flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-4 text-zinc-400 dark:text-zinc-600">
           <InboxOutlined style={{ fontSize: "32px" }} />
         </div>

@@ -246,6 +246,7 @@ export const BlockedTimeList: React.FC<BlockedTimeListProps> = ({
           dataSource={blockedTimes}
           columns={columns}
           rowKey="id"
+          scroll={{ x: 700 }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,

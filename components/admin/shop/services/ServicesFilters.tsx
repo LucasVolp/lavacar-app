@@ -26,20 +26,20 @@ export const ServicesFilters: React.FC<ServicesFiltersProps> = ({
   onAddService,
 }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-colors">
-      <div className="flex flex-wrap gap-3 flex-1">
+    <div className="flex flex-col gap-3 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-colors">
+      <div className="flex flex-col sm:flex-row gap-3 flex-1">
         <Input
           placeholder="Buscar serviços..."
           prefix={<SearchOutlined className="text-zinc-400" />}
           value={searchText}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="max-w-[300px]"
+          className="w-full sm:max-w-[300px]"
           allowClear
         />
         <Select
           value={statusFilter}
           onChange={onStatusFilterChange}
-          className="w-[150px]"
+          className="w-full sm:w-[150px]"
           popupMatchSelectWidth={false}
         >
           <Option value="all">Todos</Option>
@@ -47,7 +47,7 @@ export const ServicesFilters: React.FC<ServicesFiltersProps> = ({
           <Option value="inactive">Inativos</Option>
         </Select>
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
         <Segmented
           value={viewType}
           onChange={(v) => onViewTypeChange(v as "table" | "grid")}
@@ -61,7 +61,7 @@ export const ServicesFilters: React.FC<ServicesFiltersProps> = ({
             type="primary"
             icon={<PlusOutlined />}
             onClick={onAddService}
-            className="bg-blue-600 hover:bg-blue-500 shadow-sm"
+            className="bg-blue-600 hover:bg-blue-500 shadow-sm min-h-[44px] w-full sm:w-auto"
           >
             Novo Serviço
           </Button>

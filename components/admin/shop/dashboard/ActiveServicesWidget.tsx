@@ -64,9 +64,9 @@ export const ActiveServicesWidget: React.FC<ActiveServicesWidgetProps> = ({
                 </div>
 
                 <div className="pl-1 space-y-1">
-                  <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-                    <UserOutlined className="text-xs" />
-                    <span className="truncate max-w-[150px]">{apt.user?.firstName} {apt.user?.lastName}</span>
+                  <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 min-w-0">
+                    <UserOutlined className="text-xs shrink-0" />
+                    <span className="truncate">{apt.user?.firstName} {apt.user?.lastName}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>
@@ -80,7 +80,7 @@ export const ActiveServicesWidget: React.FC<ActiveServicesWidgetProps> = ({
                 icon={<CheckCircleOutlined />}
                 onClick={() => onComplete(apt.id)}
                 loading={isLoading}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 border-0 h-10 shadow-emerald-500/20 shadow-lg font-medium rounded-xl"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 border-0 min-h-[44px] shadow-emerald-500/20 shadow-lg font-medium rounded-xl"
               >
                 Concluir Serviço
               </Button>

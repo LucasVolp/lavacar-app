@@ -193,7 +193,7 @@ export default function SchedulesPage() {
 
       <SchedulesSummary openDays={openDays} closedDays={closedDays} />
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-300">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 sm:p-6 transition-colors duration-300">
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
           Fuso Horário da Loja
         </h3>
@@ -206,13 +206,13 @@ export default function SchedulesPage() {
             options={timezones.map((tz) => ({ value: tz, label: tz }))}
             optionFilterProp="label"
           />
-          <Button type="primary" onClick={handleSaveTimezone} loading={savingTimezone}>
+          <Button type="primary" onClick={handleSaveTimezone} loading={savingTimezone} className="min-h-[44px]">
             Salvar
           </Button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-300">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 sm:p-6 transition-colors duration-300">
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
           Configuração Semanal
         </h3>

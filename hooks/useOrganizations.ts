@@ -24,11 +24,22 @@ export function useOrganizationDashboardMetrics(
   organizationId: string | undefined,
   filters?: { period?: OrganizationInsightsPeriod; startDate?: string; endDate?: string },
 ) {
+  // Create a deterministic query key with serialized filters to avoid object mutation issues
+  const queryKey = [
+    "organizations",
+    organizationId,
+    "dashboard-metrics",
+    filters?.period || "30d",
+    filters?.startDate,
+    filters?.endDate,
+  ];
+
   return useQuery({
-    queryKey: ["organizations", organizationId, "dashboard-metrics", filters],
+    queryKey,
     queryFn: () => organizationService.findDashboardMetrics(organizationId!, filters),
     enabled: !!organizationId,
-    staleTime: 60 * 1000,
+    staleTime: 30 * 1000, // 30s - data becomes stale quickly for dashboards
+    gcTime: 5 * 60 * 1000, // 5m - garbage collection, then remove from cache
   });
 }
 

@@ -111,8 +111,8 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
   return (
     <Row gutter={[24, 24]}>
       <Col xs={24} md={12}>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="flex items-center gap-3 mb-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 h-full shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
             <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wide m-0">
               Cliente
@@ -128,7 +128,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h4 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-0 truncate max-w-[180px]">
+                <h4 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-0 truncate">
                   {clientName}
                 </h4>
                 {clientNameData.isOverride && (
@@ -145,7 +145,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
             {clientPhone && (
               <InfoItem
                 icon={<PhoneOutlined />}
@@ -172,8 +172,8 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
       </Col>
 
       <Col xs={24} md={12}>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-shadow duration-200">
-          <div className="flex items-center gap-3 mb-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 h-full shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
             <div className="w-2 h-2 rounded-full bg-purple-500" />
             <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wide m-0">
               Veículo
@@ -206,7 +206,7 @@ export const AppointmentClientVehicle: React.FC<AppointmentClientVehicleProps> =
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
             {vehiclePlate && (
               <InfoItem
                 icon={<IdcardOutlined />}

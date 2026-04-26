@@ -24,10 +24,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-50 m-0 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-50 m-0 tracking-tight">
           {getGreeting()}, {userName}.
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base">
           Vamos cuidar do seu veículo hoje?
         </p>
       </div>
@@ -36,12 +36,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {lastShopInfo ? (
           <Link href={`/shop/${lastShopInfo.slug}/booking`}>
             <Button
-              size="large"
               type="primary"
               icon={<RedoOutlined />}
-              className="bg-indigo-600 hover:bg-indigo-500 border-0 rounded-xl h-12 px-6 font-semibold shadow-lg shadow-indigo-500/20 transition-all duration-200"
+              className="bg-indigo-600 hover:bg-indigo-500 border-0 rounded-xl min-h-[44px] px-4 sm:px-6 font-semibold shadow-lg shadow-indigo-500/20 transition-all duration-200 max-w-[220px] sm:max-w-none"
             >
-              Reagendar em {lastShopInfo.name}
+              <span className="truncate block">Reagendar em {lastShopInfo.name}</span>
             </Button>
           </Link>
         ) : (

@@ -37,14 +37,14 @@ const StatCard: React.FC<StatCardProps> = ({
   value,
   valueColor = "text-zinc-900 dark:text-zinc-100"
 }) => (
-  <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 text-center hover:shadow-md transition-shadow duration-200">
-    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${iconBg} mb-3`}>
+  <div className="min-w-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 sm:p-4 text-center hover:shadow-md transition-shadow duration-200">
+    <div className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${iconBg} mb-2 sm:mb-3`}>
       {icon}
     </div>
-    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1">
+    <p className="text-[10px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1 truncate">
       {title}
     </p>
-    <p className={`text-2xl font-bold m-0 ${valueColor}`}>{value}</p>
+    <p className={`text-lg sm:text-2xl font-bold m-0 truncate ${valueColor}`}>{value}</p>
   </div>
 );
 

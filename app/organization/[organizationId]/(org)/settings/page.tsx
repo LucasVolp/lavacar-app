@@ -49,7 +49,7 @@ export default function OrganizationSettingsPage() {
   };
 
   if (isLoading) {
-     return <div className="p-8 text-center text-zinc-500">Carregando configurações...</div>;
+     return <div className="p-4 sm:p-8 text-center text-zinc-500">Carregando configurações...</div>;
   }
 
   return (
@@ -84,18 +84,18 @@ export default function OrganizationSettingsPage() {
 
                 <DangerZone />
 
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-base-100/85 backdrop-blur border-t border-base-content/10 flex justify-end gap-3 z-40 md:pl-80">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-base-100/85 backdrop-blur border-t border-base-content/10 flex justify-end gap-3 z-40">
                    <div className="max-w-4xl w-full mx-auto flex justify-end gap-3">
-                      <Button size="large" className="text-base-content/70 hover:text-base-content border-base-content/20 bg-transparent">
+                      <Button size="large" className="min-h-[44px] text-base-content/70 hover:text-base-content border-base-content/20 bg-transparent">
                         Cancelar
                       </Button>
-                      <Button 
-                        type="primary" 
-                        htmlType="submit" 
-                        size="large" 
-                        icon={<SaveOutlined />} 
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        size="large"
+                        icon={<SaveOutlined />}
                         loading={isSaving}
-                        className="bg-indigo-600 hover:!bg-indigo-500 border-indigo-500"
+                        className="min-h-[44px] bg-indigo-600 hover:!bg-indigo-500 border-indigo-500"
                       >
                         Salvar Alterações
                       </Button>
