@@ -4,5 +4,5 @@ export const BRAND_CONFIG = {
   LOGO_LARGE_URL: "https://cdn.nexocar.com.br/system/assets/logo.png",
   FAVICON_URL: "https://cdn.nexocar.com.br/system/assets/logo.png",
   COMPANY_NAME: "NexoCar",
-  COMPANY_EMAIL: "suporte@nexocar.com",
+  COMPANY_EMAIL: "contato@nexocar.com",
 };

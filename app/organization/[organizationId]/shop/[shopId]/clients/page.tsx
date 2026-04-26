@@ -79,7 +79,7 @@ export default function ClientsPage() {
           prefix={<SearchOutlined className="text-zinc-400" />}
           value={searchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="max-w-md"
+          className="w-full sm:max-w-md"
           size="large"
           allowClear
         />

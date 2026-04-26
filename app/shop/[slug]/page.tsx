@@ -113,7 +113,7 @@ export default function ShopPage({ params }: ShopPageProps) {
   if (shopError || !shop) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-4 transition-colors duration-300">
-        <div className="max-w-md w-full text-center bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-3xl p-12 shadow-xl dark:shadow-2xl transition-colors duration-300">
+        <div className="max-w-md w-full text-center bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-xl dark:shadow-2xl transition-colors duration-300">
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
              <CarFilled className="text-4xl text-indigo-500" />
           </div>
@@ -138,6 +138,7 @@ export default function ShopPage({ params }: ShopPageProps) {
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-slate-50 selection:bg-indigo-500/30 selection:text-indigo-600 dark:selection:text-indigo-200 transition-colors duration-300">
       <HeroSection
         shop={shop}
+        schedules={schedules}
         averageRating={averageRating}
         totalReviews={totalReviews}
         totalServices={activeServices.length}

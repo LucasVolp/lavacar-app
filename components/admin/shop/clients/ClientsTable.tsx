@@ -62,17 +62,18 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
           .toUpperCase();
 
         return (
-          <div className="flex items-center gap-3">
-            <Avatar 
-              size={40} 
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar
+              size={40}
               src={user.picture}
               style={{ backgroundColor: !user.picture ? getAvatarColor(fullName) : undefined }}
+              className="flex-shrink-0"
             >
               {!user.picture && initials}
             </Avatar>
-            <div>
-              <Text strong className="block dark:text-white">{fullName}</Text>
-              <Text type="secondary" className="text-xs">{email}</Text>
+            <div className="min-w-0">
+              <Text strong className="block dark:text-white truncate">{fullName}</Text>
+              <Text type="secondary" className="text-xs truncate block">{email}</Text>
             </div>
           </div>
         );
@@ -206,7 +207,8 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
       columns={columns}
       dataSource={clients}
       rowKey="id"
-      pagination={{ 
+      scroll={{ x: 800 }}
+      pagination={{
         pageSize: 10, 
         showSizeChanger: true,
         showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} clientes`,

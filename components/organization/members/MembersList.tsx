@@ -310,6 +310,7 @@ export const MembersList: React.FC<MembersListProps> = ({
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 700 }}
           className="custom-table"
           locale={{
             emptyText: (

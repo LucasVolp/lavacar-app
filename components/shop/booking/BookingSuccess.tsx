@@ -53,8 +53,9 @@ export function BookingSuccess({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] p-6">
-      <Card className="max-w-xl w-full border-none shadow-2xl rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] px-4 py-6 sm:py-8">
+      <div className="w-full max-w-md mx-auto">
+      <Card className="w-full border-none shadow-2xl rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
         <div className="text-center py-8">
           <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircleFilled className="text-5xl text-emerald-500" />
@@ -144,15 +145,14 @@ export function BookingSuccess({
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
                 type="primary"
                 icon={<LinkOutlined />}
-                block
                 size="large"
                 href={trackingUrl}
                 target="_blank"
-                className="h-11 bg-blue-600 hover:bg-blue-700 border-none font-semibold rounded-xl flex-1"
+                className="h-11 w-full bg-blue-600 hover:bg-blue-700 border-none font-semibold rounded-xl sm:flex-1"
               >
                 Acompanhar Serviço
               </Button>
@@ -160,7 +160,7 @@ export function BookingSuccess({
                 icon={<CopyOutlined />}
                 size="large"
                 onClick={handleCopyLink}
-                className="h-11 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-xl"
+                className="h-11 w-full border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-xl sm:w-auto"
               >
                 {copied ? "Copiado!" : "Copiar"}
               </Button>
@@ -172,22 +172,21 @@ export function BookingSuccess({
           <Button
             type="primary"
             size="large"
-            block
             onClick={onReturnToHome}
-            className="h-12 bg-slate-900 hover:bg-slate-800 border-none font-semibold rounded-xl"
+            className="h-12 w-full bg-slate-900 hover:bg-slate-800 border-none font-semibold rounded-xl"
           >
             {isGuest ? "Voltar ao Início" : "Ver Meus Agendamentos"}
           </Button>
           <Button
             size="large"
-            block
             onClick={onReturnToShop}
-            className="h-12 border-slate-200 dark:border-[#27272a] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold rounded-xl"
+            className="h-12 w-full border-slate-200 dark:border-[#27272a] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold rounded-xl"
           >
             Novo Agendamento
           </Button>
         </div>
       </Card>
+      </div>
     </div>
   );
 }

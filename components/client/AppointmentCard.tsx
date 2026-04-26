@@ -87,17 +87,26 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
           </Text>
           <StatusBadge status={status} className="hidden sm:flex" />
         </div>
-        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-          <ShopOutlined className="text-[10px]" />
-          <span className="truncate max-w-[100px]">{shopName}</span>
-          <span className="text-zinc-300 dark:text-zinc-600">•</span>
-          <CarOutlined className="text-[10px]" />
-          <span className="truncate max-w-[80px]">{vehicleInfo}</span>
+        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 min-w-0">
+          <ShopOutlined className="text-[10px] shrink-0" />
+          <span className="truncate">{shopName}</span>
+          <span className="text-zinc-300 dark:text-zinc-600 shrink-0">•</span>
+          <CarOutlined className="text-[10px] shrink-0" />
+          <span className="truncate">{vehicleInfo}</span>
+        </div>
+        <div className="flex sm:hidden items-center gap-2 mt-1">
+          <Text className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
+            R$ {parseFloat(totalPrice).toFixed(2)}
+          </Text>
+          <span className="text-zinc-300 dark:text-zinc-600 text-[10px]">·</span>
+          <Text className="text-[10px] text-zinc-400 flex items-center gap-0.5">
+            <ClockCircleOutlined /> {totalDuration}min
+          </Text>
         </div>
       </div>
 
       <div className="flex items-center gap-2 flex-shrink-0">
-        <div className="hidden md:flex flex-col items-end text-right">
+        <div className="hidden sm:flex flex-col items-end text-right">
           <Text className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
             R$ {parseFloat(totalPrice).toFixed(2)}
           </Text>

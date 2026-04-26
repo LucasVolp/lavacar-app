@@ -294,21 +294,21 @@ export function SubscriptionManagement({ organizationId }: SubscriptionManagemen
 
                 {/* Period details */}
                 <div className="flex flex-col gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                    <div className="flex items-center justify-between text-sm gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm gap-1 sm:gap-4">
                         <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 shrink-0">
                             <CalendarOutlined />
                             Período atual
                         </span>
-                        <span className="font-medium text-zinc-900 dark:text-white text-right">
+                        <span className="font-medium text-zinc-900 dark:text-white sm:text-right">
                             {fmtDate(current.currentPeriodStart)} → {fmtDate(current.currentPeriodEnd)}
                         </span>
                     </div>
-                    <div className="flex items-center justify-between text-sm gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm gap-1 sm:gap-4">
                         <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 shrink-0">
                             <DollarOutlined />
                             ID da assinatura
                         </span>
-                        <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500 truncate">
+                        <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500 truncate min-w-0">
                             {current.subscriptionId}
                         </span>
                     </div>
@@ -337,6 +337,7 @@ export function SubscriptionManagement({ organizationId }: SubscriptionManagemen
                         rowKey="id"
                         pagination={false}
                         size="middle"
+                        scroll={{ x: 560 }}
                         className="[&_.ant-table]:bg-transparent [&_.ant-table-cell]:border-zinc-100 [&_.ant-table-cell]:dark:border-zinc-800"
                     />
                 </div>

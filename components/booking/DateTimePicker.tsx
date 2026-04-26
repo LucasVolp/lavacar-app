@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Empty } from "antd";
-import { LeftOutlined, RightOutlined, ClockCircleOutlined, CalendarOutlined } from "@ant-design/icons";
+import {
+  LeftOutlined,
+  RightOutlined,
+  ClockCircleOutlined,
+  CalendarOutlined,
+} from "@ant-design/icons";
 import { Schedule } from "@/types/schedule";
 import { Shop } from "@/types/shop";
 import {
@@ -41,6 +46,9 @@ interface DateTimePickerProps {
   selectedTime: string | null;
   onDateChange: (date: Date) => void;
   onTimeChange: (time: string) => void;
+  showTimes?: boolean;
+  onShowTimesChange?: (showTimes: boolean) => void;
+  onBackToCalendar?: () => void;
   loading?: boolean;
 }
 
@@ -53,6 +61,9 @@ export function DateTimePicker({
   selectedTime,
   onDateChange,
   onTimeChange,
+  showTimes = false,
+  onShowTimesChange,
+  onBackToCalendar,
   loading = false,
 }: DateTimePickerProps) {
   const shopTimeZone = shop?.timeZone || DEFAULT_TIMEZONE;
@@ -73,9 +84,7 @@ export function DateTimePicker({
     const maxDate = addDays(today, shop?.maxAdvanceDays || 30);
 
     if (isBefore(date, today)) return false;
-
     if (isAfter(date, maxDate)) return false;
-
     if (!isDayOpen(date)) return false;
 
     return true;
@@ -108,9 +117,6 @@ export function DateTimePicker({
     return allSlots;
   }, [availableSlots, selectedDate, shop, shopSchedules, totalDuration]);
 
-  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-
   const daysInMonth = getDaysInMonth(currentMonth);
   const firstDayOfMonth = getDay(startOfMonth(currentMonth));
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -122,11 +128,25 @@ export function DateTimePicker({
     return createDateInTimezone(year, month, day, 12, 0, shopTimeZone);
   };
 
+  const handleDateSelect = (date: Date) => {
+    onDateChange(date);
+    onShowTimesChange?.(true);
+  };
+
+  const handleBackToCalendar = () => {
+    onBackToCalendar?.();
+    onShowTimesChange?.(false);
+  };
+
+  const selectedDateLabel = selectedDate
+    ? formatDayMonth(selectedDate, shopTimeZone)
+    : "Selecione uma data";
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
         <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-50" />
           <span className="text-slate-500 text-sm">Carregando disponibilidade...</span>
         </div>
       </div>
@@ -134,8 +154,12 @@ export function DateTimePicker({
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8">
-      <div className="bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 transition-colors duration-300 shadow-sm">
+    <div className="grid gap-4 lg:grid-cols-2 lg:gap-8">
+      <div
+        className={`bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-4 sm:p-6 transition-all duration-300 ease-out shadow-sm ${
+          showTimes ? "hidden lg:block" : "block"
+        }`}
+      >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 transition-colors duration-300 capitalize">
             <CalendarOutlined />
@@ -143,15 +167,17 @@ export function DateTimePicker({
           </h3>
           <div className="flex gap-2">
             <button
-              onClick={prevMonth}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              type="button"
+              onClick={() => setCurrentMonth((current) => subMonths(current, 1))}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               disabled={isBefore(currentMonth, startOfMonth(nowInTimezone(shopTimeZone)))}
             >
               <LeftOutlined />
             </button>
             <button
-              onClick={nextMonth}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              type="button"
+              onClick={() => setCurrentMonth((current) => addMonths(current, 1))}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <RightOutlined />
             </button>
@@ -178,10 +204,11 @@ export function DateTimePicker({
             return (
               <button
                 key={day}
+                type="button"
                 disabled={!available}
-                onClick={() => onDateChange(date)}
+                onClick={() => handleDateSelect(date)}
                 className={`
-                  h-10 w-full rounded-lg text-sm font-medium transition-all duration-200 relative
+                  min-h-[44px] w-full rounded-lg text-sm font-medium transition-all duration-200 relative
                   ${
                     isSelected
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
@@ -193,7 +220,7 @@ export function DateTimePicker({
               >
                 {day}
                 {available && isSelected && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 bg-white rounded-full"></span>
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 bg-white rounded-full" />
                 )}
               </button>
             );
@@ -201,27 +228,65 @@ export function DateTimePicker({
         </div>
       </div>
 
-      <div className="space-y-4 bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-6 flex flex-col min-h-[400px] transition-colors duration-300 shadow-sm">
+      <div
+        className={`space-y-4 bg-white dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] rounded-2xl p-4 sm:p-6 flex flex-col min-h-[400px] transition-all duration-300 ease-out shadow-sm ${
+          showTimes ? "block" : "hidden lg:flex"
+        }`}
+      >
         <div className="mb-6">
-          <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 mb-1 transition-colors duration-300">
-            <ClockCircleOutlined />
-            Horários
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300">
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <h3 className="text-slate-900 dark:text-slate-50 text-lg font-bold flex items-center gap-2 transition-colors duration-300">
+              <ClockCircleOutlined />
+              Horários
+            </h3>
+
+            {showTimes && (
+              <button
+                type="button"
+                onClick={handleBackToCalendar}
+                className="lg:hidden inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 dark:border-[#27272a] px-3 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 dark:hover:bg-[#27272a]"
+              >
+                <LeftOutlined />
+                Voltar
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleBackToCalendar}
+            className="mt-2 w-full rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-left transition-all duration-300 hover:border-slate-300 hover:bg-slate-100 dark:border-[#27272a] dark:bg-[#111113] dark:text-slate-100 dark:hover:border-slate-600 dark:hover:bg-[#1b1b1e] lg:cursor-default"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                  Data selecionada
+                </div>
+                <div className="truncate font-semibold capitalize text-slate-700 dark:text-slate-100">
+                  {selectedDateLabel}
+                </div>
+              </div>
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-xl bg-white px-3 text-sm font-medium text-slate-700 shadow-sm dark:bg-[#27272a] dark:text-slate-200 lg:hidden">
+                <LeftOutlined />
+              </span>
+            </div>
+          </button>
+
+          <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300 mt-4">
             {selectedDate
-              ? `Disponibilidade para ${formatDayMonth(selectedDate, shopTimeZone)}`
+              ? `Disponibilidade para ${selectedDateLabel}`
               : "Selecione uma data para ver os horários"}
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-600 mt-1 flex items-center gap-1">
-             <ClockCircleOutlined className="text-[10px]" />
-             Fuso horário: {shopTimeZone === 'America/Sao_Paulo' ? 'Horário de Brasília' : shopTimeZone}
+            <ClockCircleOutlined className="text-[10px]" />
+            Fuso horário: {shopTimeZone === "America/Sao_Paulo" ? "Horário de Brasília" : shopTimeZone}
           </p>
         </div>
 
         {!selectedDate ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
             <CalendarOutlined className="text-4xl mb-4 opacity-50" />
-            <p>Selecione um dia no calendário</p>
+            <p className="text-center">Selecione um dia no calendário</p>
           </div>
         ) : timeSlots.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
@@ -236,10 +301,11 @@ export function DateTimePicker({
             {timeSlots.map((slot) => (
               <button
                 key={slot.time}
+                type="button"
                 disabled={!slot.available}
                 onClick={() => onTimeChange(slot.time)}
                 className={`
-                  py-2 px-1 rounded-lg text-sm font-medium border transition-all duration-200
+                  min-h-[44px] py-3 px-2 rounded-lg text-sm font-medium border transition-all duration-200
                   ${
                     selectedTime === slot.time
                       ? "bg-slate-900 dark:bg-slate-50 text-white dark:text-black border-slate-900 dark:border-slate-50 shadow-lg shadow-slate-900/20 dark:shadow-white/20 transform scale-105"

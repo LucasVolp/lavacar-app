@@ -91,17 +91,17 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
     <Card
       variant="outlined"
       title={
-        <div className="flex items-center gap-3 py-2">
-          <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
+        <div className="flex flex-wrap items-center gap-2 py-1">
+          <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg text-indigo-600 dark:text-indigo-400 shrink-0">
             <CalendarOutlined />
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-lg dark:text-white">Próximos Agendamentos</span>
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-base dark:text-white truncate">Próximos Agendamentos</span>
             <span className="text-xs text-zinc-500 font-normal">Agendamentos futuros</span>
           </div>
-          <div className="ml-2 inline-flex items-center gap-2 rounded-xl border border-indigo-200/80 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1">
+          <div className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200/80 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 px-2.5 py-1 shrink-0">
             <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wide">Total</span>
-            <span className="text-lg leading-none font-black text-indigo-700 dark:text-indigo-200">
+            <span className="text-base leading-none font-black text-indigo-700 dark:text-indigo-200">
               {appointments.length}
             </span>
           </div>
@@ -136,35 +136,35 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                 className="group flex flex-col p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-all cursor-pointer"
                 onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments/${appointment.id}`)}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-center justify-center bg-white dark:bg-zinc-800 rounded-lg px-3 py-2 min-w-[60px] border border-zinc-200 dark:border-zinc-700 shadow-sm">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
+                  <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                    <div className="shrink-0 flex flex-col items-center justify-center bg-white dark:bg-zinc-800 rounded-lg px-3 py-2 w-[66px] border border-zinc-200 dark:border-zinc-700 shadow-sm">
                       {!isToday && (
-                        <Text className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+                        <Text className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5 whitespace-nowrap">
                           {dayjs(appointment.scheduledAt).format("DD/MM")}
                         </Text>
                       )}
-                      <Text strong className="text-indigo-600 dark:text-indigo-400 text-lg leading-none">
+                      <Text strong className="text-indigo-600 dark:text-indigo-400 text-lg leading-none whitespace-nowrap">
                         {dayjs(appointment.scheduledAt).format("HH:mm")}
                       </Text>
-                      <Text type="secondary" className="text-xs">
+                      <Text type="secondary" className="text-xs whitespace-nowrap">
                         {dayjs(appointment.endTime).format("HH:mm")}
                       </Text>
                     </div>
-                    <div>
-                      <Text strong className="text-zinc-800 dark:text-zinc-100 text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors block">
+                    <div className="min-w-0 flex-1">
+                      <Text strong className="text-zinc-800 dark:text-zinc-100 text-sm sm:text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors block truncate">
                         {appointment.services.map((s) => s.serviceName).join(", ")}
                       </Text>
-                      <div className="flex items-center gap-2 text-zinc-500 text-sm mt-0.5">
-                        <span>{appointment.totalDuration} min</span>
-                        <span className="w-1 h-1 bg-zinc-300 rounded-full"></span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <div className="flex items-center gap-2 text-zinc-500 text-sm mt-0.5 flex-wrap">
+                        <span className="whitespace-nowrap">{appointment.totalDuration} min</span>
+                        <span className="w-1 h-1 bg-zinc-300 rounded-full shrink-0"></span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap">
                           R$ {parseFloat(appointment.totalPrice).toFixed(2)}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 sm:shrink-0">
                     <StatusBadge status={appointment.status} className="px-3 py-1 rounded-full font-medium" />
                     <RightOutlined className="text-zinc-300 group-hover:text-indigo-400 transition-colors hidden sm:block" />
                   </div>

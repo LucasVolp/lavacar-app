@@ -493,10 +493,10 @@ export default function ServicesPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="flex justify-between items-center bg-indigo-50/50 dark:bg-indigo-900/10 p-6 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Gerenciamento de Grupos</h3>
-                  <Text className="text-zinc-500 dark:text-zinc-400 block">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-indigo-50/50 dark:bg-indigo-900/10 p-4 sm:p-6 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Gerenciamento de Grupos</h3>
+                  <Text className="text-zinc-500 dark:text-zinc-400 block text-sm">
                     Organize seus serviços em grupos para facilitar a navegação e o agendamento.
                   </Text>
                 </div>
@@ -506,7 +506,7 @@ export default function ServicesPage() {
                     icon={<PlusOutlined />}
                     size="large"
                     onClick={() => handleOpenGroupModal()}
-                    className="shadow-lg shadow-indigo-500/20"
+                    className="shadow-lg shadow-indigo-500/20 min-h-[44px] w-full sm:w-auto shrink-0"
                   >
                     Novo Grupo
                   </Button>

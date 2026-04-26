@@ -1,5 +1,8 @@
 "use client";
 
+// Force fresh data on every navigation - prevents stale dashboard metrics
+export const dynamic = "force-dynamic";
+
 import React, { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Spin } from "antd";

@@ -14,9 +14,32 @@ import {
   TikTokFilled,
 } from "@ant-design/icons";
 import { Shop } from "@/types/shop";
+import { Schedule } from "@/types/schedule";
+
+const WEEKDAY_MAP: Record<number, Schedule["weekday"]> = {
+  0: "SUNDAY",
+  1: "MONDAY",
+  2: "TUESDAY",
+  3: "WEDNESDAY",
+  4: "THURSDAY",
+  5: "FRIDAY",
+  6: "SATURDAY",
+};
+
+function computeIsOpen(schedules: Schedule[]): boolean {
+  if (!schedules.length) return false;
+  const now = new Date();
+  const todaySchedule = schedules.find((s) => s.weekday === WEEKDAY_MAP[now.getDay()]);
+  if (!todaySchedule || todaySchedule.isOpen !== "ACTIVE") return false;
+  const [startH = 0, startM = 0] = todaySchedule.startTime.split(":").map(Number);
+  const [endH = 0, endM = 0] = todaySchedule.endTime.split(":").map(Number);
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  return nowMin >= startH * 60 + startM && nowMin < endH * 60 + endM;
+}
 
 interface HeroSectionProps {
   shop: Shop;
+  schedules: Schedule[];
   averageRating: number;
   totalReviews: number;
   totalServices: number;
@@ -29,6 +52,7 @@ interface HeroSectionProps {
 
 export function HeroSection({
   shop,
+  schedules,
   averageRating,
   totalReviews,
   totalServices,
@@ -38,8 +62,8 @@ export function HeroSection({
   tiktokUrl,
   whatsappUrl,
 }: HeroSectionProps) {
-  
-  const isOpen = shop.status === "ACTIVE";
+
+  const isOpen = shop.status === "ACTIVE" && computeIsOpen(schedules);
 
   return (
     <section className="relative w-full bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-slate-50 pt-16 pb-24 px-4 sm:px-6 overflow-hidden border-b border-slate-200 dark:border-[#27272a] transition-colors duration-300">

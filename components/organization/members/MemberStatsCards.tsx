@@ -19,13 +19,13 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, accent, iconBg }) => (
-  <div className={`bg-white dark:bg-zinc-900 rounded-2xl border-l-4 ${accent} border border-zinc-200 dark:border-zinc-800 p-5 flex items-center gap-4 shadow-sm`}>
-    <div className={`${iconBg} p-3 rounded-xl flex-shrink-0`}>
+  <div className={`bg-white dark:bg-zinc-900 rounded-2xl border-l-4 ${accent} border border-zinc-200 dark:border-zinc-800 p-4 sm:p-5 flex items-center gap-3 shadow-sm min-w-0`}>
+    <div className={`${iconBg} p-2.5 sm:p-3 rounded-xl shrink-0`}>
       {icon}
     </div>
-    <div>
-      <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{value}</p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">{label}</p>
+    <div className="min-w-0">
+      <p className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{value}</p>
+      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 truncate">{label}</p>
     </div>
   </div>
 );
@@ -68,7 +68,7 @@ export const MemberStatsCards: React.FC<MemberStatsCardsProps> = ({
   ];
 
   return (
-    <div className={`grid gap-4 ${shopCount !== undefined ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"}`}>
+    <div className={`grid gap-4 ${shopCount !== undefined ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"}`}>
       {cards.map((card) => (
         <StatCard key={card.label} {...card} />
       ))}

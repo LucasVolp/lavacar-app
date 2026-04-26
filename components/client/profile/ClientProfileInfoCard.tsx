@@ -170,7 +170,7 @@ export const ClientProfileInfoCard: React.FC<ClientProfileInfoCardProps> = ({
               icon={<SaveOutlined />}
               loading={loading}
               size="large"
-              className="rounded-xl bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-500/20"
+              className="min-h-[44px] w-full sm:w-auto rounded-xl bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-500/20"
             >
               Salvar Alterações
             </Button>

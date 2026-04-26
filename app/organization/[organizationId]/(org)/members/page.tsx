@@ -34,20 +34,28 @@ const OrgInvitesTab = ({ organizationId }: { organizationId: string }) => {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      width: 240,
+      render: (email: string) => (
+        <span className="block truncate max-w-[220px] text-zinc-800 dark:text-zinc-200" title={email}>
+          {email}
+        </span>
+      ),
     },
     {
       title: "Função",
       dataIndex: "role",
       key: "role",
+      width: 120,
       render: (role: string) => {
         const labels: Record<string, string> = { EMPLOYEE: "Funcionário", MANAGER: "Gerente" };
-        return labels[role] || role;
+        return <span className="whitespace-nowrap">{labels[role] || role}</span>;
       },
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 120,
       render: (status: string, record: { expiresAt: string | Date; status: string }) => {
         const isExpired = new Date(record.expiresAt) < new Date();
         const resolvedStatus = isExpired && status === "PENDING" ? "EXPIRED" : status;
@@ -57,6 +65,7 @@ const OrgInvitesTab = ({ organizationId }: { organizationId: string }) => {
     {
       title: "Ações",
       key: "actions",
+      width: 80,
       render: (_: unknown, record: { id: string; expiresAt: string | Date; status: string }) => {
         const isExpired = new Date(record.expiresAt) < new Date();
         if (record.status !== "PENDING" || isExpired) return null;
@@ -76,13 +85,14 @@ const OrgInvitesTab = ({ organizationId }: { organizationId: string }) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden w-full overflow-x-auto">
       <Table
         dataSource={invites}
         columns={columns}
         rowKey="id"
         loading={isLoading}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: 500 }}
         className="[&_.ant-table]:!bg-transparent [&_.ant-table-cell]:!bg-transparent"
       />
     </div>
@@ -135,7 +145,10 @@ export default function OrganizationMembersPage() {
   if (isLoadingMembers) {
     return (
       <div className="flex flex-col gap-4 animate-pulse">
-        <div className="h-12 bg-zinc-800/50 rounded-lg w-1/3" />
+        <div className="h-12 bg-zinc-800/50 rounded-lg w-full sm:w-1/2 md:w-1/3" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-20 bg-zinc-800/50 rounded-2xl" />)}
+        </div>
         <div className="h-96 bg-zinc-800/50 rounded-2xl" />
       </div>
     );

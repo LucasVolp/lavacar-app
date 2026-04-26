@@ -17,7 +17,6 @@ import {
   MoonOutlined,
   SunOutlined,
   HomeOutlined,
-  ShopOutlined,
   ArrowLeftOutlined,
   LineChartOutlined,
   StarOutlined,
@@ -41,10 +40,12 @@ interface ShopLayoutProps {
 
 export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  
+
   const { resolvedTheme, setTheme } = useTheme();
   const { logout, user } = useAuth();
   const { shop, shopId, organizationId, isLoading } = useShopAdmin();
@@ -57,7 +58,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
     const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
     return membership?.role === "EMPLOYEE";
   })();
-  
+
   const isDarkMode = resolvedTheme === "dark";
 
   useEffect(() => {
@@ -67,14 +68,13 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     if (!mounted) return;
-    const handleResize = () => {
-      if (window.innerWidth < 768) setCollapsed(true);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, [mounted]);
 
+  const siderCollapsed = isMobile ? !mobileOpen : collapsed;
   const borderColor = isDarkMode ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)";
 
   const operationsChildren = [
@@ -125,7 +125,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
     {
       key: "operations-group",
       type: "group",
-      label: collapsed ? null : (
+      label: siderCollapsed ? null : (
         <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
           Operações
         </span>
@@ -137,7 +137,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       {
         key: "config-group",
         type: "group" as const,
-        label: collapsed ? null : (
+        label: siderCollapsed ? null : (
           <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
             Configurações
           </span>
@@ -149,7 +149,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
     {
       key: "analytics-group",
       type: "group" as const,
-      label: collapsed ? null : (
+      label: siderCollapsed ? null : (
         <span className="text-xs font-semibold uppercase tracking-wider opacity-60 px-2">
           Análise
         </span>
@@ -183,6 +183,12 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     router.push(e.key);
+    if (isMobile) setMobileOpen(false);
+  };
+
+  const handleToggle = () => {
+    if (isMobile) setMobileOpen(!mobileOpen);
+    else setCollapsed(!collapsed);
   };
 
   const getSelectedKeys = () => {
@@ -191,7 +197,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
     const exactMatch = menuItems.flatMap(i =>
         (i && 'children' in i && i.children) ? i.children : [i]
     ).find(item => item?.key === pathname);
-    
+
     if (exactMatch) return [exactMatch.key as string];
 
     return menuItems.flatMap(i =>
@@ -235,17 +241,28 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
   return (
     <Layout className="min-h-screen" hasSider>
+      {isMobile && mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       <Sider
         trigger={null}
         collapsible
-        collapsed={collapsed}
+        collapsed={siderCollapsed}
         width={260}
-        collapsedWidth={80}
-        className="z-50 shadow-lg border-r"
-        style={{ 
+        collapsedWidth={isMobile ? 0 : 80}
+        className="z-[9999] !opacity-100 !border-r !border-zinc-200 !bg-white !shadow-2xl dark:!border-zinc-800 dark:!bg-zinc-950"
+        style={{
           borderColor: borderColor,
-          backgroundColor: isDarkMode ? '#18181b' : '#ffffff',
-          position: 'sticky',
+          backgroundColor: isDarkMode
+            ? "var(--fallback-b1, oklch(var(--b1)/1))"
+            : "#ffffff",
+          opacity: 1,
+          position: isMobile ? 'fixed' : 'sticky',
+          zIndex: 9999,
           top: 0,
           height: '100vh',
           left: 0,
@@ -255,8 +272,8 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       >
         <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
             <NexoLogo size={62} />
-            
-            {!collapsed && (
+
+            {!siderCollapsed && (
               <div className="flex flex-col overflow-hidden">
                 <Text strong className="text-sm leading-tight truncate text-zinc-800 dark:text-zinc-100">
                    {isLoading ? "Carregando..." : shop?.name || "Shop Admin"}
@@ -281,16 +298,16 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
         </div>
 
         {shop?.organizationId && (
-            <div className="w-full p-2 border-t flex-shrink-0" style={{ borderColor, backgroundColor: isDarkMode ? '#18181b' : '#ffffff' }}>
-                <Tooltip title={collapsed ? "Voltar para Organização" : ""} placement="right">
-                    <Button 
-                        type="text" 
-                        block={!collapsed}
+          <div className="w-full p-2 border-t flex-shrink-0 bg-white dark:bg-zinc-950" style={{ borderColor }}>
+                <Tooltip title={siderCollapsed ? "Voltar para Organização" : ""} placement="right">
+                    <Button
+                        type="text"
+                        block={!siderCollapsed}
                         icon={<ArrowLeftOutlined />}
                         onClick={() => router.push(`/organization/${shop.organizationId}`)}
                         className="flex items-center justify-center gap-2 text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400"
                     >
-                        {!collapsed && "Voltar à Organização"}
+                        {!siderCollapsed && "Voltar à Organização"}
                     </Button>
                 </Tooltip>
             </div>
@@ -299,25 +316,25 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
 
       <Layout style={{ transition: "all 0.2s" }}>
         <AntHeader
-          className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}
-          style={{ 
+          className={`flex items-center justify-between sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? 'bg-zinc-950/80' : 'bg-white/80'}`}
+          style={{
             borderBottom: `1px solid ${borderColor}`,
-            padding: '0 24px',
+            padding: '0 16px',
             height: '64px'
           }}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Button
               type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              icon={isMobile ? (mobileOpen ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />) : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)}
+              onClick={handleToggle}
+              className="hover:bg-zinc-100 dark:hover:bg-zinc-800 min-h-[44px] min-w-[44px]"
             />
 
              <Breadcrumb
                 className="hidden md:block"
                 items={[
-                    { 
+                    {
                         title: <Link href={shop?.organizationId ? `/organization/${shop.organizationId}` : "/"}><HomeOutlined /></Link>
                     },
                     {
@@ -325,7 +342,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
                     },
                     {
                         title: <span className="text-zinc-500">{
-                             (menuItems?.flatMap(i => 
+                             (menuItems?.flatMap(i =>
                                 (i && 'children' in i && i.children) ? i.children : [i]
                             ).find(item => item?.key === pathname) as { label: React.ReactNode } | undefined)?.label
                         }</span>
@@ -334,26 +351,26 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
              />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               type="text"
               shape="circle"
               icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />}
               onClick={() => setTheme(isDarkMode ? "light" : "dark")}
-              className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              className="hover:bg-zinc-100 dark:hover:bg-zinc-800 min-h-[44px] min-w-[44px]"
             />
 
             <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-800 mx-1" />
 
             <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">
-              <div className="flex items-center gap-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-lg transition-colors">
+              <div className="flex items-center gap-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-lg transition-colors min-h-[44px]">
                 <Avatar
                   size={32}
                   icon={<UserOutlined />}
                   className="bg-indigo-600"
                   src={user?.picture}
                 />
-                <span className="hidden md:block text-sm font-medium opacity-90 text-zinc-700 dark:text-zinc-200">
+                <span className="hidden md:block text-sm font-medium opacity-90 text-zinc-700 dark:text-zinc-200 max-w-[120px] truncate">
                    {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : "Usuário"}
                 </span>
               </div>
@@ -361,7 +378,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           </div>
         </AntHeader>
 
-        <Content className="p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
+        <Content className="p-4 sm:p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
           <div className="w-full max-w-[1600px] mx-auto animate-fade-in">
              {children}
           </div>

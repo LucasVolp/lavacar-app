@@ -53,7 +53,7 @@ export const AppointmentStatusCard: React.FC<AppointmentStatusCardProps> = ({
   return (
     <div className="space-y-8">
       <Card className="shadow-sm border-slate-200 dark:border-zinc-800 rounded-2xl dark:bg-zinc-900" bordered={false}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-4">
           <div>
             <span className="text-xs text-slate-400 uppercase font-bold tracking-wider block mb-1">Status Atual</span>
             <StatusBadge status={appointment.status} className="px-3 py-1.5 text-sm w-fit rounded-lg" />

@@ -111,10 +111,10 @@ export const AppointmentsCalendar: React.FC<AppointmentsCalendarProps> = ({
   };
 
   return (
-    <div className="flex flex-col xl:flex-row gap-8 min-h-[800px] h-auto bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-colors">
+    <div className="flex flex-col xl:flex-row gap-4 sm:gap-8 xl:min-h-[800px] h-auto bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 transition-colors">
 
       <div className="flex-1 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-8">
           <div>
             <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100 capitalize m-0">
               {format(currentMonth, "MMMM yyyy", { locale: ptBR })}

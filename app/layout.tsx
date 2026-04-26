@@ -5,6 +5,7 @@ import ThemeAwareConfigProvider, { Providers } from "./providers";
 import ptBR from "antd/locale/pt_BR";
 import { BRAND_CONFIG } from "@/config/constants";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: `${BRAND_CONFIG.COMPANY_NAME} - Sistema de Gestão de Agendamentos`,
-  description: `${BRAND_CONFIG.COMPANY_NAME} - Sistema SaaS de gestão de agendamentos para estética automotiva`,
+  description: `${BRAND_CONFIG.COMPANY_NAME} - Sistema de gestão de agendamentos para estética automotiva`,
   icons: {
     icon: [
       {
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: `${BRAND_CONFIG.COMPANY_NAME}`,
-    description: `Sistema SaaS de gestão de agendamentos para estética automotiva`,
+    description: `Sistema de gestão de agendamentos para estética automotiva`,
     images: [
       {
         url: BRAND_CONFIG.LOGO_LARGE_URL,
@@ -61,6 +62,7 @@ export default function RootLayout({
           </ThemeAwareConfigProvider>
         </Providers>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
