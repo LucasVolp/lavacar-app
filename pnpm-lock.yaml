@@ -25,6 +25,9 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: ^5.91.1
         version: 5.91.1(@tanstack/react-query@5.90.12(react@19.2.3))(react@19.2.3)
+      '@vercel/speed-insights':
+        specifier: ^2.0.0
+        version: 2.0.0(next@16.1.5(@babel/core@7.29.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.1.5(@babel/core@7.29.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
@@ -1219,6 +1222,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@vercel/speed-insights@2.0.0':
+    resolution: {integrity: sha512-jwkNcrTeafWxjmWq4AHBaptSqZiJkYU5adLC9QBSqeim0GcqDMgN5Ievh8OG1rJ6W3A4l1oiP7qr9CWxGuzu3w==}
+    peerDependencies:
   '@vercel/analytics@2.0.1':
     resolution: {integrity: sha512-MTQG6V9qQrt1tsDeF+2Uoo5aPjqbVPys1xvnIftXSJYG2SrwXRHnqEvVoYID7BTruDz4lCd2Z7rM1BdkUehk2g==}
     peerDependencies:
@@ -3735,6 +3741,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
+  '@vercel/speed-insights@2.0.0(next@16.1.5(@babel/core@7.29.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)':
   '@vercel/analytics@2.0.1(next@16.1.5(@babel/core@7.29.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)':
     optionalDependencies:
       next: 16.1.5(@babel/core@7.29.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

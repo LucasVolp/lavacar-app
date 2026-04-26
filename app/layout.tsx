@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeAwareConfigProvider, { Providers } from "./providers";
 import ptBR from "antd/locale/pt_BR";
 import { BRAND_CONFIG } from "@/config/constants";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -60,6 +61,7 @@ export default function RootLayout({
             {children}
           </ThemeAwareConfigProvider>
         </Providers>
+        <SpeedInsights />
         <Analytics />
       </body>
     </html>
