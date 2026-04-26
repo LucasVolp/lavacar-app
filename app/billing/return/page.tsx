@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button, Result, Spin } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,14 +15,14 @@ function BillingReturnContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { refreshUser } = useAuth();
-    const [state, setState] = useState<ReturnState>("checking");
+    const statusParam = searchParams.get("status");
+    const [state, setState] = useState<ReturnState>(() => statusParam === "failed" ? "failed" : "checking");
     const [attemptsLeft, setAttemptsLeft] = useState(MAX_ATTEMPTS);
     const attemptRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pollRef = useRef<() => Promise<void>>();
 
-    const statusParam = searchParams.get("status");
-
-    const poll = async () => {
+    const poll = useCallback(async () => {
         if (attemptRef.current >= MAX_ATTEMPTS) {
             setState("pending");
             return;
@@ -48,21 +48,19 @@ function BillingReturnContent() {
         }
 
         const delay = Math.min(BASE_DELAY_MS * 2 ** (attemptRef.current - 1), 30000);
-        timerRef.current = setTimeout(poll, delay);
-    };
+        timerRef.current = setTimeout(() => pollRef.current?.(), delay);
+    }, [refreshUser, router]);
 
     useEffect(() => {
-        if (statusParam === "failed") {
-            setState("failed");
-            return;
-        }
+        pollRef.current = poll;
+        if (statusParam === "failed") return;
 
-        poll();
+        timerRef.current = setTimeout(() => pollRef.current?.(), 0);
 
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
         };
-    }, []);
+    }, [poll, statusParam]);
 
     const handleGoToCheckout = () => router.replace("/billing/checkout");
     const handleRetryNow = () => {

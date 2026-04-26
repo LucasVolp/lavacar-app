@@ -125,10 +125,6 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
     },
   ];
 
-  const handleMenuClick: MenuProps["onClick"] = (e) => {
-    router.push(e.key);
-  };
-
   const getSelectedKeys = () => {
     if (pathname === "/client") {
       return ["/client"];

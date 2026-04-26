@@ -57,12 +57,12 @@ export const organizationInvitesService = {
     return response.data;
   },
 
-  listInvites: async (organizationId: string, shopId?: string): Promise<InviteResponse[]> => {
+  listInvites: async (organizationId: string, _shopId?: string): Promise<InviteResponse[]> => {
     const response = await axiosInstance.get(`/organization-invites/${organizationId}`);
     return response.data;
   },
 
-  revokeInvite: async (organizationId: string, inviteId: string, shopId?: string): Promise<void> => {
+  revokeInvite: async (organizationId: string, inviteId: string, _shopId?: string): Promise<void> => {
     await axiosInstance.post(`/organization-invites/${organizationId}/revoke/${inviteId}`);
   },
 

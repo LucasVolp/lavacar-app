@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Row, Col, Typography, Space, Tooltip } from "antd";
+import { Typography, Tooltip } from "antd";
 import { CalendarOutlined, GlobalOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import dayjs from "dayjs";

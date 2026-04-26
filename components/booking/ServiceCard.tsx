@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import { Services, ServiceVariant } from "@/types/services";
 import { ClockCircleOutlined, DollarOutlined, CheckCircleFilled, PictureOutlined } from "@ant-design/icons";
 
@@ -24,6 +26,7 @@ export function ServiceCard({
   onSelect,
   vehicleSize,
 }: ServiceCardProps) {
+  const [imgError, setImgError] = useState(false);
   const effective = getEffectivePricing(service, vehicleSize);
 
   const formatPrice = (price: string | number) => {
@@ -55,16 +58,15 @@ export function ServiceCard({
         }
       `}
     >
-      {service.photoUrl ? (
+      {service.photoUrl && !imgError ? (
         <div className="relative w-full h-28 sm:h-36 overflow-hidden">
-          <img
+          <Image
             src={service.photoUrl}
             alt={service.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-              (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
-            }}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={() => setImgError(true)}
+            unoptimized
           />
           <div className="hidden w-full h-full bg-slate-100 dark:bg-[#27272a] flex items-center justify-center">
             <PictureOutlined className="text-3xl text-slate-400" />
