@@ -23,7 +23,7 @@ export function RequireRole({ children, allowedRoles, fallbackUrl = "/" }: Requi
         if (user && !allowedRoles.includes(user.role as Role)) {
             router.replace(fallbackUrl);
         } 
-            }, [isLoading, isAuthenticated, user]);
+            }, [isLoading, isAuthenticated, user, allowedRoles, fallbackUrl, router]);
 
         if (isLoading || !user || !allowedRoles.includes(user.role as Role)) {
             return <div className="flex items-center justify-center min-h-screen">

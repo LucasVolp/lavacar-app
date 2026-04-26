@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { Button } from "antd";
+import React, { useMemo, useState } from "react";
 import { LeftOutlined, CalendarOutlined } from "@ant-design/icons";
 import { DateTimePicker } from "@/components/booking";
 import { Schedule } from "@/types/schedule";
@@ -30,16 +29,8 @@ export function DateTimeStep({
   onTimeChange,
   isLoading,
 }: DateTimeStepProps) {
-  const [showTimes, setShowTimes] = useState(false);
-
-  useEffect(() => {
-    if (selectedDate) {
-      setShowTimes(true);
-      return;
-    }
-
-    setShowTimes(false);
-  }, [selectedDate]);
+  const [hiddenByUser, setHiddenByUser] = useState(false);
+  const showTimes = !!selectedDate && !hiddenByUser;
 
   const selectedDateLabel = useMemo(() => {
     if (!selectedDate) {
@@ -55,11 +46,11 @@ export function DateTimeStep({
 
   const handleDateChange = (date: Date) => {
     onDateChange(date);
-    setShowTimes(true);
+    setHiddenByUser(false);
   };
 
   const handleBackToCalendar = () => {
-    setShowTimes(false);
+    setHiddenByUser(true);
   };
 
   return (
@@ -115,7 +106,7 @@ export function DateTimeStep({
         onTimeChange={onTimeChange}
         loading={isLoading}
         showTimes={showTimes}
-        onShowTimesChange={setShowTimes}
+        onShowTimesChange={(show) => setHiddenByUser(!show)}
         onBackToCalendar={handleBackToCalendar}
       />
     </div>

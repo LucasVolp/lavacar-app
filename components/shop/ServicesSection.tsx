@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import {
   ClockCircleOutlined,
   ArrowRightOutlined,
@@ -39,26 +41,28 @@ function ServiceCard({
   isPopular?: boolean;
   onBooking: () => void;
 }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div
       onClick={onBooking}
       className={`
         group relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer
-        ${isPopular 
-          ? "bg-white dark:bg-[#18181b] border-indigo-500/50 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20" 
+        ${isPopular
+          ? "bg-white dark:bg-[#18181b] border-indigo-500/50 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20"
           : "bg-white dark:bg-[#18181b] border-slate-200 dark:border-[#27272a] hover:border-slate-400 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-[#27272a]"
         }
       `}
     >
-      {service.photoUrl ? (
+      {service.photoUrl && !imgError ? (
         <div className="relative w-full h-40 overflow-hidden">
-          <img
+          <Image
             src={service.photoUrl}
             alt={service.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={() => setImgError(true)}
+            unoptimized
           />
         </div>
       ) : (

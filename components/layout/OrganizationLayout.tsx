@@ -124,10 +124,6 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
     ] : []),
   ];
 
-  const handleMenuClick: MenuProps["onClick"] = (e) => {
-    router.push(e.key);
-  };
-
   const getSelectedKeys = () => {
     if (pathname === `/organization/${organizationId}`) return [`/organization/${organizationId}`];
     return [pathname];
