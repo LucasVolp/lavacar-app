@@ -65,10 +65,7 @@ export function PlanStep({ selectedCycle, onCycleChange, onContinue }: PlanStepP
                 type="primary"
                 size="large"
                 icon={<ArrowRightOutlined />}
-                onClick={() => {
-                    console.log('[PlanStep] Continuar clicked, calling onContinue');
-                    onContinue();
-                }}
+                onClick={onContinue}
                 htmlType="button"
                 className="h-14 w-full rounded-xl text-base"
             >

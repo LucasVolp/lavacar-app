@@ -47,7 +47,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
         const imageFailed = failedImages[record.id] || (!record.photoUrl && failedImages[fallbackKey]);
 
         return (
-        <div className="flex items-center gap-3 min-w-[250px]">
+        <div className="flex items-center gap-3 min-w-0">
           <Avatar
             shape="square"
             size={46}
@@ -134,7 +134,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
 
   return (
     <Card className="shadow-sm border-zinc-200 dark:border-zinc-800">
-      <Table dataSource={services} columns={columns} rowKey="id" loading={loading} pagination={{ pageSize: 10 }} />
+      <Table dataSource={services} columns={columns} rowKey="id" loading={loading} pagination={{ pageSize: 10 }} scroll={{ x: 600 }} />
     </Card>
   );
 };

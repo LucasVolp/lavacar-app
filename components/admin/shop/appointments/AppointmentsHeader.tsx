@@ -31,7 +31,7 @@ export const AppointmentsHeader: React.FC<AppointmentsHeaderProps> = ({
           Gerencie todos os agendamentos do estabelecimento
         </Text>
       </div>
-      <Space>
+      <div className="flex flex-wrap items-center gap-2">
         <Segmented
           value={viewType}
           onChange={(v) => onViewTypeChange(v as "table" | "calendar")}
@@ -39,11 +39,12 @@ export const AppointmentsHeader: React.FC<AppointmentsHeaderProps> = ({
             { value: "table", icon: <UnorderedListOutlined />, label: "Lista" },
             { value: "calendar", icon: <AppstoreOutlined />, label: "Agenda" },
           ]}
+          className="min-h-[44px] flex items-center"
         />
-        <Button icon={<ReloadOutlined />} onClick={onRefresh}>
+        <Button icon={<ReloadOutlined />} onClick={onRefresh} className="min-h-[44px]">
           Atualizar
         </Button>
-      </Space>
+      </div>
     </div>
   );
 };

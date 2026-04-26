@@ -75,7 +75,7 @@ export const BlockedTimeStats: React.FC<BlockedTimeStatsProps> = ({ stats }) => 
           `}>
             {item.icon}
           </div>
-          <div className={`text-3xl font-bold ${item.color} mb-1 tracking-tight`}>
+          <div className={`text-2xl sm:text-3xl font-bold ${item.color} mb-1 tracking-tight`}>
             {item.value}
           </div>
           <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">

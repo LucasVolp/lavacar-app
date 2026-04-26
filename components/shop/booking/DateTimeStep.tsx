@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Button } from "antd";
+import { LeftOutlined, CalendarOutlined } from "@ant-design/icons";
 import { DateTimePicker } from "@/components/booking";
 import { Schedule } from "@/types/schedule";
 import { Shop } from "@/types/shop";
@@ -28,6 +30,38 @@ export function DateTimeStep({
   onTimeChange,
   isLoading,
 }: DateTimeStepProps) {
+  const [showTimes, setShowTimes] = useState(false);
+
+  useEffect(() => {
+    if (selectedDate) {
+      setShowTimes(true);
+      return;
+    }
+
+    setShowTimes(false);
+  }, [selectedDate]);
+
+  const selectedDateLabel = useMemo(() => {
+    if (!selectedDate) {
+      return "Selecione uma data";
+    }
+
+    return selectedDate.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+    });
+  }, [selectedDate]);
+
+  const handleDateChange = (date: Date) => {
+    onDateChange(date);
+    setShowTimes(true);
+  };
+
+  const handleBackToCalendar = () => {
+    setShowTimes(false);
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6 md:mb-8">
@@ -39,6 +73,37 @@ export function DateTimeStep({
         </p>
       </div>
 
+      <div className="md:hidden mb-4">
+        <button
+          type="button"
+          onClick={showTimes ? handleBackToCalendar : undefined}
+          disabled={!showTimes || !selectedDate}
+          className={`w-full rounded-2xl border px-4 py-3 text-left transition-all duration-300 ${
+            selectedDate
+              ? "border-slate-200 bg-white text-slate-900 dark:border-[#27272a] dark:bg-[#18181b] dark:text-white"
+              : "border-dashed border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-[#111113] dark:text-slate-500"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">
+                {showTimes ? "Data selecionada" : "Calendário"}
+              </div>
+              <div className="truncate font-semibold capitalize">{selectedDateLabel}</div>
+            </div>
+            {showTimes ? (
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-xl bg-slate-100 px-3 text-sm font-medium text-slate-700 dark:bg-[#27272a] dark:text-slate-200">
+                <LeftOutlined />
+              </span>
+            ) : (
+              <span className="inline-flex h-11 min-w-11 items-center justify-center rounded-xl bg-slate-100 px-3 text-sm font-medium text-slate-700 dark:bg-[#27272a] dark:text-slate-200">
+                <CalendarOutlined />
+              </span>
+            )}
+          </div>
+        </button>
+      </div>
+
       <DateTimePicker
         shopSchedules={schedules}
         availableSlots={availableSlots}
@@ -46,9 +111,12 @@ export function DateTimeStep({
         totalDuration={totalDuration}
         selectedDate={selectedDate}
         selectedTime={selectedTime}
-        onDateChange={onDateChange}
+        onDateChange={handleDateChange}
         onTimeChange={onTimeChange}
         loading={isLoading}
+        showTimes={showTimes}
+        onShowTimesChange={setShowTimes}
+        onBackToCalendar={handleBackToCalendar}
       />
     </div>
   );

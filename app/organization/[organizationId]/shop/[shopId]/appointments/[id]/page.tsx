@@ -189,11 +189,11 @@ export default function AppointmentDetailPage() {
                   children: (
                     <div className="pt-2">
                       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-4">
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 m-0">
                             Detalhes da Vistoria
                           </h3>
-                          <Button onClick={() => setChecklistModalOpen(true)}>
+                          <Button onClick={() => setChecklistModalOpen(true)} className="min-h-[44px] w-full sm:w-auto">
                             {checklist ? "Ver/Editar Vistoria" : "Criar Vistoria"}
                           </Button>
                         </div>

@@ -207,6 +207,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
         dataSource={appointments}
         columns={columns}
         rowKey="id"
+        scroll={{ x: 700 }}
         locale={{
           emptyText: (
             <Empty

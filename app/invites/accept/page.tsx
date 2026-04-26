@@ -1,10 +1,10 @@
 "use client";
 
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGetInviteDetails, useAcceptInvite } from "@/hooks/useOrganizationInvites";
 import { Card, Typography, Button, Form, Input, message, Spin, Alert } from "antd";
-import { UserOutlined, LockOutlined, CheckCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { UserOutlined, LockOutlined, CheckCircleOutlined, InfoCircleOutlined, PhoneOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
@@ -46,13 +46,14 @@ function AcceptInviteContent() {
     );
   }
 
-  const handleAccept = async (values?: { firstName?: string; lastName?: string; password?: string }) => {
+  const handleAccept = async (values?: { firstName?: string; lastName?: string; password?: string; phone?: string }) => {
     try {
       await acceptInvite({
         token,
         firstName: values?.firstName,
         lastName: values?.lastName,
         password: values?.password,
+        phone: values?.phone || undefined,
       });
 
       message.success("Convite aceito com sucesso!");
@@ -105,7 +106,7 @@ function AcceptInviteContent() {
             onFinish={handleAccept}
             requiredMark={false}
           >
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Form.Item
                 name="firstName"
                 label={<span className="text-zinc-700 dark:text-zinc-300 font-medium">Nome</span>}
@@ -124,6 +125,25 @@ function AcceptInviteContent() {
             
             <Form.Item label={<span className="text-zinc-700 dark:text-zinc-300 font-medium">Email</span>}>
               <Input size="large" value={invite.invite.email} disabled className="rounded-lg dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400" />
+            </Form.Item>
+
+            <Form.Item
+              name="phone"
+              label={<span className="text-zinc-700 dark:text-zinc-300 font-medium">Telefone</span>}
+              rules={[
+                { required: true, message: "Informe seu telefone" },
+                {
+                  pattern: /^\+?[1-9]\d{1,14}$/,
+                  message: "Informe um número válido (ex: 67991234567)",
+                },
+              ]}
+            >
+              <Input
+                size="large"
+                prefix={<PhoneOutlined className="text-zinc-400" />}
+                placeholder="Ex: 67991234567"
+                className="rounded-lg dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+              />
             </Form.Item>
 
             <Form.Item

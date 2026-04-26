@@ -26,6 +26,7 @@ export interface AcceptInviteDTO {
   firstName?: string;
   lastName?: string;
   password?: string;
+  phone?: string;
 }
 
 export interface InviteDetailsResponse {

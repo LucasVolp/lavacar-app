@@ -17,7 +17,7 @@ interface InsightsWeeklyDistributionProps {
 export const InsightsWeeklyDistribution: React.FC<InsightsWeeklyDistributionProps> = ({ data }) => {
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg transition-colors duration-300">
-      <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
+      <div className="px-4 sm:px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2 flex-wrap">
         <BarChartOutlined className="text-blue-500" />
         <span className="font-semibold text-zinc-900 dark:text-zinc-100">Agendamentos por Dia da Semana</span>
         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
@@ -25,7 +25,7 @@ export const InsightsWeeklyDistribution: React.FC<InsightsWeeklyDistributionProp
         </span>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <Row gutter={[8, 8]} justify="center">
           {data.map((item) => {
             const maxCount = Math.max(...data.map((d) => d.count));

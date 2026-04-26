@@ -35,7 +35,7 @@ export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
   const formattedGrowth = Math.abs(revenueGrowth).toFixed(1);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 relative overflow-hidden transition-colors duration-300">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden transition-colors duration-300">
       <div className="absolute -top-6 -right-6 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
         <BarChartOutlined style={{ fontSize: "220px" }} />
       </div>
@@ -73,7 +73,7 @@ export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
             <p className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-medium mb-1">
               Receita do Período
             </p>
-            <div className="text-4xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-zinc-100 leading-none tracking-tight">
+            <div className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-zinc-900 dark:text-zinc-100 leading-none tracking-tight">
               {formatCurrency(monthRevenue)}
             </div>
           </div>

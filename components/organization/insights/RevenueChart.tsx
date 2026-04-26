@@ -14,21 +14,21 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
   const maxRevenue = Math.max(...data.map((point) => point.revenue), 1);
 
   return (
-    <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 rounded-3xl min-h-[420px] shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">Receita no Período</h3>
-          <Text className="text-zinc-500 dark:text-zinc-400">Consolidado por intervalo</Text>
+    <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl min-h-[280px] sm:min-h-[360px] lg:min-h-[420px] shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-4 sm:mb-6 lg:mb-8">
+        <div className="min-w-0">
+          <h3 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-white mb-1">Receita no Período</h3>
+          <Text className="text-zinc-500 dark:text-zinc-400 text-sm">Consolidado por intervalo</Text>
         </div>
       </div>
 
       {data.length === 0 ? (
-        <div className="h-72 flex items-center justify-center text-zinc-500 dark:text-zinc-400">
+        <div className="h-48 sm:h-72 flex items-center justify-center text-zinc-500 dark:text-zinc-400 text-sm">
           Nenhum dado para o período selecionado.
         </div>
       ) : (
         <>
-          <div className="relative h-72 w-full mt-4">
+          <div className="relative h-48 sm:h-64 lg:h-72 w-full mt-4">
             <div className="absolute inset-0 flex items-end justify-between px-2 gap-2 sm:gap-3 z-10">
               {data.map((point) => (
                 <div key={point.dateKey} className="relative w-full h-full flex items-end group">

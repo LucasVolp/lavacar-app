@@ -78,13 +78,13 @@ export default function OrganizationSelectPage() {
         <span className="text-base-content font-semibold text-lg tracking-tight">NexoCar</span>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-16">
         <div className="max-w-2xl w-full">
-          <div className="mb-10 text-center">
-            <h1 className="text-3xl font-extrabold text-base-content mb-3 tracking-tight">
+          <div className="mb-8 sm:mb-10 text-center">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-base-content mb-2 sm:mb-3 tracking-tight">
               Selecione um estabelecimento
             </h1>
-            <p className="text-base-content/60 text-base">
+            <p className="text-base-content/60 text-sm sm:text-base">
               Escolha para qual negócio deseja acessar o painel.
             </p>
           </div>
@@ -112,7 +112,7 @@ export default function OrganizationSelectPage() {
             onClick={() => router.push("/billing/checkout")}
             className="group cursor-pointer mt-2"
           >
-            <div className="w-full p-6 rounded-2xl border-2 border-dashed border-base-content/20 hover:border-blue-600/60 hover:bg-blue-600/5 transition-all duration-200 flex items-center gap-4">
+            <div className="w-full p-4 sm:p-6 rounded-2xl border-2 border-dashed border-base-content/20 hover:border-blue-600/60 hover:bg-blue-600/5 transition-all duration-200 flex items-center gap-3 sm:gap-4">
               <div className="w-12 h-12 rounded-xl bg-base-200 border border-base-content/10 group-hover:bg-blue-600/10 group-hover:border-blue-600/20 flex items-center justify-center text-base-content/40 group-hover:text-blue-600 transition-colors flex-shrink-0">
                 <PlusOutlined className="text-xl" />
               </div>
@@ -138,14 +138,14 @@ function OrgCard({ entry, onClick }: { entry: OrgEntry; onClick: () => void }) {
   return (
     <div
       onClick={onClick}
-      className="group cursor-pointer p-6 rounded-2xl bg-base-200 border border-base-content/10 hover:border-blue-600/40 hover:bg-base-200 transition-all duration-200"
+      className="group cursor-pointer p-4 sm:p-6 rounded-2xl bg-base-200 border border-base-content/10 hover:border-blue-600/40 hover:bg-base-200 transition-all duration-200"
     >
       <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 dark:text-blue-500 flex-shrink-0">
-          <ShopOutlined className="text-xl" />
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-600/10 border border-blue-600/20 flex items-center justify-center text-blue-600 dark:text-blue-500 shrink-0">
+          <ShopOutlined className="text-lg sm:text-xl" />
         </div>
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase ${
+          className={`shrink-0 inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-bold tracking-wide uppercase ${
             isOwner
               ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50"
               : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50"
@@ -156,8 +156,8 @@ function OrgCard({ entry, onClick }: { entry: OrgEntry; onClick: () => void }) {
         </span>
       </div>
 
-      <div className="flex-1 mb-4">
-        <p className="font-bold text-base-content text-lg leading-tight mb-1">{entry.name}</p>
+      <div className="flex-1 mb-4 min-w-0">
+        <p className="font-bold text-base-content text-base sm:text-lg leading-tight mb-1 truncate">{entry.name}</p>
         {!isOwner && entry.shopName && (
           <p className="text-xs text-base-content/50 flex items-center gap-1">
             <ShopOutlined /> {entry.shopName}

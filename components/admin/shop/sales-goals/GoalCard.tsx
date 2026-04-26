@@ -63,7 +63,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
   const status = getStatusConfig();
 
   return (
-    <div className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 ${isPast && !isCompleted ? 'opacity-70' : ''} ${isCompleted ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''}`}>
+    <div className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 ${isPast && !isCompleted ? 'opacity-70' : ''} ${isCompleted ? 'ring-1 ring-emerald-500/30 dark:ring-emerald-400/30' : ''}`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`p-2.5 rounded-xl ${
@@ -121,7 +121,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-medium mb-1">
           Meta de Faturamento
         </p>
-        <div className="text-3xl md:text-4xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
+        <div className="text-2xl sm:text-3xl md:text-4xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight truncate">
           {formatCurrency(goal.amount)}
         </div>
       </div>
@@ -148,12 +148,12 @@ export const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) =>
           trailColor={isPast ? '#d4d4d8' : '#e4e4e7'}
           className="[&_.ant-progress-inner]:!bg-zinc-200 dark:[&_.ant-progress-inner]:!bg-zinc-700"
         />
-        <div className="flex justify-between mt-2">
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="flex flex-wrap justify-between gap-1 mt-2">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
             Atual: <span className={`font-semibold ${isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-700 dark:text-zinc-300'}`}>{formatCurrency(currentAmount)}</span>
           </span>
           {!isCompleted && (
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
               Faltam: <span className="font-semibold">{formatCurrency(Math.max(0, targetAmount - currentAmount))}</span>
             </span>
           )}

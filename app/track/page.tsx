@@ -4,12 +4,12 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button, Card, Modal, Input, message } from "antd";
-import { PrinterOutlined, FileTextOutlined } from "@ant-design/icons";
+import { PrinterOutlined, FileTextOutlined, CarOutlined } from "@ant-design/icons";
 import { useReactToPrint } from "react-to-print";
 import { authService, TrackingAppointment } from "@/services/auth";
 import { appointmentService } from "@/services/appointment";
 import {
-  TrackingStatusBanner,
+  TrackingProgressTracker,
   TrackingAppointmentDetails,
   TrackingShopInfo,
   TrackingLoading,
@@ -147,10 +147,12 @@ function TrackPageContent() {
   if (error || !appointment) return <TrackingError message={error || undefined} />;
 
   const isCompleted = ["COMPLETED"].includes(appointment.status);
+  const serviceNames = appointment.services.map((service) => service.serviceName);
+  const vehiclePlate = appointment.vehicle.plate || "Sem placa informada";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] p-4 sm:p-6">
-      <div className="w-full max-w-2xl mx-auto">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] px-4 py-4 sm:px-6 sm:py-6">
+      <div className="mx-auto w-full max-w-2xl">
         {appointment.shop?.logoUrl && (
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
@@ -165,18 +167,93 @@ function TrackPageContent() {
         )}
 
         <div className="space-y-6">
-          {/* Status + Details */}
-          <Card className="border-none shadow-2xl rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
-            <div className="mb-6">
-              <TrackingStatusBanner
-                status={appointment.status}
-                onRefresh={handleRefresh}
-                onConfirm={handleConfirm}
-                onCancel={openCancelModal}
-                confirmLoading={confirmLoading}
-                cancelLoading={cancelLoading}
-              />
+          <Card className="border-none shadow-2xl rounded-[28px] overflow-hidden bg-white dark:bg-[#18181b]">
+            <div className="rounded-[24px] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-5 text-white shadow-2xl shadow-slate-950/20 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-300/80">
+                    Resumo do agendamento
+                  </p>
+                  <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
+                    {appointment.vehicle.brand} {appointment.vehicle.model}
+                  </h1>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-200/80">
+                    Acompanhe o progresso, a placa do veículo e os serviços contratados em uma visão rápida.
+                  </p>
+                </div>
+
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10 backdrop-blur">
+                  <CarOutlined className="text-2xl text-white" />
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10 backdrop-blur">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-300/80">
+                    Placa
+                  </p>
+                  <p className="mt-1 text-lg font-black tracking-[0.16em] text-white">
+                    {vehiclePlate}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10 backdrop-blur">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-300/80">
+                    Serviços
+                  </p>
+                  <p className="mt-1 text-lg font-black text-white">{appointment.services.length} contratado(s)</p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {serviceNames.slice(0, 4).map((serviceName) => (
+                  <span
+                    key={serviceName}
+                    className="inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white ring-1 ring-white/10"
+                  >
+                    {serviceName}
+                  </span>
+                ))}
+                {serviceNames.length > 4 && (
+                  <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white ring-1 ring-white/10">
+                    +{serviceNames.length - 4}
+                  </span>
+                )}
+              </div>
             </div>
+
+            <div className="mt-4">
+              <TrackingProgressTracker status={appointment.status} />
+            </div>
+
+            {appointment.status === "PENDING" && (
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <Button
+                  type="primary"
+                  onClick={handleConfirm}
+                  loading={confirmLoading}
+                  className="min-h-[44px] rounded-xl border-none bg-indigo-600 font-semibold shadow-none hover:!bg-indigo-700"
+                >
+                  Confirmar
+                </Button>
+                <Button
+                  onClick={openCancelModal}
+                  loading={cancelLoading}
+                  danger
+                  className="min-h-[44px] rounded-xl font-semibold"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleRefresh}
+                  className="min-h-[44px] rounded-xl font-semibold"
+                >
+                  Atualizar
+                </Button>
+              </div>
+            )}
+          </Card>
+
+          <Card className="border-none shadow-lg rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
             <TrackingAppointmentDetails appointment={appointment} />
           </Card>
 
@@ -200,9 +277,9 @@ function TrackPageContent() {
           {/* Receipt / Print */}
           {isCompleted && (
             <Card className="border-none shadow-lg rounded-3xl overflow-hidden bg-white dark:bg-[#18181b]">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
                     <PrinterOutlined className="text-emerald-600 dark:text-emerald-400 text-sm" />
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider m-0">
@@ -212,7 +289,7 @@ function TrackPageContent() {
                 <Button
                   icon={<PrinterOutlined />}
                   onClick={() => handlePrint()}
-                  className="rounded-xl font-medium"
+                  className="rounded-xl font-medium w-full sm:w-auto min-h-[44px]"
                 >
                   Imprimir / Salvar PDF
                 </Button>
@@ -262,7 +339,7 @@ function TrackPageContent() {
         okText="Confirmar Cancelamento"
         cancelText="Voltar"
         okButtonProps={{ danger: true, loading: cancelLoading }}
-        destroyOnClose
+        destroyOnHidden
       >
         <p className="mb-4 text-zinc-600 dark:text-zinc-300 text-sm sm:text-base">
           Tem certeza que deseja cancelar este agendamento? Esta ação não pode ser desfeita.

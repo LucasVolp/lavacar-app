@@ -34,6 +34,8 @@ interface ClientLayoutProps {
 
 export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -55,7 +57,12 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   useEffect(() => {
     if (!mounted) return;
     const handleResize = () => {
-      if (window.innerWidth < 768) setCollapsed(true);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setCollapsed(true);
+        setMobileOpen(false);
+      }
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -163,130 +170,164 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
     );
   }
 
+  const siderCollapsed = isMobile ? !mobileOpen : collapsed;
+
+  const handleToggle = () => {
+    if (isMobile) setMobileOpen(!mobileOpen);
+    else setCollapsed(!collapsed);
+  };
+
+  const handleMenuNavigate: MenuProps["onClick"] = (e) => {
+    router.push(e.key);
+    if (isMobile) setMobileOpen(false);
+  };
+
   return (
-    <Layout className="min-h-screen" hasSider>
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        width={260}
-        collapsedWidth={80}
-        className="z-50 shadow-lg border-r"
-        style={{
-          borderColor,
-          backgroundColor: isDarkMode ? "#18181b" : "#ffffff",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          left: 0,
-          overflow: "hidden",
-        }}
-        theme={isDarkMode ? "dark" : "light"}
-      >
-        <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
-          <NexoLogo size={60} />
-          {!collapsed && (
-            <div className="flex flex-col overflow-hidden">
-              <Text strong className="text-sm leading-tight truncate text-zinc-800 dark:text-zinc-100">
-                NexoCar
-              </Text>
-              <Text type="secondary" className="text-xs leading-tight text-zinc-500">
-                Área do Cliente
-              </Text>
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ height: "calc(100vh - 64px)" }}>
-          <Menu
-            mode="inline"
-            selectedKeys={getSelectedKeys()}
-            onClick={handleMenuClick}
-            items={menuItems}
-            className="border-none bg-transparent"
-            style={{ paddingTop: "8px", paddingBottom: "16px" }}
-            theme={isDarkMode ? "dark" : "light"}
-          />
-        </div>
-      </Sider>
-
-      <Layout style={{ transition: "margin-left 0.2s" }}>
-        <AntHeader
-          className={`flex items-center justify-between px-4 sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? "bg-zinc-950/80" : "bg-white/80"}`}
+    <>
+      {isMobile && mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <Layout className="min-h-screen" hasSider>
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={siderCollapsed}
+          width={260}
+          collapsedWidth={isMobile ? 0 : 80}
+          className="z-[9999] !opacity-100 !border-r !border-zinc-200 !bg-white !shadow-2xl dark:!border-zinc-800 dark:!bg-zinc-950"
           style={{
-            borderBottom: `1px solid ${borderColor}`,
-            padding: "0 24px",
-            height: "64px",
+            borderColor,
+            backgroundColor: isDarkMode
+              ? "var(--fallback-b1, oklch(var(--b1)/1))"
+              : "#ffffff",
+            opacity: 1,
+            ...(isMobile
+              ? {
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  height: "100%",
+                  zIndex: 9999,
+                  overflow: "hidden",
+                }
+              : {
+                  position: "sticky",
+                  top: 0,
+                  height: "100vh",
+                  zIndex: 9999,
+                  overflow: "hidden",
+                }),
           }}
+          theme={isDarkMode ? "dark" : "light"}
         >
-          <div className="flex items-center gap-4">
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            />
-            <Breadcrumb
-              className="hidden md:block"
-              items={[
-                { title: <Link href="/"><HomeOutlined /></Link> },
-                { title: <span className="font-medium text-zinc-800 dark:text-zinc-200">Cliente</span> },
-                {
-                  title: (
-                    <span className="text-zinc-500">
-                      {
-                        (menuItems
-                          .flatMap((item) => ((item && "children" in item && item.children) ? item.children : [item]))
-                          .find((item) => item?.key === pathname) as { label: React.ReactNode } | undefined)
-                          ?.label
-                      }
-                    </span>
-                  ),
-                },
-              ]}
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              type="text"
-              shape="circle"
-              icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />}
-              onClick={() => setTheme(isDarkMode ? "light" : "dark")}
-              className="hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            />
-
-            <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-800 mx-1" />
-
-            <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">
-              <div className="flex items-center gap-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-lg transition-colors">
-                <Avatar
-                  size={32}
-                  icon={<UserOutlined />}
-                  className="bg-indigo-600"
-                  src={user?.picture}
-                />
-                <span className="hidden md:block text-sm font-medium opacity-90 text-zinc-700 dark:text-zinc-200">
-                  {user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Usuário"}
-                </span>
+          <div className="h-16 flex items-center gap-3 px-4 border-b transition-colors flex-shrink-0" style={{ borderColor }}>
+            <NexoLogo size={60} />
+            {!siderCollapsed && (
+              <div className="flex flex-col overflow-hidden">
+                <Text strong className="text-sm leading-tight truncate text-zinc-800 dark:text-zinc-100">
+                  NexoCar
+                </Text>
+                <Text type="secondary" className="text-xs leading-tight text-zinc-500">
+                  Área do Cliente
+                </Text>
               </div>
-            </Dropdown>
+            )}
           </div>
-        </AntHeader>
 
-        <Content className="p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
-          <div className="w-full max-w-[1600px] mx-auto animate-fade-in">
-            {children}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar" style={{ height: "calc(100vh - 64px)" }}>
+            <Menu
+              mode="inline"
+              selectedKeys={getSelectedKeys()}
+              onClick={handleMenuNavigate}
+              items={menuItems}
+              className="border-none bg-transparent"
+              style={{ paddingTop: "8px", paddingBottom: "16px" }}
+              theme={isDarkMode ? "dark" : "light"}
+            />
           </div>
-        </Content>
+        </Sider>
 
-        <AntFooter className="text-center" style={{ borderTop: `1px solid ${borderColor}` }}>
-          <Text type="secondary" className="text-xs">
-            © {new Date().getFullYear()} NexoCar - Área do Cliente
-          </Text>
-        </AntFooter>
+        <Layout style={{ transition: "all 0.2s", minWidth: 0 }}>
+          <AntHeader
+            className={`flex items-center justify-between sticky top-0 z-40 backdrop-blur-md transition-colors ${isDarkMode ? "bg-zinc-950/80" : "bg-white/80"}`}
+            style={{
+              borderBottom: `1px solid ${borderColor}`,
+              padding: "0 16px",
+              height: "64px",
+            }}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <Button
+                type="text"
+                icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={handleToggle}
+                className="hover:bg-zinc-100 dark:hover:bg-zinc-800 shrink-0 min-w-[44px] min-h-[44px]"
+              />
+              <Breadcrumb
+                className="hidden md:flex min-w-0"
+                items={[
+                  { title: <Link href="/"><HomeOutlined /></Link> },
+                  { title: <span className="font-medium text-zinc-800 dark:text-zinc-200 truncate">Cliente</span> },
+                  {
+                    title: (
+                      <span className="text-zinc-500 truncate">
+                        {
+                          (menuItems
+                            .flatMap((item) => ((item && "children" in item && item.children) ? item.children : [item]))
+                            .find((item) => item?.key === pathname) as { label: React.ReactNode } | undefined)
+                            ?.label
+                        }
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                type="text"
+                shape="circle"
+                icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />}
+                onClick={() => setTheme(isDarkMode ? "light" : "dark")}
+                className="hover:bg-zinc-100 dark:hover:bg-zinc-800 min-w-[44px] min-h-[44px]"
+              />
+
+              <div className="w-px h-8 bg-zinc-200 dark:bg-zinc-800" />
+
+              <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">
+                <div className="flex items-center gap-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-lg transition-colors min-h-[44px]">
+                  <Avatar
+                    size={32}
+                    icon={<UserOutlined />}
+                    className="bg-indigo-600 shrink-0"
+                    src={user?.picture}
+                  />
+                  <span className="hidden md:block text-sm font-medium opacity-90 text-zinc-700 dark:text-zinc-200 max-w-[120px] truncate">
+                    {user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Usuário"}
+                  </span>
+                </div>
+              </Dropdown>
+            </div>
+          </AntHeader>
+
+          <Content className="p-4 sm:p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
+            <div className="w-full max-w-[1600px] mx-auto animate-fade-in">
+              {children}
+            </div>
+          </Content>
+
+          <AntFooter className="text-center px-4" style={{ borderTop: `1px solid ${borderColor}` }}>
+            <Text type="secondary" className="text-xs">
+              © {new Date().getFullYear()} NexoCar - Área do Cliente
+            </Text>
+          </AntFooter>
+        </Layout>
       </Layout>
-    </Layout>
+    </>
   );
 };
 
