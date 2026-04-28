@@ -14,6 +14,7 @@ import {
   InfoSection,
   CTASection,
   ShopFooter,
+  ShopGallery,
 } from "@/components/shop";
 import { CarFilled, WhatsAppOutlined } from "@ant-design/icons";
 import { Services } from "@/types/services";
@@ -154,6 +155,8 @@ export default function ShopPage({ params }: ShopPageProps) {
         isLoading={servicesLoading}
         onBooking={handleBooking}
       />
+
+      <ShopGallery images={shop.gallery ?? []} />
 
       <InfoSection
         shop={shop}

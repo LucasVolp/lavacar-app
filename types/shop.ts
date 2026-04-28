@@ -37,6 +37,8 @@ export interface Shop {
   organizationId: string;
   ownerId?: string;
 
+  gallery?: string[];
+
   createdAt: string;
   updatedAt: string;
 }

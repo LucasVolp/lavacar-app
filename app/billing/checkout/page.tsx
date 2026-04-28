@@ -25,6 +25,33 @@ import {
     FailedStep,
 } from "@/components/billing/checkout";
 
+const parseCheckoutError = (err: unknown): string => {
+    const responseData = (err as { response?: { data?: { message?: string; errors?: { description?: string }[] } } })?.response?.data;
+    const rawMessage = responseData?.message || responseData?.errors?.[0]?.description || "";
+    const lowerMsg = String(rawMessage).toLowerCase();
+
+    if (lowerMsg.includes("cpf") || lowerMsg.includes("cnpj") || lowerMsg.includes("document")) {
+        return "O CPF ou CNPJ informado é inválido. Por favor, verifique os números digitados.";
+    }
+    if (lowerMsg.includes("credit card") || lowerMsg.includes("cartão")) {
+        return "Houve um problema com os dados do cartão. Verifique o número, validade e código de segurança.";
+    }
+    if (lowerMsg.includes("zipcode") || lowerMsg.includes("cep")) {
+        return "O CEP informado é inválido ou não foi encontrado.";
+    }
+    if (lowerMsg.includes("email")) {
+        return "O e-mail informado é inválido.";
+    }
+    if (lowerMsg.includes("phone") || lowerMsg.includes("telefone")) {
+        return "O número de telefone informado está incorreto.";
+    }
+    if (lowerMsg.includes("insufficient funds") || lowerMsg.includes("saldo")) {
+        return "O pagamento foi recusado pelo banco (saldo insuficiente).";
+    }
+
+    return "Não foi possível processar o pagamento. Verifique seus dados e tente novamente.";
+};
+
 type CheckoutStep =
     | "loading"
     | "active"
@@ -253,10 +280,7 @@ export default function CheckoutPage() {
 
             setStep("plan");
         } catch (err: unknown) {
-            const errorMessage =
-                (err as { response?: { data?: { message?: string } } }).response?.data?.message ||
-                "Erro ao processar o checkout. Tente novamente.";
-            message.error(errorMessage);
+            message.error(parseCheckoutError(err));
             setStep("payment");
         }
     };

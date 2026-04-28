@@ -10,3 +10,4 @@ export { ReviewsSection } from "./ReviewsSection";
 export { InfoSection } from "./InfoSection";
 export { CTASection } from "./CTASection";
 export { ShopFooter } from "./ShopFooter";
+export { ShopGallery } from "./ShopGallery";

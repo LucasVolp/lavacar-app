@@ -39,7 +39,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ clients, onViewClien
     e.stopPropagation();
     const cleanPhone = phone?.replace(/\D/g, "");
     if (cleanPhone) {
-      window.open(`https://wa.me/55${cleanPhone}`, "_blank");
+      window.open(`https://wa.me/${cleanPhone}`, "_blank");
     }
   };
 

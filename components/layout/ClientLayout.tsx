@@ -316,10 +316,18 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             </div>
           </Content>
 
-          <AntFooter className="text-center px-4" style={{ borderTop: `1px solid ${borderColor}` }}>
+          <AntFooter className="flex flex-col items-center gap-2 py-4 px-4" style={{ borderTop: `1px solid ${borderColor}` }}>
             <Text type="secondary" className="text-xs">
               © {new Date().getFullYear()} NexoCar - Área do Cliente
             </Text>
+            <div className="flex items-center gap-4">
+              <Link href="/termos" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                Termos de Uso
+              </Link>
+              <Link href="/privacidade" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                Privacidade
+              </Link>
+            </div>
           </AntFooter>
         </Layout>
       </Layout>

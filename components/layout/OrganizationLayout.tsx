@@ -17,6 +17,7 @@ import {
   HomeOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import type { MenuProps } from "antd";
 import { useAuth } from "@/contexts/AuthContext";
@@ -311,10 +312,18 @@ export const OrganizationLayout: React.FC<OrganizationLayoutProps> = ({ children
             </div>
           </Content>
 
-          <AntFooter className="text-center bg-transparent px-4">
+          <AntFooter className="bg-transparent flex flex-col items-center gap-2 py-4 px-4">
             <Text type="secondary" className="text-xs">
               © {new Date().getFullYear()} NexoCar - Sistema de Gestão de Agendamentos
             </Text>
+            <div className="flex items-center gap-4">
+              <Link href="/termos" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                Termos de Uso
+              </Link>
+              <Link href="/privacidade" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                Privacidade
+              </Link>
+            </div>
           </AntFooter>
         </Layout>
       </Layout>

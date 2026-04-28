@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { Form, Input, Button, Alert, Spin } from "antd";
+import { Form, Input, Button, Alert, Spin, Checkbox } from "antd";
 import {
   MailOutlined,
   LockOutlined,
@@ -210,12 +210,46 @@ function RegisterForm() {
                 </Form.Item>
             </div>
 
+            <Form.Item
+              name="acceptTerms"
+              valuePropName="checked"
+              rules={[
+                {
+                  validator: (_, value) =>
+                    value
+                      ? Promise.resolve()
+                      : Promise.reject(new Error("Você deve aceitar os termos para continuar")),
+                },
+              ]}
+            >
+              <Checkbox className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
+                Li e aceito os{" "}
+                <a
+                  href="/termos"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 font-medium"
+                >
+                  Termos de Uso
+                </a>{" "}
+                e a{" "}
+                <a
+                  href="/privacidade"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 font-medium"
+                >
+                  Política de Privacidade
+                </a>
+              </Checkbox>
+            </Form.Item>
+
             <Button
               type="primary"
               htmlType="submit"
               block
               loading={isLoading}
-              className="h-12 mt-2 bg-blue-600 hover:bg-blue-500 border-none text-base font-semibold shadow-lg shadow-blue-500/20 rounded-xl"
+              className="h-12 bg-blue-600 hover:bg-blue-500 border-none text-base font-semibold shadow-lg shadow-blue-500/20 rounded-xl"
             >
               Criar Conta
             </Button>

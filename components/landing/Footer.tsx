@@ -29,9 +29,9 @@ export const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8">
           <div className="flex gap-8 text-sm text-base-content/60 font-medium">
-            <Link href="#" className="hover:text-base-content transition-colors">Termos</Link>
-            <Link href="#" className="hover:text-base-content transition-colors">Privacidade</Link>
-            <Link href="#" className="hover:text-base-content transition-colors">Suporte</Link>
+            <Link href="/termos" target="_blank" rel="noreferrer" className="hover:text-base-content transition-colors">Termos</Link>
+            <Link href="/privacidade" target="_blank" rel="noreferrer" className="hover:text-base-content transition-colors">Privacidade</Link>
+            <Link href="mailto:suporte@nexocar.com.br" className="hover:text-base-content transition-colors">Suporte</Link>
           </div>
 
           <p className="text-base-content/50 text-sm">

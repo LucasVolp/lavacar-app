@@ -20,13 +20,13 @@ export function ShopFooter({ shopName }: ShopFooterProps) {
           </div>
 
           <div className="flex justify-center gap-8">
-             <Link href="#" className="text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+             <Link href="/termos" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                Termos de Uso
              </Link>
-             <Link href="#" className="text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+             <Link href="/privacidade" target="_blank" rel="noreferrer" className="text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                Privacidade
              </Link>
-             <Link href="#" className="text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+             <Link href="mailto:suporte@nexocar.com.br" className="text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                Suporte
              </Link>
           </div>

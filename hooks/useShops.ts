@@ -70,6 +70,28 @@ export function useUpdateShop() {
   });
 }
 
+export function useUploadGalleryImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      shopService.uploadGallery(id, file),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.detail(id) });
+    },
+  });
+}
+
+export function useDeleteGalleryImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, url }: { id: string; url: string }) =>
+      shopService.deleteGalleryImage(id, url),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: shopKeys.detail(id) });
+    },
+  });
+}
+
 export function useDeleteShop() {
   const queryClient = useQueryClient();
 

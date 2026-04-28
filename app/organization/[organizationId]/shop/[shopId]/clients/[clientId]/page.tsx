@@ -199,7 +199,7 @@ export default function ClientDetailPage() {
       `Quer reservar um horário para cuidar do seu carro?`
   );
   const whatsappUrl = phone
-    ? `https://wa.me/55${phone.replace(/\D/g, "")}?text=${rescueMessage}`
+    ? `https://wa.me/${phone.replace(/\D/g, "")}?text=${rescueMessage}`
     : "";
 
   if (isLoadingClient) {

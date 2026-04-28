@@ -21,7 +21,8 @@ import {
   LineChartOutlined,
   StarOutlined,
   DollarOutlined,
-  ContactsOutlined
+  ContactsOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -93,11 +94,18 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
       icon: <ToolOutlined style={{ fontSize: "18px", color: "#10b981" }} />,
       label: <span className="font-medium">Serviços</span>,
     },
-    ...(!isEmployee ? [{
-      key: `/organization/${organizationId}/shop/${shopId}/employees`,
-      icon: <TeamOutlined style={{ fontSize: "18px", color: "#f43f5e" }} />,
-      label: <span className="font-medium">Funcionários</span>,
-    }] : []),
+    ...(!isEmployee ? [
+      {
+        key: `/organization/${organizationId}/shop/${shopId}/gallery`,
+        icon: <PictureOutlined style={{ fontSize: "18px", color: "#a855f7" }} />,
+        label: <span className="font-medium">Portfólio</span>,
+      },
+      {
+        key: `/organization/${organizationId}/shop/${shopId}/employees`,
+        icon: <TeamOutlined style={{ fontSize: "18px", color: "#f43f5e" }} />,
+        label: <span className="font-medium">Funcionários</span>,
+      },
+    ] : []),
   ];
 
   const configChildren = [
@@ -384,10 +392,18 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           </div>
         </Content>
 
-        <AntFooter className="text-center bg-transparent">
+        <AntFooter className="bg-transparent flex flex-col items-center gap-2 py-4">
           <Text type="secondary" className="text-xs">
             © {new Date().getFullYear()} NexoCar - Sistema de Gestão de Agendamentos
           </Text>
+          <div className="flex items-center gap-4">
+            <Link href="/termos" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+              Termos de Uso
+            </Link>
+            <Link href="/privacidade" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+              Privacidade
+            </Link>
+          </div>
         </AntFooter>
       </Layout>
     </Layout>

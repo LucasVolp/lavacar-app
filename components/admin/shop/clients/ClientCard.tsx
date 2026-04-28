@@ -64,7 +64,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
     e.stopPropagation();
     const cleanPhone = phone?.replace(/\D/g, "");
     if (cleanPhone) {
-      window.open(`https://wa.me/55${cleanPhone}`, "_blank");
+      window.open(`https://wa.me/${cleanPhone}`, "_blank");
     }
   };
 

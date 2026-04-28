@@ -4,6 +4,7 @@ import React from "react";
 import { Layout, Typography, Space, Divider } from "antd";
 import { GithubOutlined, HeartFilled, MailOutlined, PhoneOutlined } from "@ant-design/icons";
 import { useTheme } from "next-themes";
+import NextLink from "next/link";
 import { NexoLogo } from "@/components/ui/NexoLogo";
 
 const { Footer: AntFooter } = Layout;
@@ -62,14 +63,24 @@ export const Footer: React.FC = () => {
             </Link>
           </Space>
 
-          <div className="flex items-center gap-1 text-center">
-            <Text type="secondary" className="text-xs">
-              © {currentYear} NexoCar. Feito com
-            </Text>
-            <HeartFilled className="text-error text-xs animate-pulse" />
-            <Text type="secondary" className="text-xs">
-              no Brasil
-            </Text>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex items-center gap-1">
+              <Text type="secondary" className="text-xs">
+                © {currentYear} NexoCar. Feito com
+              </Text>
+              <HeartFilled className="text-error text-xs animate-pulse" />
+              <Text type="secondary" className="text-xs">
+                no Brasil
+              </Text>
+            </div>
+            <div className="flex items-center gap-4">
+              <NextLink href="/termos" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                Termos de Uso
+              </NextLink>
+              <NextLink href="/privacidade" target="_blank" rel="noreferrer" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                Privacidade
+              </NextLink>
+            </div>
           </div>
         </div>
       </div>

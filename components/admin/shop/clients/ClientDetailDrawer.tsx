@@ -224,7 +224,7 @@ export const ClientDetailDrawer: React.FC<ClientDetailDrawerProps> = ({
   const handleWhatsApp = () => {
     const phone = displayPhone?.replace(/\D/g, "");
     if (phone) {
-      window.open(`https://wa.me/55${phone}`, "_blank");
+      window.open(`https://wa.me/${phone}`, "_blank");
     }
   };
 
