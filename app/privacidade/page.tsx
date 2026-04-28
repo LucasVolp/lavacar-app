@@ -142,7 +142,7 @@ export default function PrivacidadePage() {
             >
               suporte@nexocar.com.br
             </a>{" "}
-            com o assunto <em>"Solicitação LGPD"</em>. Responderemos em até 15 dias úteis.
+            com o assunto <em>&quot;Solicitação LGPD&quot;</em>. Responderemos em até 15 dias úteis.
           </p>
         </section>
 
