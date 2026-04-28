@@ -117,79 +117,39 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
           </div>
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 sm:grid sm:gap-2"
-          style={{ gridTemplateColumns: canDelete ? "repeat(auto-fit, minmax(0, 1fr))" : "repeat(auto-fit, minmax(0, 1fr))" }}>
-          {/* Button Stack Mobile - Hidden on SM and above */}
-          <div className="flex sm:hidden gap-1">
-            <Button
-              type="text"
-              icon={<SettingOutlined />}
-              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
-              title="Configurar"
-              className="flex-1 min-h-[44px]"
-            />
-            <Button
-              type="primary"
-              icon={<ArrowRightOutlined />}
-              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
-              title="Gerenciar"
-              className="flex-1 min-h-[44px]"
-            />
-            {canDelete && onDelete && (
-              <Popconfirm
-                title="Excluir estabelecimento"
-                description="Tem certeza em excluir permanentemente?"
-                onConfirm={() => onDelete(shop.id)}
-                okText="Sim"
-                cancelText="Não"
-                okButtonProps={{ danger: true }}
-              >
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  title="Excluir"
-                  className="flex-1 min-h-[44px]"
-                />
-              </Popconfirm>
-            )}
-          </div>
-
-          {/* Button Grid Desktop - Hidden below SM */}
-          <div className="hidden sm:grid gap-2" style={{ gridTemplateColumns: canDelete ? "repeat(3, 1fr)" : "repeat(2, 1fr)" }}>
-            <Button
-              icon={<SettingOutlined />}
-              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
-              className="min-h-[44px]"
+        <div className="mt-auto flex items-center gap-2">
+          <Button
+            icon={<SettingOutlined />}
+            onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
+            className="flex-1 min-w-0 min-h-[40px]"
+          >
+            <span className="truncate">Configurar</span>
+          </Button>
+          <Button
+            type="primary"
+            icon={<ArrowRightOutlined />}
+            onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
+            className="flex-1 min-w-0 min-h-[40px]"
+          >
+            <span className="truncate">Gerenciar</span>
+          </Button>
+          {canDelete && onDelete && (
+            <Popconfirm
+              title="Excluir estabelecimento"
+              description="Tem certeza? Isso apagará todos os agendamentos e dados desta loja permanentemente."
+              onConfirm={() => onDelete(shop.id)}
+              okText="Excluir"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true }}
             >
-              <span className="line-clamp-1">Configurar</span>
-            </Button>
-            <Button
-              type="primary"
-              icon={<ArrowRightOutlined />}
-              onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
-              className="min-h-[44px]"
-            >
-              <span className="line-clamp-1">Gerenciar</span>
-            </Button>
-            {canDelete && onDelete && (
-              <Popconfirm
-                title="Excluir estabelecimento"
-                description="Tem certeza? Isso apagará todos os agendamentos e dados desta loja permanentemente."
-                onConfirm={() => onDelete(shop.id)}
-                okText="Excluir"
-                cancelText="Cancelar"
-                okButtonProps={{ danger: true }}
-              >
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  className="min-h-[44px]"
-                >
-                  <span className="line-clamp-1">Excluir</span>
-                </Button>
-              </Popconfirm>
-            )}
-          </div>
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                title="Excluir"
+                className="flex-shrink-0 min-h-[40px]"
+              />
+            </Popconfirm>
+          )}
         </div>
       </div>
     </div>

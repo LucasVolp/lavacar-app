@@ -73,7 +73,12 @@ export const PricingSection = () => {
             </div>
 
             <div className="mb-8 mt-2">
-              <h3 className="text-2xl font-extrabold text-base-content mb-2">NexoCar</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-2xl font-extrabold text-base-content">NexoCar</h3>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-600/10 text-blue-600 dark:text-blue-400 border border-blue-600/20">
+                  15 Dias de Teste
+                </span>
+              </div>
               <p className="text-base-content/60 text-sm leading-[1.7]">
                 Para lava-rápidos e estéticas que querem controle, tecnologia e operação previsível.
               </p>
@@ -112,14 +117,14 @@ export const PricingSection = () => {
             </ul>
 
             <button
-              onClick={() => router.push("/billing/checkout")}
+              onClick={() => router.push("/billing")}
               className="w-full py-4 rounded-xl font-bold text-base tracking-wide transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/20 active:translate-y-0.5"
             >
-              {isAnnually ? 'Assinar Anual' : 'Começar Agora'}
+              Iniciar meu teste gratuito
             </button>
 
-            <p className="text-center text-sm text-base-content/70 mt-6 font-medium leading-[1.7]">
-              Com organização e dados claros, o sistema se paga rapidamente.
+            <p className="text-center text-sm text-zinc-500 mt-3">
+              Sem necessidade de cartão de crédito.
             </p>
           </div>
         </div>

@@ -39,6 +39,13 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (
+      error.response?.status === 402 &&
+      typeof window !== 'undefined' &&
+      !window.location.pathname.startsWith('/billing')
+    ) {
+      window.location.href = '/billing';
+    }
     return Promise.reject(error);
   }
 );

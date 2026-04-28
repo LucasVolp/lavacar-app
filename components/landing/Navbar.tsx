@@ -26,10 +26,10 @@ export const Navbar = () => {
 
   const handleBusinessClick = () => {
     if (!isAuthenticated) {
-      router.push("/auth/login?redirect=/organization/select");
+      router.push("/auth/login?redirect=/billing");
       return;
     }
-    router.push(hasAnyOrg ? "/organization/select" : "/billing/checkout");
+    router.push(hasAnyOrg ? "/organization/select" : "/billing");
   };
 
   const menuItems = [
