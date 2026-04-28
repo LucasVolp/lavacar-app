@@ -9,7 +9,7 @@ import { CreateOrgHeader } from "@/components/organization/create/CreateOrgHeade
 import { CreateOrgForm } from "@/components/organization/create/CreateOrgForm";
 
 export default function CreateOrganizationPage() {
-    const { user, isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading, refreshUser } = useAuth();
     const router = useRouter();
     const createOrganization = useCreateOrganization();
     const { data: organizations, isLoading: isLoadingOrgs } = useOrganizationByOwner(user?.id);
@@ -36,6 +36,7 @@ export default function CreateOrganizationPage() {
                 document: values.document.replace(/\D/g, ""),
                 ownerId: user.id,
             });
+            await refreshUser();
             message.success("Organização criada com sucesso!");
             router.push(`/organization/${newOrg.id}`);
         } catch {

@@ -103,7 +103,7 @@ function useBeforeUnload(active: boolean) {
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { isAuthenticated, isLoading: authLoading, refreshUser } = useAuth();
+    const { isAuthenticated, isLoading: authLoading, refreshUser, user } = useAuth();
     const [form] = Form.useForm<{ orgName: string; document: string }>();
 
     const [step, setStep] = useState<CheckoutStep>("loading");
@@ -121,6 +121,13 @@ export default function CheckoutPage() {
 
     const { data: billingStatus, isLoading: statusLoading, refetch: refetchStatus } = useBillingStatus(isAuthenticated);
     const createSelfCheckout = useCreateSelfCheckout();
+
+    const isTrialActive = !!(
+        billingStatus?.canAccessOrganization &&
+        billingStatus?.hasOrganization &&
+        !billingStatus?.subscription &&
+        billingStatus?.trial?.isActive
+    );
 
     const isInActiveCheckout = step === "awaiting_cc" || step === "pix";
     useBeforeUnload(isInActiveCheckout);
@@ -169,6 +176,11 @@ export default function CheckoutPage() {
         }
 
         if (billingStatus?.canAccessOrganization) {
+            if (isTrialActive) {
+                // Early upgrade: user is in trial, allow purchase flow
+                if (step === "loading") setStep("plan");
+                return;
+            }
             setIsResubscribeFlow(false);
             setStep("active");
             return;
@@ -181,7 +193,8 @@ export default function CheckoutPage() {
             step === "failed" ||
             step === "payment" ||
             step === "processing" ||
-            (isResubscribeFlow && step === "plan")
+            (isResubscribeFlow && step === "plan") ||
+            (isTrialActive && step === "plan")
         ) {
             return;
         }
@@ -220,7 +233,21 @@ export default function CheckoutPage() {
         if (status === "CANCELLED" || status === "EXPIRED") { setStep("cancelled"); return; }
 
         setStep("plan");
-    }, [authLoading, statusLoading, isAuthenticated, billingStatus, router, step, pollingActive, isResubscribeFlow]);
+    }, [authLoading, statusLoading, isAuthenticated, billingStatus, router, step, pollingActive, isResubscribeFlow, isTrialActive]);
+
+    useEffect(() => {
+        if (step !== "payment") return;
+        const org = billingStatus?.organization;
+        if (!form.getFieldValue("document") && org?.document) {
+            form.setFieldValue("document", formatDocument(org.document));
+        }
+        if (!form.getFieldValue("orgName")) {
+            form.setFieldValue(
+                "orgName",
+                org?.name || `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim(),
+            );
+        }
+    }, [step, billingStatus?.organization, form, user]);
 
     const startCCPolling = () => {
         checkoutTypeRef.current = "CREDIT_CARD";
@@ -325,11 +352,17 @@ export default function CheckoutPage() {
         );
     }
 
+    const trialDaysRemaining = billingStatus?.trial?.daysRemaining ?? 0;
+
     const heading = step === "active"
         ? (billingStatus?.organization?.name ?? "Sua organização")
+        : step === "plan" && isTrialActive
+        ? "Antecipar assinatura"
         : (HEADINGS[step] ?? null);
 
-    const subtitle = SUBTITLES[step] ?? "Gerencie sua estética automotiva com o melhor sistema do mercado";
+    const subtitle = step === "plan" && isTrialActive
+        ? `Você está no seu período de testes — ${trialDaysRemaining} dia${trialDaysRemaining !== 1 ? "s" : ""} restante${trialDaysRemaining !== 1 ? "s" : ""}. Assine agora para garantir acesso contínuo.`
+        : (SUBTITLES[step] ?? "Gerencie sua estética automotiva com o melhor sistema do mercado");
 
     return (
         <CheckoutLayout>
@@ -360,6 +393,16 @@ export default function CheckoutPage() {
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3 }}
                         >
+                            {isTrialActive && (
+                                <div className="mb-5 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/20 px-4 py-3.5">
+                                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
+                                        Período de testes ativo — {trialDaysRemaining} dia{trialDaysRemaining !== 1 ? "s" : ""} restante{trialDaysRemaining !== 1 ? "s" : ""}
+                                    </p>
+                                    <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
+                                        Antecipe sua assinatura para garantir que o seu painel e o recebimento de novos agendamentos não sejam pausados. Fique tranquilo: as fotos da sua vitrine e o histórico de clientes estão seguros e não serão apagados.
+                                    </p>
+                                </div>
+                            )}
                             <PlanStep
                                 selectedCycle={selectedCycle}
                                 onCycleChange={setSelectedCycle}

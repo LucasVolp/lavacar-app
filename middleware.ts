@@ -60,6 +60,7 @@ export const config = {
     matcher: [
         "/organization/:path*",
         "/client/:path*",
+        "/billing",
         "/billing/checkout",
         "/billing/return",
         "/auth/:path*",

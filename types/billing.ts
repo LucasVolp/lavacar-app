@@ -19,6 +19,12 @@ export interface SubscriptionInfo {
     pixData?: PixData;
 }
 
+export interface TrialInfo {
+    isActive: boolean;
+    endsAt: string;
+    daysRemaining: number;
+}
+
 export interface BillingStatusResponse {
     userRole: string;
     canAccessOrganization: boolean;
@@ -27,8 +33,11 @@ export interface BillingStatusResponse {
         id: string;
         name: string;
         isActive: boolean;
+        createdAt?: string;
+        document?: string;
     };
     subscription?: SubscriptionInfo;
+    trial?: TrialInfo;
 }
 
 export interface CreateSelfCheckoutPayload {

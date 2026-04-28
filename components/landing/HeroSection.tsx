@@ -16,13 +16,13 @@ export const HeroSection = () => {
 
   const handlePrimaryCta = () => {
     if (!isAuthenticated) {
-      router.push("/auth/login?redirect=/organization/select");
+      router.push("/auth/login?redirect=/billing");
       return;
     }
     const hasAnyOrg =
       (user?.organizations?.length ?? 0) > 0 ||
       (user?.organizationMembers?.length ?? 0) > 0;
-    router.push(hasAnyOrg ? "/organization/select" : "/billing/checkout");
+    router.push(hasAnyOrg ? "/organization/select" : "/billing");
   };
 
   const handleSecondaryCta = () => {
@@ -54,20 +54,23 @@ export const HeroSection = () => {
           e entenda seu lucro com clareza.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-          <button
-            onClick={handlePrimaryCta}
-            className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base shadow-lg shadow-blue-900/20 active:translate-y-0.5 transition-colors w-full sm:w-auto"
-          >
-            Assumir o comando
-            <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button
-            onClick={handleSecondaryCta}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-base-200 hover:bg-base-300 border border-base-content/10 text-base-content font-semibold text-base transition-colors w-full sm:w-auto"
-          >
-            Ver funcionalidades
-          </button>
+        <div className="flex flex-col items-center gap-2 mb-20">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={handlePrimaryCta}
+              className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base shadow-lg shadow-blue-900/20 active:translate-y-0.5 transition-colors w-full sm:w-auto"
+            >
+              Começar 15 dias grátis
+              <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={handleSecondaryCta}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-base-200 hover:bg-base-300 border border-base-content/10 text-base-content font-semibold text-base transition-colors w-full sm:w-auto"
+            >
+              Ver funcionalidades
+            </button>
+          </div>
+          <p className="text-sm text-zinc-500 mt-2">Sem necessidade de cartão de crédito.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
