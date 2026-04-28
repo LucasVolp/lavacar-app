@@ -18,7 +18,7 @@ export const MembersHeader: React.FC<MembersHeaderProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Membros da Organização</h1>
+        <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100">Membros da Organização</h1>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm">Gerencie quem tem acesso à sua organização e suas permissões.</p>
       </div>
 

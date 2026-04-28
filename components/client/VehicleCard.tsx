@@ -28,7 +28,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
         </div>
 
         <div className="flex-grow min-w-0">
-          <span className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+          <span className="block text-xs font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1">
             {vehicle.brand ?? "Marca"} {vehicle.model ?? ""}
           </span>
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -36,7 +36,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
               {formatVehiclePlate(vehicle.plate) || "---"}
             </Tag>
             {vehicle.color && vehicle.color !== "-" && (
-              <span className="text-[10px] text-zinc-400 capitalize truncate">
+              <span className="text-[10px] text-zinc-400 capitalize line-clamp-1">
                 {vehicle.color}
               </span>
             )}

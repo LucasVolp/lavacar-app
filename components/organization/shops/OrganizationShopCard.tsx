@@ -123,19 +123,17 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
           <div className="flex sm:hidden gap-1">
             <Button
               type="text"
-              size="small"
               icon={<SettingOutlined />}
               onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
               title="Configurar"
-              className="flex-1"
+              className="flex-1 min-h-[44px]"
             />
             <Button
               type="primary"
-              size="small"
               icon={<ArrowRightOutlined />}
               onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
               title="Gerenciar"
-              className="flex-1"
+              className="flex-1 min-h-[44px]"
             />
             {canDelete && onDelete && (
               <Popconfirm
@@ -144,14 +142,13 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
                 onConfirm={() => onDelete(shop.id)}
                 okText="Sim"
                 cancelText="Não"
-                okButtonProps={{ danger: true, size: "small" }}
+                okButtonProps={{ danger: true }}
               >
                 <Button
                   danger
-                  size="small"
                   icon={<DeleteOutlined />}
                   title="Excluir"
-                  className="flex-1"
+                  className="flex-1 min-h-[44px]"
                 />
               </Popconfirm>
             )}
@@ -162,17 +159,17 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
             <Button
               icon={<SettingOutlined />}
               onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}/settings`)}
-              className="truncate"
+              className="min-h-[44px]"
             >
-              <span className="truncate">Configurar</span>
+              <span className="line-clamp-1">Configurar</span>
             </Button>
             <Button
               type="primary"
               icon={<ArrowRightOutlined />}
               onClick={() => router.push(`/organization/${shop.organizationId}/shop/${shop.id}`)}
-              className="truncate"
+              className="min-h-[44px]"
             >
-              <span className="truncate">Gerenciar</span>
+              <span className="line-clamp-1">Gerenciar</span>
             </Button>
             {canDelete && onDelete && (
               <Popconfirm
@@ -186,9 +183,9 @@ export function OrganizationShopCard({ shop, canDelete, onDelete }: Organization
                 <Button
                   danger
                   icon={<DeleteOutlined />}
-                  className="truncate"
+                  className="min-h-[44px]"
                 >
-                  <span className="truncate">Excluir</span>
+                  <span className="line-clamp-1">Excluir</span>
                 </Button>
               </Popconfirm>
             )}

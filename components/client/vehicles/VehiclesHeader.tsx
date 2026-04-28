@@ -10,13 +10,13 @@ interface VehiclesHeaderProps {
 
 export const VehiclesHeader: React.FC<VehiclesHeaderProps> = ({ onAdd }) => {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center shrink-0">
           <CarOutlined className="text-cyan-500 text-xl" />
         </div>
-        <div>
-          <h1 className="text-2xl font-bold m-0 text-zinc-800 dark:text-zinc-100">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold m-0 text-zinc-800 dark:text-zinc-100">
             Meus Veículos
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm m-0">
@@ -29,7 +29,7 @@ export const VehiclesHeader: React.FC<VehiclesHeaderProps> = ({ onAdd }) => {
         icon={<PlusOutlined />}
         onClick={onAdd}
         size="large"
-        className="rounded-xl font-semibold"
+        className="rounded-xl font-semibold min-h-[44px] w-full sm:w-auto"
       >
         Novo Veículo
       </Button>

@@ -54,7 +54,7 @@ const AppointmentChecklistAction: React.FC<AppointmentChecklistActionProps> = ({
           event.stopPropagation();
           setModalOpen(true);
         }}
-        className={`h-9 px-4 font-medium rounded-lg ${ 
+        className={`min-h-[44px] px-4 font-medium rounded-lg ${
           hasChecklist
             ? "border-zinc-300 dark:border-zinc-700 dark:text-zinc-200"
             : "border-indigo-300 text-indigo-600 dark:border-indigo-500/40 dark:text-indigo-300"
@@ -96,7 +96,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
             <CalendarOutlined />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-bold text-base dark:text-white truncate">Próximos Agendamentos</span>
+            <span className="font-bold text-base dark:text-white line-clamp-1">Próximos Agendamentos</span>
             <span className="text-xs text-zinc-500 font-normal">Agendamentos futuros</span>
           </div>
           <div className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200/80 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 px-2.5 py-1 shrink-0">
@@ -110,7 +110,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
       extra={
         <Button
           type="text"
-          className="text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 font-medium"
+          className="text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 font-medium min-h-[44px]"
           onClick={() => router.push(`/organization/${organizationId}/shop/${shopId}/appointments`)}
         >
           Ver Todos <RightOutlined />
@@ -152,7 +152,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                       </Text>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <Text strong className="text-zinc-800 dark:text-zinc-100 text-sm sm:text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors block truncate">
+                      <Text strong className="text-zinc-800 dark:text-zinc-100 text-sm sm:text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors block line-clamp-2">
                         {appointment.services.map((s) => s.serviceName).join(", ")}
                       </Text>
                       <div className="flex items-center gap-2 text-zinc-500 text-sm mt-0.5 flex-wrap">
@@ -187,7 +187,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                         className="bg-indigo-100 dark:bg-indigo-900/30 flex-shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <Text className="text-zinc-700 dark:text-zinc-200 font-medium block truncate hover:text-indigo-600 dark:hover:text-indigo-400">
+                        <Text className="text-zinc-700 dark:text-zinc-200 font-medium block line-clamp-1 hover:text-indigo-600 dark:hover:text-indigo-400">
                           {appointment.user?.firstName} {appointment.user?.lastName || ''}
                         </Text>
                         {appointment.user?.phone && (
@@ -204,7 +204,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                       <CarOutlined className="text-emerald-600 dark:text-emerald-400 text-sm" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <Text className="text-zinc-700 dark:text-zinc-200 font-medium block truncate">
+                      <Text className="text-zinc-700 dark:text-zinc-200 font-medium block line-clamp-1">
                         {appointment.vehicle?.brand} {appointment.vehicle?.model}
                       </Text>
                       <Text type="secondary" className="text-xs uppercase tracking-wide">

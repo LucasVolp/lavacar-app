@@ -77,7 +77,7 @@ const OrgInvitesTab = ({ organizationId }: { organizationId: string }) => {
             okText="Sim"
             cancelText="Não"
           >
-            <Button danger type="text" icon={<DeleteOutlined />} loading={isPending} />
+            <Button danger type="text" icon={<DeleteOutlined />} loading={isPending} className="min-h-[44px] w-11" />
           </Popconfirm>
         );
       },

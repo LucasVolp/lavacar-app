@@ -17,8 +17,8 @@ export const ClientAppointmentsHeader: React.FC<ClientAppointmentsHeaderProps> =
         <div className="w-12 h-12 bg-cyan-50 dark:bg-cyan-500/10 rounded-xl flex items-center justify-center">
           <CalendarOutlined className="text-cyan-500 text-xl" />
         </div>
-        <div>
-          <h1 className="text-2xl font-bold m-0 text-zinc-800 dark:text-zinc-100">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold m-0 text-zinc-800 dark:text-zinc-100">
             Meus Agendamentos
           </h1>
           <span className="text-zinc-500 dark:text-zinc-400 text-sm">
@@ -29,7 +29,7 @@ export const ClientAppointmentsHeader: React.FC<ClientAppointmentsHeaderProps> =
       <Select
         placeholder="Filtrar por status"
         allowClear
-        className="w-40"
+        className="w-full md:w-40"
         onChange={onFilterChange}
         options={[
           { value: "PENDING", label: "Pendentes" },

@@ -32,10 +32,10 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
           valueStyle={{ fontWeight: 700, color: 'inherit' }}
           className="dark:text-white"
         />
-        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1 truncate">
+        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1 min-w-0">
           <ArrowUpOutlined className="text-emerald-500 shrink-0" />
           <span className="text-emerald-500 font-medium shrink-0">{stats.weekAppointmentsCount}</span>
-          <span className="truncate">esta semana</span>
+          <span className="line-clamp-1">esta semana</span>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
           valueStyle={{ fontWeight: 700, color: 'inherit' }}
           className="dark:text-white"
         />
-        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 truncate">
+        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2">
           Aguardando confirmação
         </div>
       </div>
@@ -60,7 +60,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
           valueStyle={{ fontWeight: 700, color: 'inherit' }}
           className="dark:text-white"
         />
-        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 truncate">
+        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2">
           Sendo atendidos agora
         </div>
       </div>
@@ -74,10 +74,10 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
           valueStyle={{ fontWeight: 700, color: 'inherit', fontSize: 'clamp(16px, 3.5vw, 24px)' }}
           className="dark:text-white"
         />
-        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1 truncate">
+        <div className="mt-3 text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1 min-w-0">
           <ArrowUpOutlined className="text-emerald-500 shrink-0" />
           <span className="text-emerald-500 font-medium shrink-0">R$ {stats.weekRevenue.toFixed(0)}</span>
-          <span className="truncate">semana</span>
+          <span className="line-clamp-1">semana</span>
         </div>
       </div>
     </div>

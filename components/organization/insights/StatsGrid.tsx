@@ -66,7 +66,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ summary }) => {
       {stats.map((stat) => (
         <div
           key={stat.title}
-          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors group shadow-sm dark:shadow-none"
+          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 rounded-2xl flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors group shadow-sm dark:shadow-none"
         >
           <div className="flex justify-between items-start mb-4">
             <div
@@ -77,7 +77,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ summary }) => {
           </div>
           <div>
             <p className="text-zinc-500 font-medium mb-1">{stat.title}</p>
-            <h3 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">{stat.value}</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">{stat.value}</h3>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 m-0 mt-1">{stat.description}</p>
           </div>
         </div>

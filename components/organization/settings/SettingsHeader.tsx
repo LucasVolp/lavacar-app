@@ -5,7 +5,7 @@ import React from "react";
 export const SettingsHeader = () => {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+      <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100">
         Configurações da Organização
       </h1>
       <p className="text-zinc-500 dark:text-zinc-400">

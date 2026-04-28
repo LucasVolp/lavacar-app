@@ -71,7 +71,7 @@ export const AppointmentsFilters: React.FC<AppointmentsFiltersProps> = ({
             </div>
 
             {(dateRange || statusFilter) && (
-              <Button type="link" onClick={onClearFilters}>
+              <Button type="link" onClick={onClearFilters} className="min-h-[44px]">
                 Limpar filtros
               </Button>
             )}

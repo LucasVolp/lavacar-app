@@ -430,7 +430,7 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
           <div className="flex-1 min-w-0 pb-1">
             <Title
               level={2}
-              className="!text-xl md:!text-2xl !font-bold !text-zinc-900 dark:!text-zinc-100 !mb-0 truncate"
+              className="!text-xl md:!text-2xl !font-bold !text-zinc-900 dark:!text-zinc-100 !mb-0 line-clamp-2"
             >
               {sanitizeText(shop.name)}
             </Title>
@@ -443,8 +443,8 @@ export const ShopHeaderProfile: React.FC<ShopHeaderProfileProps> = ({
             icon={isEditing ? <CloseOutlined /> : <EditOutlined />}
             onClick={isEditing ? handleCancel : handleStartEdit}
             className={isEditing
-              ? ""
-              : "!bg-indigo-600 hover:!bg-indigo-500 !border-0 !shadow-md !shadow-indigo-600/20"
+              ? "min-h-[44px]"
+              : "!bg-indigo-600 hover:!bg-indigo-500 !border-0 !shadow-md !shadow-indigo-600/20 min-h-[44px]"
             }
           >
             {isEditing ? "Cancelar" : "Editar Perfil"}

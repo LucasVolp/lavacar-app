@@ -46,7 +46,7 @@ export default function OrganizationDashboardPage() {
         <div className="bg-red-500/10 p-4 rounded-full text-red-500 mb-4">
           <WarningOutlined className="text-3xl" />
         </div>
-        <h2 className="text-2xl font-bold text-zinc-100">Organização não encontrada</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-zinc-100">Organização não encontrada</h2>
         <p className="text-zinc-500 mt-2 mb-6">Não foi possível carregar os dados desta organização.</p>
         <Button type="primary" onClick={() => router.push("/")}>Voltar ao Início</Button>
       </div>

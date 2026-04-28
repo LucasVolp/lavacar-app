@@ -21,7 +21,7 @@ const rankStyles: Record<number, string> = {
 
 export function ShopRanking({ ranking }: ShopRankingProps) {
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl shadow-sm dark:shadow-none">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 rounded-2xl shadow-sm dark:shadow-none">
       <div className="flex items-center gap-2 mb-5">
         <CrownOutlined className="text-amber-500" />
         <h3 className="text-lg font-bold text-zinc-900 dark:text-white m-0">Ranking de Faturamento</h3>
@@ -43,7 +43,7 @@ export function ShopRanking({ ranking }: ShopRankingProps) {
                   {item.rank}
                 </span>
                 <div className="min-w-0">
-                  <p className="m-0 font-medium text-zinc-900 dark:text-zinc-100 truncate">{item.name}</p>
+                  <p className="m-0 font-medium text-zinc-900 dark:text-zinc-100 line-clamp-1">{item.name}</p>
                   <p className="m-0 text-xs text-zinc-500 dark:text-zinc-400">
                     {item.completedAppointments} serviços concluídos
                   </p>

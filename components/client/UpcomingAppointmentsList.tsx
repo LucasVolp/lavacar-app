@@ -50,7 +50,7 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
                 type="primary"
                 icon={<RedoOutlined />}
                 size="small"
-                className="bg-indigo-600 hover:bg-indigo-500 border-none h-8 px-4 rounded-lg text-xs font-medium"
+                className="bg-indigo-600 hover:bg-indigo-500 border-none min-h-[44px] px-4 rounded-lg text-xs font-medium w-full sm:w-auto"
               >
                 Reagendar
               </Button>
@@ -86,7 +86,7 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
             <Button
               type="text"
               size="small"
-              className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium text-xs h-7 px-2"
+              className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium text-xs min-h-[44px] px-2"
             >
               Ver Todos <RightOutlined className="text-[10px]" />
             </Button>
@@ -133,7 +133,7 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
               type="text"
               block
               size="small"
-              className="text-xs text-zinc-500 hover:text-indigo-600 h-7"
+              className="text-xs text-zinc-500 hover:text-indigo-600 min-h-[44px]"
             >
               +{appointments.length - maxItems} mais agendamentos
             </Button>

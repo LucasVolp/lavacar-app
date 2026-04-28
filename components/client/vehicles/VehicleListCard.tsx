@@ -41,7 +41,7 @@ export const VehicleListCard: React.FC<VehicleListCardProps> = ({
             <CarOutlined className={`${typeColor} text-xl`} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base font-bold m-0 text-zinc-800 dark:text-zinc-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
+            <h3 className="text-base font-bold m-0 text-zinc-800 dark:text-zinc-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors line-clamp-1">
               {vehicle.brand ?? "Veículo"} {vehicle.model ?? ""}
             </h3>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -86,6 +86,7 @@ export const VehicleListCard: React.FC<VehicleListCardProps> = ({
                 type="text"
                 size="small"
                 icon={<EditOutlined />}
+                className="min-h-[44px] w-11"
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -108,6 +109,7 @@ export const VehicleListCard: React.FC<VehicleListCardProps> = ({
                 size="small"
                 icon={<DeleteOutlined />}
                 loading={isDeleting}
+                className="min-h-[44px] w-11"
               />
             </Tooltip>
           </CustomPopconfirm>
@@ -116,6 +118,7 @@ export const VehicleListCard: React.FC<VehicleListCardProps> = ({
               type="text"
               size="small"
               icon={<RightOutlined className="text-zinc-400 dark:text-zinc-500" />}
+              className="min-h-[44px] w-11"
             />
           </Link>
         </div>

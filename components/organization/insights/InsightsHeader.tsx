@@ -35,7 +35,7 @@ export const InsightsHeader: React.FC<InsightsHeaderProps> = ({
             </span>
           </div>
 
-          <Title level={2} className="!text-zinc-900 dark:!text-white !mb-2 !font-bold tracking-tight !text-xl sm:!text-2xl lg:!text-3xl truncate">
+          <Title level={2} className="!text-zinc-900 dark:!text-white !mb-2 !font-bold tracking-tight !text-xl sm:!text-2xl lg:!text-3xl line-clamp-2">
             Insights de {organizationName}
           </Title>
           <Text className="text-zinc-500 dark:text-indigo-200 text-sm sm:text-base max-w-2xl block">

@@ -378,7 +378,7 @@ export const ShopLayout: React.FC<ShopLayoutProps> = ({ children }) => {
           </div>
         </AntHeader>
 
-        <Content className="p-4 sm:p-6 min-h-[calc(100vh-64px)] overflow-x-hidden bg-zinc-50 dark:bg-black">
+        <Content className="p-4 sm:p-6 min-h-[calc(100vh-64px)] [overflow-x:clip] bg-zinc-50 dark:bg-black">
           <div className="w-full max-w-[1600px] mx-auto animate-fade-in">
              {children}
           </div>

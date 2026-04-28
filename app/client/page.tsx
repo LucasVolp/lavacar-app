@@ -210,7 +210,7 @@ export default function ClientDashboard() {
                 <Button
                   type="text"
                   size="small"
-                  className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium text-xs h-7 px-2"
+                  className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium text-xs min-h-[44px] px-2"
                 >
                   Ver todos <RightOutlined className="text-[10px]" />
                 </Button>

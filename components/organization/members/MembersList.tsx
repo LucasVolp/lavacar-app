@@ -251,7 +251,7 @@ export const MembersList: React.FC<MembersListProps> = ({
                 <Button
                   type="text"
                   icon={<ShopOutlined />}
-                  className="text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
+                  className="text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 min-h-[44px] w-11"
                   onClick={() => handleManageShops(record)}
                 />
               </CustomTooltip>
@@ -260,7 +260,7 @@ export const MembersList: React.FC<MembersListProps> = ({
               <Button
                 type="text"
                 icon={<EditOutlined />}
-                className="text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400"
+                className="text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 min-h-[44px] w-11"
                 onClick={() => handleEditRole(record)}
               />
             </CustomTooltip>
@@ -278,7 +278,7 @@ export const MembersList: React.FC<MembersListProps> = ({
                     type="text"
                     danger
                     icon={<DeleteOutlined />}
-                    className="text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+                    className="text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 min-h-[44px] w-11"
                   />
                 </CustomTooltip>
               </CustomPopconfirm>
@@ -289,7 +289,7 @@ export const MembersList: React.FC<MembersListProps> = ({
                   type="text"
                   disabled
                   icon={<DeleteOutlined />}
-                  className="text-zinc-300 dark:text-zinc-700 opacity-50 cursor-not-allowed"
+                  className="text-zinc-300 dark:text-zinc-700 opacity-50 cursor-not-allowed min-h-[44px] w-11"
                 />
               </CustomTooltip>
             )}
@@ -392,12 +392,11 @@ export const MembersList: React.FC<MembersListProps> = ({
                     <CustomTooltip title="Remover vínculo">
                       <Button
                         type="text"
-                        size="small"
                         danger
                         icon={<CloseOutlined />}
                         loading={removeFromShop.isPending}
                         onClick={() => handleRemoveShop(sm.id)}
-                        className="text-zinc-400 hover:text-red-500"
+                        className="text-zinc-400 hover:text-red-500 min-h-[44px] w-11"
                       />
                     </CustomTooltip>
                   </div>
@@ -424,11 +423,10 @@ export const MembersList: React.FC<MembersListProps> = ({
                     </span>
                     <Button
                       type="text"
-                      size="small"
                       icon={<PlusOutlined />}
                       loading={assignToShop.isPending}
                       onClick={() => handleAssignShop(shop.id)}
-                      className="text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      className="text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 min-h-[44px]"
                     >
                       Vincular
                     </Button>

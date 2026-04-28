@@ -30,7 +30,7 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ appointment, onReview 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+            <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 line-clamp-2">
               {servicesText}
             </span>
             <StatusBadge status={appointment.status} />
@@ -48,12 +48,12 @@ export const HistoryItem: React.FC<HistoryItemProps> = ({ appointment, onReview 
           </div>
           <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
             <ShopOutlined className="text-zinc-400 shrink-0" />
-            <span className="truncate">{appointment.shop?.name ?? "Loja desconhecida"}</span>
+            <span className="line-clamp-1">{appointment.shop?.name ?? "Loja desconhecida"}</span>
           </div>
           {appointment.vehicle && (
             <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <CarOutlined className="text-zinc-400 shrink-0" />
-              <span className="truncate">
+              <span className="line-clamp-1">
                 {appointment.vehicle.brand ?? "Veículo"} {appointment.vehicle.model ?? ""}
               </span>
               {appointment.vehicle.plate && (

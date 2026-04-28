@@ -37,8 +37,7 @@ export const ClientDetailHeader: React.FC<ClientDetailHeaderProps> = ({
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={onBack}
-          className="!rounded-xl !h-9 !px-4 !font-medium self-start"
-          size="small"
+          className="!rounded-xl !min-h-[44px] !px-4 !font-medium self-start"
         >
           Voltar
         </Button>
@@ -57,15 +56,14 @@ export const ClientDetailHeader: React.FC<ClientDetailHeaderProps> = ({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 m-0 truncate">
+              <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 m-0 line-clamp-2">
                 {fullName}
               </h2>
               {onEdit && (
                 <Button
                   icon={<EditOutlined />}
                   onClick={onEdit}
-                  size="small"
-                  className="!rounded-lg shrink-0"
+                  className="!rounded-lg shrink-0 min-h-[44px] w-11"
                 />
               )}
             </div>

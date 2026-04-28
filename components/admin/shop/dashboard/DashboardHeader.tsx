@@ -51,7 +51,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </Tooltip>
             )}
           </div>
-          <Title level={2} className="!text-zinc-900 dark:!text-white !mb-1 !font-bold tracking-tight !text-xl sm:!text-2xl truncate">
+          <Title level={2} className="!text-zinc-900 dark:!text-white !mb-1 !font-bold tracking-tight !text-xl sm:!text-2xl line-clamp-2">
             Olá, {user?.firstName || "Usuário"}! Bem-vindo ao {shop?.name}
           </Title>
           <Text className="text-zinc-500 dark:text-zinc-400 text-sm sm:text-base capitalize">

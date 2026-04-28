@@ -63,12 +63,12 @@ export default function VehicleDetailPage() {
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={() => router.back()}
-          className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300"
+          className="dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300 min-h-[44px] shrink-0"
         >
           Voltar
         </Button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold m-0 dark:text-zinc-100 truncate">{vehicle.brand} {vehicle.model}</h1>
+          <h1 className="text-lg sm:text-2xl font-bold m-0 dark:text-zinc-100 line-clamp-2">{vehicle.brand} {vehicle.model}</h1>
           <p className="text-zinc-500 m-0 dark:text-zinc-400 text-sm">Gerencie as informações deste veículo</p>
         </div>
       </div>
@@ -105,8 +105,8 @@ export default function VehicleDetailPage() {
               </Descriptions.Item>
             </Descriptions>
 
-            <div className="flex flex-wrap gap-3 mt-6 justify-end">
-               <Button size="large" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)} className="min-h-[44px]">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6 sm:justify-end">
+               <Button size="large" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)} className="min-h-[44px] w-full sm:w-auto">
                  Editar
                </Button>
                <CustomPopconfirm
@@ -117,7 +117,7 @@ export default function VehicleDetailPage() {
                   cancelText="Cancelar"
                   okButtonProps={{ danger: true }}
                 >
-                  <Button danger size="large" icon={<DeleteOutlined />} className="min-h-[44px]">
+                  <Button danger size="large" icon={<DeleteOutlined />} className="min-h-[44px] w-full sm:w-auto">
                     Remover
                   </Button>
                </CustomPopconfirm>

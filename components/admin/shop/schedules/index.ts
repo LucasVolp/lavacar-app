@@ -3,3 +3,4 @@ export * from "./SchedulesHeader";
 export * from "./SchedulesSummary";
 export * from "./DayScheduleRow";
 export * from "./ScheduleAlert";
+export * from "./SchedulesStickyBar";

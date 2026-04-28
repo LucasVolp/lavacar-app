@@ -81,7 +81,7 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
               >
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="font-semibold text-sm text-zinc-800 dark:text-zinc-100 truncate">
+                    <span className="font-semibold text-sm text-zinc-800 dark:text-zinc-100 line-clamp-2">
                       {servicesText}
                     </span>
                     <StatusBadge status={item.status} />
@@ -95,11 +95,11 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
                   <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                     <ShopOutlined className="text-cyan-500 shrink-0" />
-                    <span className="truncate">{item.shop}</span>
+                    <span className="line-clamp-1">{item.shop}</span>
                     {item.shopAddress && (
                       <>
                         <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
-                        <span className="truncate text-zinc-400 dark:text-zinc-500">{item.shopAddress}</span>
+                        <span className="line-clamp-1 text-zinc-400 dark:text-zinc-500">{item.shopAddress}</span>
                       </>
                     )}
                   </div>
@@ -115,7 +115,7 @@ export const ClientAppointmentsListFull: React.FC<ClientAppointmentsListFullProp
                   </div>
                   <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                     <CarOutlined className="text-cyan-500 shrink-0" />
-                    <span className="truncate">{item.vehicle || "Veículo removido"}</span>
+                    <span className="line-clamp-1">{item.vehicle || "Veículo removido"}</span>
                     {item.vehiclePlate && (
                       <>
                         <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />

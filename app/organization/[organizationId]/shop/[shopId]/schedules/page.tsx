@@ -11,6 +11,7 @@ import {
   SchedulesSummary,
   DayScheduleRow,
   ScheduleAlert,
+  SchedulesStickyBar,
 } from "@/components/admin/shop/schedules";
 import { useCreateSchedule, useShopSchedules, useUpdateSchedule } from "@/hooks";
 import { useShopAdmin } from "@/contexts/ShopAdminContext";
@@ -19,6 +20,40 @@ import { useEffect, useState } from "react";
 import { useUpdateShop } from "@/hooks/useShops";
 import { timeApiService } from "@/services/timeApi";
 import { EmployeeAccessDenied } from "@/components/layout/EmployeeAccessDenied";
+
+const buildFormDataFromSchedules = (
+  schedules: ReturnType<typeof useShopSchedules>["data"],
+  baseDate: Date
+): Record<Weekday, ScheduleFormData> => {
+  const next: Record<string, ScheduleFormData> = {};
+  WEEKDAYS.forEach((day) => {
+    const schedule = (schedules ?? []).find((s) => s.weekday === day.key);
+    if (schedule) {
+      next[day.key] = {
+        isOpen: schedule.isOpen === "ACTIVE",
+        startTime: parse(schedule.startTime, "HH:mm", baseDate),
+        endTime: parse(schedule.endTime, "HH:mm", baseDate),
+        hasBreak: !!(schedule.breakStartTime && schedule.breakEndTime),
+        breakStartTime: schedule.breakStartTime
+          ? parse(schedule.breakStartTime, "HH:mm", baseDate)
+          : parse("12:00", "HH:mm", baseDate),
+        breakEndTime: schedule.breakEndTime
+          ? parse(schedule.breakEndTime, "HH:mm", baseDate)
+          : parse("13:00", "HH:mm", baseDate),
+      };
+    } else {
+      next[day.key] = {
+        isOpen: false,
+        startTime: parse("08:00", "HH:mm", baseDate),
+        endTime: parse("18:00", "HH:mm", baseDate),
+        hasBreak: false,
+        breakStartTime: parse("12:00", "HH:mm", baseDate),
+        breakEndTime: parse("13:00", "HH:mm", baseDate),
+      };
+    }
+  });
+  return next as Record<Weekday, ScheduleFormData>;
+};
 
 export default function SchedulesPage() {
   const { shopId, organizationId, shop } = useShopAdmin();
@@ -32,6 +67,7 @@ export default function SchedulesPage() {
     const membership = user.organizationMembers?.find((m: { organizationId: string; role: string }) => m.organizationId === organizationId);
     return membership?.role === "EMPLOYEE";
   })();
+
   const { data: schedules = [], isLoading } = useShopSchedules(shopId);
   const createSchedule = useCreateSchedule();
   const updateSchedule = useUpdateSchedule();
@@ -66,30 +102,7 @@ export default function SchedulesPage() {
 
   useEffect(() => {
     if (schedules.length > 0) {
-      const baseDate = new Date();
-      
-      setFormData((prev) => {
-        const next = { ...prev };
-        
-        schedules.forEach((schedule) => {
-          if (next[schedule.weekday]) {
-            next[schedule.weekday] = {
-              isOpen: schedule.isOpen === "ACTIVE",
-              startTime: parse(schedule.startTime, "HH:mm", baseDate),
-              endTime: parse(schedule.endTime, "HH:mm", baseDate),
-              hasBreak: !!(schedule.breakStartTime && schedule.breakEndTime),
-              breakStartTime: schedule.breakStartTime
-                ? parse(schedule.breakStartTime, "HH:mm", baseDate)
-                : parse("12:00", "HH:mm", baseDate),
-              breakEndTime: schedule.breakEndTime
-                ? parse(schedule.breakEndTime, "HH:mm", baseDate)
-                : parse("13:00", "HH:mm", baseDate),
-            };
-          }
-        });
-        
-        return next;
-      });
+      setFormData(buildFormDataFromSchedules(schedules, new Date()));
     }
   }, [schedules]);
 
@@ -100,12 +113,14 @@ export default function SchedulesPage() {
   ) => {
     setFormData((prev) => ({
       ...prev,
-      [day]: {
-        ...prev[day],
-        [field]: value,
-      },
+      [day]: { ...prev[day], [field]: value },
     }));
     setHasChanges(true);
+  };
+
+  const handleDiscard = () => {
+    setFormData(buildFormDataFromSchedules(schedules, new Date()));
+    setHasChanges(false);
   };
 
   const handleSaveAll = async () => {
@@ -131,15 +146,9 @@ export default function SchedulesPage() {
         };
 
         if (existingSchedule) {
-          await updateSchedule.mutateAsync({
-            id: existingSchedule.id,
-            payload,
-          });
+          await updateSchedule.mutateAsync({ id: existingSchedule.id, payload });
         } else {
-          const createPayload: CreateSchedulePayload = {
-            ...payload,
-            shopId,
-          };
+          const createPayload: CreateSchedulePayload = { ...payload, shopId };
           await createSchedule.mutateAsync(createPayload);
         }
       }
@@ -156,10 +165,7 @@ export default function SchedulesPage() {
     if (!selectedTimezone) return;
     setSavingTimezone(true);
     try {
-      await updateShop.mutateAsync({
-        id: shopId,
-        payload: { timeZone: selectedTimezone },
-      });
+      await updateShop.mutateAsync({ id: shopId, payload: { timeZone: selectedTimezone } });
       message.success("Timezone atualizado com sucesso!");
     } catch {
       message.error("Erro ao atualizar timezone.");
@@ -185,11 +191,13 @@ export default function SchedulesPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <SchedulesHeader
-        onSave={handleSaveAll}
-        saving={saving}
+      <SchedulesStickyBar
         hasChanges={hasChanges}
+        saving={saving}
+        onSave={handleSaveAll}
+        onDiscard={handleDiscard}
       />
+      <SchedulesHeader />
 
       <SchedulesSummary openDays={openDays} closedDays={closedDays} />
 
@@ -220,7 +228,6 @@ export default function SchedulesPage() {
           {WEEKDAYS.map((day, index) => {
             const data = formData[day.key];
             const isWeekend = ["SATURDAY", "SUNDAY"].includes(day.key);
-
             return (
               <DayScheduleRow
                 key={day.key}

@@ -81,7 +81,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
         <div className="flex items-center gap-2">
           <Text
             strong
-            className="text-zinc-900 dark:text-zinc-100 text-sm truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+            className="text-zinc-900 dark:text-zinc-100 text-sm line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
           >
             {serviceName}
           </Text>
@@ -127,7 +127,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
                   onConfirm?.(id);
                 }}
                 loading={isConfirming}
-                className="bg-emerald-600 hover:bg-emerald-500 border-none h-7 w-7 rounded-lg p-0 flex items-center justify-center"
+                className="bg-emerald-600 hover:bg-emerald-500 border-none h-10 w-10 rounded-lg p-0 flex items-center justify-center"
               />
             </Tooltip>
             <Tooltip title="Cancelar">
@@ -138,7 +138,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({
                   e.stopPropagation();
                   onCancel?.(id);
                 }}
-                className="h-7 w-7 rounded-lg p-0 flex items-center justify-center bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-red-400 hover:text-red-500"
+                className="h-10 w-10 rounded-lg p-0 flex items-center justify-center bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:border-red-400 hover:text-red-500"
               />
             </Tooltip>
           </div>

@@ -86,13 +86,13 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
               {!user.picture && initials}
             </Avatar>
             <div className="min-w-0 flex-1">
-              <Text strong className="text-lg block truncate dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              <Text strong className="text-lg block line-clamp-1 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 {fullName}
               </Text>
               {email && (
-                <div className="flex items-center gap-1 text-zinc-500 text-sm truncate">
+                <div className="flex items-center gap-1 text-zinc-500 text-sm min-w-0">
                   <MailOutlined className="flex-shrink-0" />
-                  <span className="truncate">{email}</span>
+                  <span className="line-clamp-1">{email}</span>
                 </div>
               )}
             </div>
@@ -105,7 +105,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({ client, onClick, onEdit 
                 e.stopPropagation();
                 onEdit();
               }}
-              className="text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="text-zinc-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 min-h-[44px] w-11"
             />
           </div>
         </div>

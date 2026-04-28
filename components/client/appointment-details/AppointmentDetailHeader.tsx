@@ -28,16 +28,16 @@ export function AppointmentDetailHeader({
 }: AppointmentDetailHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 min-w-0">
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={onBack}
-          className="dark:bg-zinc-800 dark:border-zinc-700"
+          className="dark:bg-zinc-800 dark:border-zinc-700 min-h-[44px] shrink-0"
         >
           Voltar
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold m-0 dark:text-zinc-100">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold m-0 dark:text-zinc-100 line-clamp-2">
             Agendamento #{appointment.id.substring(0, 6)}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 m-0 text-sm">
@@ -58,7 +58,7 @@ export function AppointmentDetailHeader({
             icon={<CheckCircleOutlined />}
             onClick={onConfirm}
             loading={confirmLoading}
-            className="bg-green-600 hover:bg-green-500 border-green-600 shadow-sm"
+            className="bg-green-600 hover:bg-green-500 border-green-600 shadow-sm min-h-[44px] w-full sm:w-auto"
           >
             Confirmar Presença
           </Button>
@@ -71,7 +71,7 @@ export function AppointmentDetailHeader({
               danger
               icon={<CloseCircleOutlined />}
               onClick={onCancel}
-              className="hover:bg-red-50 dark:hover:bg-red-900/20 shadow-none border-0"
+              className="hover:bg-red-50 dark:hover:bg-red-900/20 shadow-none border-0 min-h-[44px] w-full sm:w-auto"
             >
               Cancelar
             </Button>

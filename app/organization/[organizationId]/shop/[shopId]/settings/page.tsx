@@ -136,7 +136,7 @@ export default function SettingsPage() {
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Configurações</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100">Configurações</h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{shop.name}</p>
         </div>
         {shop.slug && (
@@ -144,7 +144,7 @@ export default function SettingsPage() {
             <Link
               href={`/shop/${shop.slug}`}
               target="_blank"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors min-h-[44px]"
             >
               <GlobalOutlined />
               Ver Vitrine

@@ -8,7 +8,7 @@ export function EvaluationsPageHeader() {
         <StarOutlined className="text-amber-500 text-2xl" />
       </div>
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 m-0">Minhas Avaliações</h1>
+        <h1 className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 m-0">Minhas Avaliações</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
           Histórico de feedback enviado para lava-jatos
         </p>

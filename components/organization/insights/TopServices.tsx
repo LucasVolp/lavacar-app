@@ -15,7 +15,7 @@ export const TopServices: React.FC<TopServicesProps> = ({ services }) => {
   const maxRevenue = Math.max(...services.map((service) => service.revenue), 1);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl h-full shadow-sm dark:shadow-none">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 rounded-2xl h-full shadow-sm dark:shadow-none">
       <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-6">Serviços Mais Rentáveis</h3>
 
       {services.length === 0 ? (

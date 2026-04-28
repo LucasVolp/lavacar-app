@@ -40,12 +40,12 @@ export function OrganizationShopsCardsGrid({
         {!searchTerm &&
           (createHref ? (
             <Link href={createHref}>
-              <Button type="primary" size="large" icon={<PlusOutlined />}>
+              <Button type="primary" size="large" icon={<PlusOutlined />} className="min-h-[44px] w-full sm:w-auto">
                 Adicionar Primeiro Shop
               </Button>
             </Link>
           ) : (
-            <Button type="primary" size="large" icon={<PlusOutlined />} onClick={onCreateShop}>
+            <Button type="primary" size="large" icon={<PlusOutlined />} onClick={onCreateShop} className="min-h-[44px] w-full sm:w-auto">
               Adicionar Primeiro Shop
             </Button>
           ))}

@@ -64,10 +64,10 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({ shopsCount, metric
             >
               {card.icon}
             </div>
-            <span className="font-medium text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm truncate">{card.title}</span>
+            <span className="font-medium text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm line-clamp-1">{card.title}</span>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight truncate">{card.value}</div>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 m-0 truncate">{card.subtitle}</p>
+          <div className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight line-clamp-1">{card.value}</div>
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 m-0 line-clamp-2">{card.subtitle}</p>
         </div>
       ))}
     </div>
