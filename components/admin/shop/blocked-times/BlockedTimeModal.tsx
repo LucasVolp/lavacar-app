@@ -4,7 +4,6 @@ import React from "react";
 import { Modal, Form, DatePicker, TimePicker, Button, Input, type FormInstance } from "antd";
 import { StopOutlined, ClockCircleOutlined, CalendarOutlined, WarningOutlined } from "@ant-design/icons";
 import { BlockedTime } from "@/types/blockedTime";
-import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 
 const { TextArea } = Input;
@@ -12,8 +11,8 @@ const { TextArea } = Input;
 interface BlockedTimeFormValues {
   type: "FULL_DAY" | "PARTIAL";
   date: Dayjs;
-  startTime?: string;
-  endTime?: string;
+  startTime?: Dayjs | null;
+  endTime?: Dayjs | null;
   reason?: string;
 }
 
@@ -37,8 +36,6 @@ export const BlockedTimeModal: React.FC<BlockedTimeModalProps> = ({
   blockType,
 }) => {
   const currentType = Form.useWatch('type', form) || blockType;
-  const startTime = Form.useWatch('startTime', form);
-  const endTime = Form.useWatch('endTime', form);
 
   return (
     <Modal
@@ -138,8 +135,6 @@ export const BlockedTimeModal: React.FC<BlockedTimeModalProps> = ({
                   placeholder="00:00"
                   className="w-full h-11 !bg-zinc-50 dark:!bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-xl"
                   popupClassName="dark:[&_.ant-picker-panel]:!bg-zinc-800 dark:[&_.ant-picker-time-panel-column]:!border-zinc-700 dark:[&_li]:!text-zinc-300 dark:[&_li:hover]:!bg-zinc-700"
-                  value={startTime ? dayjs(startTime, "HH:mm") : null}
-                  onChange={(time) => form.setFieldValue("startTime", time ? time.format("HH:mm") : null)}
                   minuteStep={15}
                   showNow={false}
                   suffixIcon={<ClockCircleOutlined className="text-zinc-400" />}
@@ -156,8 +151,6 @@ export const BlockedTimeModal: React.FC<BlockedTimeModalProps> = ({
                   placeholder="00:00"
                   className="w-full h-11 !bg-zinc-50 dark:!bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-xl"
                   popupClassName="dark:[&_.ant-picker-panel]:!bg-zinc-800 dark:[&_.ant-picker-time-panel-column]:!border-zinc-700 dark:[&_li]:!text-zinc-300 dark:[&_li:hover]:!bg-zinc-700"
-                  value={endTime ? dayjs(endTime, "HH:mm") : null}
-                  onChange={(time) => form.setFieldValue("endTime", time ? time.format("HH:mm") : null)}
                   minuteStep={15}
                   showNow={false}
                   suffixIcon={<ClockCircleOutlined className="text-zinc-400" />}

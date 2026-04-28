@@ -91,8 +91,8 @@ export default function BlockedTimesPage() {
   const handleSubmit = async (values: {
     type: "FULL_DAY" | "PARTIAL";
     date: Dayjs;
-    startTime?: string;
-    endTime?: string;
+    startTime?: Dayjs | null;
+    endTime?: Dayjs | null;
     reason?: string;
   }) => {
     try {
@@ -102,10 +102,10 @@ export default function BlockedTimesPage() {
         type: values.type,
         date: dateStr,
         startTime: values.type === "PARTIAL" && values.startTime 
-          ? values.startTime
+          ? values.startTime.format("HH:mm")
           : undefined,
         endTime: values.type === "PARTIAL" && values.endTime 
-          ? values.endTime
+          ? values.endTime.format("HH:mm")
           : undefined,
         reason: values.reason,
       };
