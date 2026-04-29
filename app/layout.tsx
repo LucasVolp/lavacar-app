@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: `${BRAND_CONFIG.COMPANY_NAME} - Sistema de Gestão de Agendamentos`,
-  description: `${BRAND_CONFIG.COMPANY_NAME} - Sistema de gestão de agendamentos para estética automotiva`,
+  title: `${BRAND_CONFIG.COMPANY_NAME} — Gestão de Estética Automotiva`,
+  description: `Gerencie agendamentos, clientes e serviços da sua estética automotiva em um só lugar. Comece grátis por 15 dias, sem cartão de crédito.`,
   icons: {
     icon: [
       {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: `${BRAND_CONFIG.COMPANY_NAME}`,
-    description: `Sistema de gestão de agendamentos para estética automotiva`,
+    description: `Gerencie agendamentos, clientes e serviços da sua estética automotiva em um só lugar. Comece grátis por 15 dias, sem cartão de crédito.`,
     images: [
       {
         url: BRAND_CONFIG.LOGO_LARGE_URL,
