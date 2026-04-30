@@ -1,19 +1,19 @@
 "use client";
 
 import {
-  MobileOutlined,
+  CalendarOutlined,
   LineChartOutlined,
-  TeamOutlined,
+  GlobalOutlined,
   AppstoreOutlined,
 } from "@ant-design/icons";
 
 const features = [
   {
-    title: "Comanda Digital Integrada",
+    title: "Gestão de Agenda 24h Sem Interrupções",
     description:
-      "Organização dos serviços em tempo real. Cada comanda vira dado direto no seu painel — sem papel, sem retrabalho.",
-    icon: <MobileOutlined />,
-    highlight: "Operação em tempo real",
+      "Seu cliente agenda sozinho, a qualquer hora, direto pela sua vitrine. Chega de perder serviço porque estava ocupado no WhatsApp.",
+    icon: <CalendarOutlined />,
+    highlight: "Agendamento automático",
   },
   {
     title: "Dashboard de Receita em Tempo Real",
@@ -23,11 +23,11 @@ const features = [
     highlight: "Decisão por dado",
   },
   {
-    title: "Gestão de Equipe",
+    title: "Seu Site de Alta Conversão",
     description:
-      "Cadastre atendentes, lavadores e gerentes com permissões específicas. Cada pessoa com o acesso certo para sua função.",
-    icon: <TeamOutlined />,
-    highlight: "Equipe sob controle",
+      "Vitrine premium com URL personalizada: nexocar.com.br/shop/sua-estetica. Design dark de elite que você vai querer colocar na bio.",
+    icon: <GlobalOutlined />,
+    highlight: "Portfólio premium",
   },
   {
     title: "Múltiplas Filiais no Mesmo Painel",
