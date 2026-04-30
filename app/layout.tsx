@@ -18,8 +18,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: `${BRAND_CONFIG.COMPANY_NAME} — Gestão de Estética Automotiva`,
-  description: `Gerencie agendamentos, clientes e serviços da sua estética automotiva em um só lugar. Comece grátis por 15 dias, sem cartão de crédito.`,
+  title: `${BRAND_CONFIG.COMPANY_NAME} | Sistema de Gestão e Agendamento para Estética Automotiva`,
+  description: `Automatize seus agendamentos, gerencie clientes e pare de perder serviços no WhatsApp. Gestão completa para lava rápido, vitrificação e estética automotiva. Teste grátis por 15 dias.`,
+  keywords: [
+    "estética automotiva",
+    "sistema de agendamento",
+    "lava rápido sistema",
+    "software lava jato",
+    "gestão estética automotiva",
+    "agendamento online estética",
+    "vitrificação sistema",
+    "polimento agendamento",
+    "sistema para lava rápido",
+    "gestão automotiva",
+  ],
   icons: {
     icon: [
       {
@@ -35,16 +47,18 @@ export const metadata: Metadata = {
     apple: BRAND_CONFIG.FAVICON_URL,
   },
   openGraph: {
-    title: `${BRAND_CONFIG.COMPANY_NAME}`,
-    description: `Gerencie agendamentos, clientes e serviços da sua estética automotiva em um só lugar. Comece grátis por 15 dias, sem cartão de crédito.`,
+    title: `${BRAND_CONFIG.COMPANY_NAME} | Sistema para Estética Automotiva`,
+    description: `Automatize seus agendamentos e pare de perder clientes no WhatsApp. Gestão completa para lava rápido, vitrificação e estética automotiva. Teste grátis por 15 dias.`,
     images: [
       {
         url: BRAND_CONFIG.LOGO_LARGE_URL,
         width: 1200,
         height: 630,
-        alt: BRAND_CONFIG.COMPANY_NAME,
+        alt: `${BRAND_CONFIG.COMPANY_NAME} — Sistema para Estética Automotiva`,
       },
     ],
+    type: "website",
+    locale: "pt_BR",
   },
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRightOutlined,
@@ -10,9 +10,60 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 
+const ROTATING_PHRASES = [
+  "vitrine digital",
+  "ferramenta de gestão",
+  "página de agendamentos",
+];
+
+const TYPING_SPEED = 55;
+const ERASING_SPEED = 30;
+const PAUSE_AFTER_TYPE = 2000;
+const PAUSE_AFTER_ERASE = 300;
+
+function useTypingAnimation() {
+  const [displayed, setDisplayed] = useState(ROTATING_PHRASES[0]);
+  const [isErasing, setIsErasing] = useState(false);
+  const phraseIndex = useRef(0);
+  const charIndex = useRef(ROTATING_PHRASES[0].length);
+  const timeout = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    const tick = () => {
+      const current = ROTATING_PHRASES[phraseIndex.current];
+
+      if (!isErasing) {
+        if (charIndex.current < current.length) {
+          charIndex.current += 1;
+          setDisplayed(current.slice(0, charIndex.current));
+          timeout.current = setTimeout(tick, TYPING_SPEED);
+        } else {
+          timeout.current = setTimeout(() => setIsErasing(true), PAUSE_AFTER_TYPE);
+        }
+      } else {
+        if (charIndex.current > 0) {
+          charIndex.current -= 1;
+          setDisplayed(current.slice(0, charIndex.current));
+          timeout.current = setTimeout(tick, ERASING_SPEED);
+        } else {
+          phraseIndex.current = (phraseIndex.current + 1) % ROTATING_PHRASES.length;
+          setIsErasing(false);
+          timeout.current = setTimeout(tick, PAUSE_AFTER_ERASE);
+        }
+      }
+    };
+
+    timeout.current = setTimeout(tick, PAUSE_AFTER_TYPE);
+    return () => { if (timeout.current) clearTimeout(timeout.current); };
+  }, [isErasing]);
+
+  return displayed;
+}
+
 export const HeroSection = () => {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
+  const rotatingPhrase = useTypingAnimation();
 
   const handlePrimaryCta = () => {
     if (!isAuthenticated) {
@@ -43,15 +94,21 @@ export const HeroSection = () => {
         </div>
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-base-content mb-8 leading-[1.05]">
-          Controle Total do <br />
+          A primeira{" "}
+          {rotatingPhrase}
+          <span className="animate-pulse text-base-content/40">|</span>{" "}
           <span className="text-blue-600 dark:text-blue-500">
-            Seu Lava-Rápido
+            que você vai ter orgulho de colocar na bio.
           </span>
         </h1>
 
         <p className="text-lg sm:text-xl text-base-content/70 max-w-2xl mx-auto leading-[1.8] mb-12">
-          Veja em tempo real o que acontece na sua operação, controle sua equipe
-          e entenda seu lucro com clareza.
+          Automatize seus agendamentos com uma gestão de elite e dê aos seus
+          clientes uma experiência premium com a sua marca:{" "}
+          <span className="font-semibold text-base-content/90 font-mono text-base">
+            nexocar.com.br/shop/sua-estetica
+          </span>
+          . Teste 15 dias grátis, sem cartão.
         </p>
 
         <div className="flex flex-col items-center gap-2 mb-20">
