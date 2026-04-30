@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button, Empty } from "antd";
-import { RocketOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { Empty } from "antd";
+import { ThunderboltOutlined } from "@ant-design/icons";
 import { sanitizeText } from "@/lib/security";
 
 export interface OpportunityItem {
@@ -39,12 +39,9 @@ export const InsightsOpportunityCards: React.FC<InsightsOpportunityCardsProps> =
               <p className="text-zinc-800 dark:text-zinc-100 font-semibold mb-2">
                 Sua {sanitizeText(item.label)} está {item.emptyPercent.toFixed(0)}% vazia.
               </p>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-3">
+              <p className="text-xs text-zinc-600 dark:text-zinc-400">
                 Ocupação atual: {item.occupancyPercent.toFixed(0)}% ({item.appointments} agendamentos no mês).
               </p>
-              <Button type="primary" size="small" icon={<RocketOutlined />}>
-                Criar Promoção Relâmpago
-              </Button>
             </div>
           ))
         )}
